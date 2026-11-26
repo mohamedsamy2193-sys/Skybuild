@@ -10,6 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+  <!-- Firebase Compat SDK (Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
       --bg: #F3F4F6;
@@ -44,9 +48,6 @@
       font-family: inherit;
     }
 
-    /* ===================================================================== */
-    /* SKYBUILD BRANDED HEADER + MOVING SLOGAN STRIP                         */
-    /* ===================================================================== */
     .sb-header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -159,9 +160,6 @@
       100% { transform: translateX(100%); }
     }
 
-    /* ===================================================================== */
-    /* BUTTONS & LAYOUT                                                      */
-    /* ===================================================================== */
     .header-actions {
       display: flex;
       flex-wrap: wrap;
@@ -251,9 +249,26 @@
       color: var(--obsidian);
     }
 
-    /* ===================================================================== */
-    /* DASHBOARD KPI CARDS & REQUESTS TABLE                                  */
-    /* ===================================================================== */
+    .sync-badge {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-live {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .sync-local {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -287,9 +302,6 @@
     .st-visit { background: #E0E7FF; color: #1E40AF; }
     .st-quoted { background: #D1FAE5; color: #065F46; }
 
-    /* ===================================================================== */
-    /* FORMS, NAV PILLS & ITEM CARDS                                         */
-    /* ===================================================================== */
     .grid-4 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -446,9 +458,6 @@
       font-weight: 600;
     }
 
-    /* ===================================================================== */
-    /* STICKY SUMMARY BAR & MODAL                                            */
-    /* ===================================================================== */
     .sticky-summary {
       position: fixed;
       bottom: 0;
@@ -517,9 +526,6 @@
 </head>
 <body>
 
-  <!-- ===================================================================== -->
-  <!-- SKYBUILD BRANDED HEADER + MOVING SLOGAN STRIP                         -->
-  <!-- ===================================================================== -->
   <header class="sb-header">
     <div class="sb-header-inner">
       <a href="#" class="sb-logo-link">
@@ -573,7 +579,7 @@
           <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
         </span>
         <span style="color:#6B7280;">•</span>
-        <span>لوحة المهندس — متابعة طلبات المعاينة وتحليل التكاليف التفصيلي (16 بنداً)</span>
+        <span>لوحة المهندس — استقبال طلبات المعاينة وتحليل التكاليف التفصيلي (16 بنداً)</span>
         <span style="color:#6B7280;">•</span>
         <span class="sb-marquee-gold">
           <i class="ph ph-phone"></i>
@@ -585,16 +591,14 @@
 
   <div class="container">
 
-    <!-- ===================================================================== -->
-    <!-- DASHBOARD: INCOMING CLIENT REQUESTS & OVERVIEW                        -->
-    <!-- ===================================================================== -->
     <section class="card card-featured">
       <div class="section-head">
         <div class="section-title-wrap">
           <span class="step-badge"><i class="ph ph-kanban"></i></span>
           <h2 class="section-title">لوحة المعلومات — طلبات المعاينة والعملاء</h2>
+          <span id="firestoreSyncBadge" class="sync-badge sync-local">وضع محلي (أضف Firebase Config للمزامنة المباشرة)</span>
         </div>
-        <button class="btn btn-gold btn-sm no-print" onclick="addSampleRequest()">+ إضافة طلب معاينة جديد</button>
+        <button class="btn btn-gold btn-sm no-print" onclick="addSampleRequest()">+ إضافة طلب معاينة</button>
       </div>
 
       <div class="kpi-grid" id="dashboardKpis"></div>
@@ -618,9 +622,6 @@
       </div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- GLOBAL UNIT & SHARED OVERHEAD                                         -->
-    <!-- ===================================================================== -->
     <section class="card">
       <div class="section-head">
         <div class="section-title-wrap">
@@ -650,14 +651,10 @@
       </div>
     </section>
 
-    <!-- شريط التنقل السريع بين البنود -->
     <div class="items-nav no-print" id="itemsNav"></div>
-
-    <!-- حاوية البنود الـ 16 -->
     <main id="itemsContainer"></main>
   </div>
 
-  <!-- شريط الإجمالي السفلي الثابت -->
   <div class="sticky-summary">
     <div class="sticky-inner">
       <div class="summary-stats">
@@ -670,7 +667,6 @@
     </div>
   </div>
 
-  <!-- نافذة التقرير التجميعي -->
   <div class="modal-backdrop" id="reportModal" onclick="if(event.target===this)closeReportModal()">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -682,6 +678,17 @@
   </div>
 
   <script>
+    // ضع هنا إعدادات مشروع Firebase نفسه المستخدم في صفحة العميل
+    const FIREBASE_CONFIG = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+    const FIRESTORE_COLLECTION = "inspection_requests";
+
     const STORAGE_KEY = "skybuild_engineer_suite_v1";
     const UNITS = ["م²", "م.ط", "عدد", "شكارة", "لتر", "متر", "يومية", "مقطوعية", "قطعة", "جركن", "م³"];
 
@@ -713,17 +720,6 @@
           contract: "إشراف هندسي فقط",
           has3D: "3D فقط",
           status: "visit"
-        },
-        {
-          id: "req-3",
-          client: "أ. كريم عادل",
-          phone: "01255443322",
-          location: "6 أكتوبر — كمبوند غرب سوميد",
-          floor: "أرضي بحديقة",
-          area: 220,
-          contract: "تشطيب كامل (Fixed Cost)",
-          has3D: "نعم (مودرن)",
-          status: "quoted"
         }
       ],
       items: [
@@ -958,6 +954,8 @@
     };
 
     let state = loadState();
+    let db = null;
+    let isFirestoreConnected = false;
 
     function loadState() {
       try {
@@ -975,6 +973,62 @@
 
     function fmt(n) {
       return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
+    function normalizeFirestoreDoc(doc) {
+      const d = doc.data() || {};
+      const area = +(d.unitArea ?? d.area ?? 150) || 150;
+      const contractScope = d.contractScope === "supervision" ? "إشراف هندسي فقط" : "تشطيب كامل";
+      const pricingModel = d.pricingModel ? ` (${d.pricingModel})` : "";
+      const has3D = d.design3DEnabled
+        ? (d.design3DStyle ? `نعم — ${d.design3DStyle}` : "نعم (3D)")
+        : "لا";
+
+      return {
+        id: doc.id,
+        client: d.clientName || d.name || "عميل بدون اسم",
+        phone: d.phone || d.leadPhone || "-",
+        location: d.location || d.unitLocation || "غير محدد",
+        floor: d.floor || d.unitFloor || "-",
+        area,
+        contract: `${contractScope}${pricingModel}`,
+        has3D,
+        status: ["new", "visit", "quoted"].includes(d.status) ? d.status : "new"
+      };
+    }
+
+    function initFirestoreListener() {
+      const badge = document.getElementById("firestoreSyncBadge");
+      if (!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.projectId) {
+        badge.className = "sync-badge sync-local";
+        badge.innerHTML = '<i class="ph ph-hard-drives"></i> وضع محلي (أضف Firebase Config للمزامنة المباشرة)';
+        return;
+      }
+
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        db = firebase.firestore();
+        isFirestoreConnected = true;
+
+        badge.className = "sync-badge sync-live";
+        badge.innerHTML = '<i class="ph ph-broadcast"></i> متصل بـ Firestore — استقبال تلقائي';
+
+        db.collection(FIRESTORE_COLLECTION)
+          .onSnapshot(snapshot => {
+            const liveRequests = snapshot.docs.map(normalizeFirestoreDoc);
+            state.requests = liveRequests;
+            saveState();
+            renderDashboard();
+          }, err => {
+            console.error("Firestore listener error:", err);
+            badge.className = "sync-badge sync-local";
+            badge.innerHTML = '<i class="ph ph-warning"></i> تعذر الاتصال بـ Firestore (وضع محلي)';
+          });
+      } catch (e) {
+        console.error("Firebase init error:", e);
+      }
     }
 
     function renderDashboard() {
@@ -1005,6 +1059,13 @@
       const statusLabel = s => s === "new" ? "جديد" : s === "visit" ? "معاينة" : "تم التسعير";
       const statusClass = s => s === "new" ? "st-new" : s === "visit" ? "st-visit" : "st-quoted";
 
+      if (!state.requests.length) {
+        document.getElementById("requestsTableBody").innerHTML = `
+          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px;">لا توجد طلبات واردة حالياً</td></tr>
+        `;
+        return;
+      }
+
       document.getElementById("requestsTableBody").innerHTML = state.requests.map(req => `
         <tr>
           <td style="font-weight:800;">${req.client}</td>
@@ -1028,12 +1089,20 @@
       `).join("");
     }
 
-    function updateRequestStatus(id, status) {
+    async function updateRequestStatus(id, status) {
       const r = state.requests.find(x => x.id === id);
       if (!r) return;
       r.status = status;
       saveState();
       renderDashboard();
+
+      if (isFirestoreConnected && db) {
+        try {
+          await db.collection(FIRESTORE_COLLECTION).doc(id).set({ status }, { merge: true });
+        } catch (err) {
+          console.error("Error updating status in Firestore:", err);
+        }
+      }
     }
 
     function loadRequestIntoEstimator(id) {
@@ -1046,10 +1115,9 @@
       renderAll();
     }
 
-    function addSampleRequest() {
+    async function addSampleRequest() {
       const idx = state.requests.length + 1;
-      state.requests.unshift({
-        id: "req-" + Date.now(),
+      const newReq = {
         client: `عميل جديد #${idx}`,
         phone: "01060728015",
         location: "القاهرة / 6 أكتوبر",
@@ -1058,7 +1126,21 @@
         contract: "تشطيب كامل (Cost Plus)",
         has3D: "حسب الطلب",
         status: "new"
-      });
+      };
+
+      if (isFirestoreConnected && db) {
+        try {
+          await db.collection(FIRESTORE_COLLECTION).add({
+            ...newReq,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          return;
+        } catch (err) {
+          console.error("Error adding request to Firestore:", err);
+        }
+      }
+
+      state.requests.unshift({ id: "req-" + Date.now(), ...newReq });
       saveState();
       renderDashboard();
     }
@@ -1675,6 +1757,7 @@
 
     syncGlobalInputs();
     renderAll();
+    initFirestoreListener();
   </script>
 </body>
 </html>
