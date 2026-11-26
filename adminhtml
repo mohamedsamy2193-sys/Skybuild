@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyBuild Admin | إدارة طلبات المعاينة والمقايسات</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Cairo, Tajawal & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Firebase Compat SDK (Firestore & Analytics) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'Tajawal', 'sans-serif'],
+                        brand: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        obsidian: {
+                            800: '#1F2937',
+                            900: '#111827',
+                            950: '#090D16',
+                        },
+                        silver: {
+                            50: '#F9FAFB',
+                            100: '#F3F4F6',
+                            200: '#E5E7EB',
+                            300: '#D1D5DB',
+                            400: '#9CA3AF',
+                        },
+                        gold: {
+                            500: '#D97706',
+                            600: '#B45309',
+                            700: '#92400E',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F3F4F6;
+            color: #111827;
+            font-family: 'Cairo', sans-serif;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F3F4F6; }
+        ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-obsidian-900 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- ===================================================================== -->
+    <!-- TOP ADMIN HEADER                                                      -->
+    <!-- ===================================================================== -->
+    <header class="bg-obsidian-950 text-white border-b border-slate-800 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-[1360px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand & Portal Title -->
+            <div class="flex items-center gap-3.5">
+                <div class="flex items-center gap-2.5" dir="ltr">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center font-brand font-extrabold text-amber-400 text-lg">
+                        SB
+                    </div>
+                    <div class="flex flex-col text-left leading-none">
+                        <span class="font-brand font-extrabold text-lg text-white">
+                            <span class="italic text-amber-400">Sky</span>Build
+                        </span>
+                        <span class="font-brand text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">
+                            Engineering Portal
+                        </span>
+                    </div>
+                </div>
+                <span class="hidden sm:inline-block h-6 w-px bg-slate-800"></span>
+                <div class="text-xs sm:text-sm font-extrabold text-slate-200">
+                    إدارة طلبات المعاينة والمقايسات
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="loadRequests()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/15 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+                    <i id="refresh-icon" class="ph ph-arrows-clockwise text-base text-amber-400"></i>
+                    <span>تحديث</span>
+                </button>
+                <button type="button" onclick="exportToExcelCSV()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer">
+                    <i class="ph ph-file-xls text-base"></i>
+                    <span>تصدير Excel</span>
+                </button>
+                <a href="index.html" class="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-obsidian-950 px-3.5 py-2 rounded-xl text-xs font-extrabold transition">
+                    <i class="ph ph-arrow-square-out text-base"></i>
+                    <span>صفحة العميل</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- MAIN ADMIN WORKSPACE                                                  -->
+    <!-- ===================================================================== -->
+    <main class="flex-1 max-w-[1360px] w-full mx-auto px-4 sm:px-6 py-7 space-y-6">
+
+        <!-- KPI Summary Cards -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl border border-silver-200 p-4 sm:p-5 shadow-2xs space-y-1">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
+                    <span>إجمالي الطلبات</span>
+                    <i class="ph ph-files text-lg text-obsidian-900"></i>
+                </div>
+                <div id="kpi-total" class="text-2xl sm:text-3xl font-extrabold text-obsidian-950">0</div>
+                <div class="text-[11px] text-slate-500">جميع طلبات المعاينة المسجلة</div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-silver-200 p-4 sm:p-5 shadow-2xs space-y-1">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
+                    <span>طلبات جديدة</span>
+                    <i class="ph ph-bell-ringing text-lg text-amber-600"></i>
+                </div>
+                <div id="kpi-new" class="text-2xl sm:text-3xl font-extrabold text-amber-600">0</div>
+                <div class="text-[11px] text-slate-500">بانتظار المراجعة أو تحديد الموعد</div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-silver-200 p-4 sm:p-5 shadow-2xs space-y-1">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
+                    <span>تشطيب كامل</span>
+                    <i class="ph ph-buildings text-lg text-emerald-700"></i>
+                </div>
+                <div id="kpi-full" class="text-2xl sm:text-3xl font-extrabold text-emerald-700">0</div>
+                <div class="text-[11px] text-slate-500">إشراف وتنفيذ متكامل للوحدة</div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-silver-200 p-4 sm:p-5 shadow-2xs space-y-1">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-bold">
+                    <span>طلبات تصميم 3D</span>
+                    <i class="ph ph-cube text-lg text-indigo-700"></i>
+                </div>
+                <div id="kpi-3d" class="text-2xl sm:text-3xl font-extrabold text-indigo-700">0</div>
+                <div class="text-[11px] text-slate-500">مطلوب معها تصميم ثلاثي الأبعاد</div>
+            </div>
+        </section>
+
+        <!-- Search & Filter Bar -->
+        <section class="bg-white rounded-2xl border border-silver-200 p-4 sm:p-5 shadow-2xs">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div class="md:col-span-5 relative">
+                    <i class="ph ph-magnifying-glass text-lg text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="filter-search" oninput="applyFilters()" placeholder="ابحث باسم العميل، رقم الموبايل، أو مكان الوحدة..." class="w-full bg-silver-50 border border-silver-300 rounded-xl pr-10 pl-3.5 py-2.5 text-xs sm:text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
+                </div>
+
+                <div class="md:col-span-3">
+                    <select id="filter-status" onchange="applyFilters()" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-obsidian-900 focus:outline-none focus:border-obsidian-900">
+                        <option value="all">كل الحالات</option>
+                        <option value="new">جديد</option>
+                        <option value="contacted">تم التواصل</option>
+                        <option value="inspected">تمت المعاينة</option>
+                        <option value="quoted">تم إرسال المقايسة</option>
+                        <option value="closed">مغلق / مؤجل</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <select id="filter-scope" onchange="applyFilters()" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-obsidian-900 focus:outline-none focus:border-obsidian-900">
+                        <option value="all">كل أنظمة التعاقد</option>
+                        <option value="full">تشطيب كامل</option>
+                        <option value="supervision">إشراف هندسي فقط</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <select id="filter-3d" onchange="applyFilters()" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-obsidian-900 focus:outline-none focus:border-obsidian-900">
+                        <option value="all">التصميم 3D: الكل</option>
+                        <option value="yes">مطلوب 3D</option>
+                        <option value="no">بدون 3D</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Requests Workspace Grid -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Requests List (5 Cols) -->
+            <div class="lg:col-span-5 space-y-3">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-sm font-extrabold text-obsidian-950">قائمة الطلبات (<span id="filtered-count">0</span>)</h2>
+                    <span class="text-[11px] text-slate-500">اضغط على أي طلب لعرض التفاصيل الكاملة</span>
+                </div>
+                <div id="requests-list" class="space-y-3 max-h-[760px] overflow-y-auto pr-1">
+                    <div class="bg-white rounded-2xl border border-silver-200 p-8 text-center text-xs text-slate-500">
+                        جاري تحميل الطلبات من قاعدة البيانات...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Request Inspector (7 Cols) -->
+            <div class="lg:col-span-7 lg:sticky lg:top-20">
+                <div id="request-detail-panel" class="bg-white rounded-2xl border border-silver-200 p-6 sm:p-8 shadow-2xs text-center text-slate-500 text-sm">
+                    اختر طلباً من القائمة لعرض التوصيف الهندسي الكامل وإدارة حالته.
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- FOOTER                                                                -->
+    <!-- ===================================================================== -->
+    <footer class="bg-obsidian-950 text-white border-t border-slate-800 mt-12 py-4 px-4 text-center text-xs text-slate-400">
+        SkyBuild for Design &amp; Contracting — لوحة المتابعة الهندسية الداخلية
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- JAVASCRIPT LOGIC & FIRESTORE MANAGEMENT                             -->
+    <!-- ===================================================================== -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBs5O6-3V67a-LqRF9yWr1JWJnPBSrGFhg",
+            authDomain: "skybuild-a63fb.firebaseapp.com",
+            projectId: "skybuild-a63fb",
+            storageBucket: "skybuild-a63fb.firebasestorage.app",
+            messagingSenderId: "311610298789",
+            appId: "1:311610298789:web:442581f4e18f9aba11184c",
+            measurementId: "G-TL1THMTTC8"
+        };
+
+        let db = null;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+            if (typeof firebase.analytics === 'function') {
+                firebase.analytics();
+            }
+        } catch (err) {
+            console.error("Firebase init error:", err);
+        }
+
+        const STATUS_LABELS = {
+            new: { text: 'جديد', cls: 'bg-amber-100 text-amber-800 border-amber-200' },
+            contacted: { text: 'تم التواصل', cls: 'bg-sky-100 text-sky-800 border-sky-200' },
+            inspected: { text: 'تمت المعاينة', cls: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+            quoted: { text: 'تم إرسال المقايسة', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+            closed: { text: 'مغلق / مؤجل', cls: 'bg-slate-200 text-slate-700 border-slate-300' }
+        };
+
+        let allRequests = [];
+        let filteredRequests = [];
+        let selectedRequestId = null;
+
+        async function loadRequests() {
+            const icon = document.getElementById('refresh-icon');
+            if (icon) icon.classList.add('animate-spin');
+
+            try {
+                if (!db) {
+                    showToast('تعذر الاتصال بـ Firebase Firestore', 'error');
+                    return;
+                }
+
+                const snapshot = await db.collection('inspection_requests').get();
+                const items = [];
+
+                snapshot.forEach(doc => {
+                    const d = doc.data() || {};
+                    const createdMs = d.createdAt && typeof d.createdAt.toMillis === 'function'
+                        ? d.createdAt.toMillis()
+                        : (d.createdAtISO ? Date.parse(d.createdAtISO) || 0 : 0);
+
+                    items.push({
+                        id: doc.id,
+                        status: d.status || 'new',
+                        createdMs: createdMs,
+                        createdAtText: createdMs
+                            ? new Date(createdMs).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' })
+                            : 'غير محدد',
+                        client: d.client || {},
+                        contract: d.contract || {},
+                        design3D: d.design3D || {},
+                        unit: d.unit || {},
+                        selectedScope: Array.isArray(d.selectedScope) ? d.selectedScope : []
+                    });
+                });
+
+                items.sort((a, b) => b.createdMs - a.createdMs);
+                allRequests = items;
+                updateKPIs();
+                applyFilters();
+            } catch (err) {
+                console.error("Error loading requests:", err);
+                showToast('حدث خطأ أثناء قراءة الطلبات من Firestore', 'error');
+            } finally {
+                if (icon) icon.classList.remove('animate-spin');
+            }
+        }
+
+        function updateKPIs() {
+            const total = allRequests.length;
+            const newCount = allRequests.filter(r => r.status === 'new').length;
+            const fullCount = allRequests.filter(r => r.contract.scope === 'full').length;
+            const d3Count = allRequests.filter(r => Boolean(r.design3D && r.design3D.enabled)).length;
+
+            document.getElementById('kpi-total').textContent = total;
+            document.getElementById('kpi-new').textContent = newCount;
+            document.getElementById('kpi-full').textContent = fullCount;
+            document.getElementById('kpi-3d').textContent = d3Count;
+        }
+
+        function applyFilters() {
+            const q = (document.getElementById('filter-search').value || '').trim().toLowerCase();
+            const statusVal = document.getElementById('filter-status').value;
+            const scopeVal = document.getElementById('filter-scope').value;
+            const d3Val = document.getElementById('filter-3d').value;
+
+            filteredRequests = allRequests.filter(r => {
+                const name = (r.client.name || '').toLowerCase();
+                const phone = (r.client.phone || '').toLowerCase();
+                const loc = (r.unit.location || '').toLowerCase();
+                const floor = (r.unit.floor || '').toLowerCase();
+
+                const matchesSearch = !q || name.includes(q) || phone.includes(q) || loc.includes(q) || floor.includes(q);
+                const matchesStatus = statusVal === 'all' || r.status === statusVal;
+                const matchesScope = scopeVal === 'all' || r.contract.scope === scopeVal;
+                const is3D = Boolean(r.design3D && r.design3D.enabled);
+                const matches3D = d3Val === 'all' || (d3Val === 'yes' && is3D) || (d3Val === 'no' && !is3D);
+
+                return matchesSearch && matchesStatus && matchesScope && matches3D;
+            });
+
+            document.getElementById('filtered-count').textContent = filteredRequests.length;
+            renderRequestsList();
+
+            if (filteredRequests.length > 0) {
+                const stillExists = filteredRequests.some(r => r.id === selectedRequestId);
+                if (!stillExists) {
+                    selectedRequestId = filteredRequests[0].id;
+                }
+                renderRequestDetail(selectedRequestId);
+            } else {
+                selectedRequestId = null;
+                document.getElementById('request-detail-panel').innerHTML = `
+                    <div class="py-10 text-center space-y-2 text-slate-500">
+                        <i class="ph ph-folder-open text-4xl text-slate-400"></i>
+                        <div class="font-bold text-sm">لا توجد طلبات مطابقة للتصفية الحالية</div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRequestsList() {
+            const listEl = document.getElementById('requests-list');
+            if (filteredRequests.length === 0) {
+                listEl.innerHTML = `
+                    <div class="bg-white rounded-2xl border border-silver-200 p-6 text-center text-xs text-slate-500">
+                        لا توجد طلبات لعرضها
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = filteredRequests.map(r => {
+                const st = STATUS_LABELS[r.status] || STATUS_LABELS.new;
+                const active = r.id === selectedRequestId;
+                const scopeShort = r.contract.scope === 'full'
+                    ? `تشطيب كامل (${r.contract.pricingModel || 'Cost Plus'})`
+                    : 'إشراف هندسي فقط';
+
+                return `
+                    <div onclick="selectRequest('${r.id}')" class="cursor-pointer rounded-2xl border p-4 transition ${active ? 'border-obsidian-950 bg-white ring-2 ring-amber-400/50 shadow-xs' : 'border-silver-200 bg-white hover:border-slate-400'}">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <div class="font-extrabold text-sm text-obsidian-950">${escapeHTML(r.client.name || 'بدون اسم')}</div>
+                                <div class="text-xs font-bold text-slate-600 mt-0.5" dir="ltr">${escapeHTML(r.client.phone || '')}</div>
+                            </div>
+                            <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${st.cls}">${st.text}</span>
+                        </div>
+
+                        <div class="mt-3 pt-2.5 border-t border-silver-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
+                            <span class="font-bold text-obsidian-900">
+                                <i class="ph ph-map-pin text-gold-600"></i>
+                                ${escapeHTML([r.unit.location, r.unit.floor].filter(Boolean).join(' — ') || 'مكان غير محدد')}
+                            </span>
+                            <span class="font-bold">${r.unit.area || 0} م² • ${r.selectedScope.length} بنود</span>
+                        </div>
+
+                        <div class="mt-2 flex items-center justify-between gap-2 text-[11px]">
+                            <span class="text-slate-500 font-semibold">${escapeHTML(scopeShort)}</span>
+                            <span class="text-slate-400">${escapeHTML(r.createdAtText)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectRequest(id) {
+            selectedRequestId = id;
+            renderRequestsList();
+            renderRequestDetail(id);
+        }
+
+        function renderRequestDetail(id) {
+            const panel = document.getElementById('request-detail-panel');
+            const r = allRequests.find(item => item.id === id);
+            if (!r) return;
+
+            const phoneDigits = (r.client.phone || '').replace(/\D/g, '');
+            const waPhone = phoneDigits.startsWith('0') ? '2' + phoneDigits : phoneDigits;
+            const waText = encodeURIComponent(`مرحباً أ/${r.client.name || ''}، معك مهندس من شركة SkyBuild بخصوص طلب المعاينة والتشطيب في ${r.unit.location || 'وحدتك'}.`);
+
+            const scopeCardsHTML = r.selectedScope.length > 0
+                ? r.selectedScope.map((item, idx) => `
+                    <div class="p-3 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
+                        <div class="text-xs font-extrabold text-obsidian-950">${idx + 1}. ${escapeHTML(item.title || '')}</div>
+                        <div class="text-xs text-slate-600 pr-3">${escapeHTML(item.summaryText || '')}</div>
+                    </div>
+                `).join('')
+                : `<div class="p-3 rounded-xl bg-silver-50 border border-silver-200 text-xs text-slate-500 text-center">لم يتم اختيار بنود تنفيذ محددة</div>`;
+
+            panel.innerHTML = `
+                <div class="text-right space-y-6">
+                    <!-- Top Header & Status Controls -->
+                    <div class="flex flex-wrap items-start justify-between gap-4 border-b border-silver-100 pb-4">
+                        <div class="space-y-1">
+                            <div class="text-[11px] font-bold text-slate-400">تاريخ التسجيل: ${escapeHTML(r.createdAtText)}</div>
+                            <h3 class="text-xl font-extrabold text-obsidian-950">${escapeHTML(r.client.name || 'عميل')}</h3>
+                            <div class="flex flex-wrap items-center gap-2 pt-1">
+                                ${phoneDigits ? `
+                                    <a href="tel:${escapeHTML(phoneDigits)}" class="inline-flex items-center gap-1.5 bg-silver-100 hover:bg-silver-200 text-obsidian-950 px-3 py-1.5 rounded-xl text-xs font-extrabold transition">
+                                        <i class="ph ph-phone-call text-gold-600"></i>
+                                        <span dir="ltr">${escapeHTML(r.client.phone)}</span>
+                                    </a>
+                                    <a href="https://wa.me/${escapeHTML(waPhone)}?text=${waText}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-extrabold transition">
+                                        <i class="ph ph-whatsapp-logo"></i>
+                                        <span>واتساب العميل</span>
+                                    </a>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <select id="detail-status-select" onchange="updateRequestStatus('${r.id}', this.value)" class="bg-silver-50 border border-silver-300 rounded-xl px-3 py-2 text-xs font-extrabold text-obsidian-950 focus:outline-none focus:border-obsidian-900">
+                                <option value="new" ${r.status === 'new' ? 'selected' : ''}>جديد</option>
+                                <option value="contacted" ${r.status === 'contacted' ? 'selected' : ''}>تم التواصل</option>
+                                <option value="inspected" ${r.status === 'inspected' ? 'selected' : ''}>تمت المعاينة</option>
+                                <option value="quoted" ${r.status === 'quoted' ? 'selected' : ''}>تم إرسال المقايسة</option>
+                                <option value="closed" ${r.status === 'closed' ? 'selected' : ''}>مغلق / مؤجل</option>
+                            </select>
+                            <button type="button" onclick="deleteRequest('${r.id}')" title="حذف الطلب" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 p-2 rounded-xl transition cursor-pointer">
+                                <i class="ph ph-trash text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Client, Contract & 3D Summary -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
+                            <span class="text-slate-500 font-bold block">الموعد المفضل للمعاينة</span>
+                            <span class="font-extrabold text-obsidian-950">${escapeHTML(r.client.preferredDate || 'غير محدد')}</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
+                            <span class="text-slate-500 font-bold block">نظام التعاقد</span>
+                            <span class="font-extrabold text-obsidian-950">${escapeHTML(r.contract.label || 'غير محدد')}</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1 sm:col-span-2">
+                            <span class="text-slate-500 font-bold block">التصميم ثلاثي الأبعاد (3D)</span>
+                            <span class="font-extrabold text-indigo-800">${escapeHTML((r.design3D && r.design3D.summary) || 'غير مطلوب')}</span>
+                        </div>
+                        ${r.client.notes ? `
+                            <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1 sm:col-span-2">
+                                <span class="text-amber-800 font-bold block">ملاحظات العميل</span>
+                                <span class="font-semibold text-amber-950">${escapeHTML(r.client.notes)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Unit Specs -->
+                    <div class="space-y-2.5">
+                        <h4 class="text-sm font-extrabold text-obsidian-950">بيانات ومواصفات الوحدة</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
+                                <span class="text-slate-500 block">المكان</span>
+                                <strong class="text-obsidian-950">${escapeHTML(r.unit.location || '-')}</strong>
+                            </div>
+                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
+                                <span class="text-slate-500 block">الدور</span>
+                                <strong class="text-obsidian-950">${escapeHTML(r.unit.floor || '-')}</strong>
+                            </div>
+                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
+                                <span class="text-slate-500 block">المساحة</span>
+                                <strong class="text-obsidian-950">${r.unit.area || 0} م²</strong>
+                            </div>
+                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
+                                <span class="text-slate-500 block">حالة الاستلام</span>
+                                <strong class="text-obsidian-950">${escapeHTML(r.unit.condition || '-')}</strong>
+                            </div>
+                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
+                                <span class="text-slate-500 block">التقسيم</span>
+                                <strong class="text-obsidian-950">${escapeHTML([r.unit.rooms, r.unit.bathrooms].filter(Boolean).join(' — ') || '-')}</strong>
+                            </div>
+                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
+                                <span class="text-slate-500 block">الأسانسير والخدمات</span>
+                                <strong class="text-obsidian-950">${escapeHTML([r.unit.elevator, Array.isArray(r.unit.utilities) ? r.unit.utilities.join('، ') : ''].filter(Boolean).join(' | ') || '-')}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scope Items -->
+                    <div class="space-y-2.5">
+                        <h4 class="text-sm font-extrabold text-obsidian-950">البنود المختارة (${r.selectedScope.length})</h4>
+                        <div class="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                            ${scopeCardsHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function updateRequestStatus(id, newStatus) {
+            try {
+                if (!db) return;
+                await db.collection('inspection_requests').doc(id).update({ status: newStatus });
+                const target = allRequests.find(r => r.id === id);
+                if (target) target.status = newStatus;
+                updateKPIs();
+                renderRequestsList();
+                showToast('تم تحديث حالة الطلب سحابياً', 'success');
+            } catch (err) {
+                console.error("Status update error:", err);
+                showToast('تعذر تحديث الحالة', 'error');
+            }
+        }
+
+        async function deleteRequest(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) return;
+            try {
+                if (!db) return;
+                await db.collection('inspection_requests').doc(id).delete();
+                allRequests = allRequests.filter(r => r.id !== id);
+                if (selectedRequestId === id) selectedRequestId = null;
+                updateKPIs();
+                applyFilters();
+                showToast('تم حذف الطلب بنجاح', 'success');
+            } catch (err) {
+                console.error("Delete error:", err);
+                showToast('تعذر حذف الطلب', 'error');
+            }
+        }
+
+        function exportToExcelCSV() {
+            if (filteredRequests.length === 0) {
+                showToast('لا توجد بيانات للتصدير', 'error');
+                return;
+            }
+
+            const headers = [
+                'الاسم',
+                'رقم الهاتف',
+                'الموعد المفضل',
+                'الحالة',
+                'نظام التعاقد',
+                'التصميم 3D',
+                'المكان',
+                'الدور',
+                'المساحة (م²)',
+                'حالة الاستلام',
+                'التقسيم',
+                'الأسانسير والخدمات',
+                'عدد البنود',
+                'تفاصيل البنود',
+                'ملاحظات',
+                'تاريخ التسجيل'
+            ];
+
+            const rows = filteredRequests.map(r => {
+                const stText = (STATUS_LABELS[r.status] || STATUS_LABELS.new).text;
+                const scopeStr = r.selectedScope.map((s, i) => `${i + 1}. ${s.title}: ${s.summaryText}`).join(' | ');
+                const utilsStr = [r.unit.elevator, Array.isArray(r.unit.utilities) ? r.unit.utilities.join('، ') : ''].filter(Boolean).join(' | ');
+
+                return [
+                    r.client.name || '',
+                    r.client.phone || '',
+                    r.client.preferredDate || '',
+                    stText,
+                    r.contract.label || '',
+                    (r.design3D && r.design3D.summary) || 'غير مطلوب',
+                    r.unit.location || '',
+                    r.unit.floor || '',
+                    r.unit.area || 0,
+                    r.unit.condition || '',
+                    [r.unit.rooms, r.unit.bathrooms].filter(Boolean).join(' — '),
+                    utilsStr,
+                    r.selectedScope.length,
+                    scopeStr,
+                    r.client.notes || '',
+                    r.createdAtText || ''
+                ];
+            });
+
+            const csvContent = '\uFEFF' + [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+                .join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `skybuild-inspection-requests-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('تم تصدير ملف Excel بنجاح', 'success');
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'error' ? 'bg-rose-700' : 'bg-obsidian-900 border border-amber-500/40';
+            toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all duration-300`;
+            toast.innerHTML = `<i class="ph ${type === 'error' ? 'ph-warning-circle text-amber-300' : 'ph-check-circle text-emerald-400'} text-lg"></i><span>${escapeHTML(msg)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadRequests);
+    </script>
+</body>
+</html>
