@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyBuild Admin | إدارة طلبات المعاينة والمقايسات</title>
+    <title>SkyBuild Admin | إدارة الطلبات والتحليل الهندسي وحصر الخامات</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -67,14 +67,13 @@
 <body class="min-h-screen flex flex-col selection:bg-obsidian-900 selection:text-white">
 
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2"></div>
+    <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 max-w-md"></div>
 
     <!-- ===================================================================== -->
     <!-- TOP ADMIN HEADER                                                      -->
     <!-- ===================================================================== -->
     <header class="bg-obsidian-950 text-white border-b border-slate-800 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-[1360px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
-            <!-- Brand & Portal Title -->
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3.5">
                 <div class="flex items-center gap-2.5" dir="ltr">
                     <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center font-brand font-extrabold text-amber-400 text-lg">
@@ -85,17 +84,16 @@
                             <span class="italic text-amber-400">Sky</span>Build
                         </span>
                         <span class="font-brand text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">
-                            Engineering Portal
+                            Engineering &amp; BOQ Portal
                         </span>
                     </div>
                 </div>
                 <span class="hidden sm:inline-block h-6 w-px bg-slate-800"></span>
                 <div class="text-xs sm:text-sm font-extrabold text-slate-200">
-                    إدارة طلبات المعاينة والمقايسات
+                    إدارة الطلبات والتحليل الهندسي وحصر الخامات
                 </div>
             </div>
 
-            <!-- Action Controls -->
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" onclick="loadRequests()" class="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/15 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
                     <i id="refresh-icon" class="ph ph-arrows-clockwise text-base text-amber-400"></i>
@@ -103,7 +101,7 @@
                 </button>
                 <button type="button" onclick="exportToExcelCSV()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer">
                     <i class="ph ph-file-xls text-base"></i>
-                    <span>تصدير Excel</span>
+                    <span>تصدير الطلبات Excel</span>
                 </button>
                 <a href="index.html" class="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-obsidian-950 px-3.5 py-2 rounded-xl text-xs font-extrabold transition">
                     <i class="ph ph-arrow-square-out text-base"></i>
@@ -116,7 +114,7 @@
     <!-- ===================================================================== -->
     <!-- MAIN ADMIN WORKSPACE                                                  -->
     <!-- ===================================================================== -->
-    <main class="flex-1 max-w-[1360px] w-full mx-auto px-4 sm:px-6 py-7 space-y-6">
+    <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 py-7 space-y-6">
 
         <!-- KPI Summary Cards -->
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -194,25 +192,30 @@
             </div>
         </section>
 
-        <!-- Requests Workspace Grid -->
+        <!-- Requests & Engineering Workspace Grid -->
         <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <!-- Requests List (5 Cols) -->
-            <div class="lg:col-span-5 space-y-3">
+            <!-- Requests List (4 Cols) -->
+            <div class="lg:col-span-4 space-y-3">
                 <div class="flex items-center justify-between px-1">
                     <h2 class="text-sm font-extrabold text-obsidian-950">قائمة الطلبات (<span id="filtered-count">0</span>)</h2>
-                    <span class="text-[11px] text-slate-500">اضغط على أي طلب لعرض التفاصيل الكاملة</span>
+                    <span class="text-[11px] text-slate-500">اختر طلباً لعرض التفاصيل والتحليل</span>
                 </div>
-                <div id="requests-list" class="space-y-3 max-h-[760px] overflow-y-auto pr-1">
+                <div id="requests-list" class="space-y-3 max-h-[820px] overflow-y-auto pr-1">
                     <div class="bg-white rounded-2xl border border-silver-200 p-8 text-center text-xs text-slate-500">
                         جاري تحميل الطلبات من قاعدة البيانات...
                     </div>
                 </div>
             </div>
 
-            <!-- Selected Request Inspector (7 Cols) -->
-            <div class="lg:col-span-7 lg:sticky lg:top-20">
-                <div id="request-detail-panel" class="bg-white rounded-2xl border border-silver-200 p-6 sm:p-8 shadow-2xs text-center text-slate-500 text-sm">
+            <!-- Selected Request Inspector + Engineering BOQ Tool (8 Cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                <div id="request-detail-panel" class="bg-white rounded-2xl border border-silver-200 p-6 sm:p-7 shadow-2xs text-center text-slate-500 text-sm">
                     اختر طلباً من القائمة لعرض التوصيف الهندسي الكامل وإدارة حالته.
+                </div>
+
+                <!-- Engineering Quantity & Pricing Analysis Tool -->
+                <div id="engineering-boq-panel" class="hidden bg-white rounded-2xl border-2 border-obsidian-900 p-5 sm:p-7 shadow-xs space-y-6">
+                    <!-- Injected dynamically for selected request -->
                 </div>
             </div>
         </section>
@@ -223,11 +226,11 @@
     <!-- FOOTER                                                                -->
     <!-- ===================================================================== -->
     <footer class="bg-obsidian-950 text-white border-t border-slate-800 mt-12 py-4 px-4 text-center text-xs text-slate-400">
-        SkyBuild for Design &amp; Contracting — لوحة المتابعة الهندسية الداخلية
+        SkyBuild for Design &amp; Contracting — لوحة المتابعة والتحليل الهندسي
     </footer>
 
     <!-- ===================================================================== -->
-    <!-- JAVASCRIPT LOGIC & FIRESTORE MANAGEMENT                             -->
+    <!-- JAVASCRIPT LOGIC, FIRESTORE SYNC & ENGINEERING BOQ ENGINE           -->
     <!-- ===================================================================== -->
     <script>
         const firebaseConfig = {
@@ -261,9 +264,50 @@
             closed: { text: 'مغلق / مؤجل', cls: 'bg-slate-200 text-slate-700 border-slate-300' }
         };
 
+        // Editable Engineering Coefficients & Unit Rates (جنيه مصري / وحدات قياس)
+        const boqParams = {
+            wallFactor: 3.0,          // مساحة الحوائط التقريبية = المساحة × 3
+            ceilingFactor: 1.0,       // مساحة الأسقف = المساحة × 1
+            wastePct: 10,             // نسبة الهالك (%)
+
+            // معدلات بند المحارة (لكل م² من مسطح المحارة: حوائط + أسقف)
+            plasterCementBagsPerM2: 0.14,  // شيكارة أسمنت / م²
+            plasterSandM3PerM2: 0.022,     // م³ رمل / م²
+            plasterLaborRate: 55,          // مصنعية محارة / م²
+
+            // معدلات بند سيراميك/بورسلين الأرضيات (لكل م² أرضيات)
+            floorCementBagsPerM2: 0.16,    // شيكارة أسمنت / م²
+            floorSandM3PerM2: 0.032,       // م³ رمل / م²
+            floorGroutKgPerM2: 0.35,       // كجم مادة سقية / م²
+            floorTileRate: 380,            // متوسط سعر المتر سيراميك/بورسلين / م²
+            floorLaborRate: 95,            // مصنعية تركيب أرضيات / م²
+
+            // معدلات سيراميك الحوائط (حمامات ومطابخ)
+            wallTileCementBagsPerM2: 0.15,
+            wallTileSandM3PerM2: 0.02,
+            wallTileGroutKgPerM2: 0.3,
+            wallTileRate: 340,
+            wallTileLaborRate: 105,
+
+            // معدلات دهانات وجبسمبورد وتأسيسات
+            paintCoatsAreaFactor: 2.6,     // مسطح دهانات تقديري = مساحة الوحدة × 2.6
+            paintMaterialRate: 45,         // خامات دهانات / م²
+            paintLaborRate: 45,            // مصنعية دهانات / م²
+            gypsumAreaFactor: 0.65,        // مسطح جبسمبورد تقديري = مساحة الوحدة × 0.65
+            gypsumTotalRate: 320,          // سعر متر الجبسمبورد (خامة + مصنعية) / م²
+            roughPlumbingPerBath: 6500,    // تقدير تأسيس سباكة / حمام
+            roughElecPerM2: 180,           // تقدير تأسيس كهرباء / م²
+
+            // أسعار الخامات للمحاسبة الإجمالية
+            cementBagPrice: 165,           // سعر شيكارة الأسمنت
+            sandM3Price: 220,              // سعر م³ الرمل
+            groutKgPrice: 25               // سعر كجم مادة السقية
+        };
+
         let allRequests = [];
         let filteredRequests = [];
         let selectedRequestId = null;
+        let lastCalculatedBOQ = null;
 
         async function loadRequests() {
             const icon = document.getElementById('refresh-icon');
@@ -271,7 +315,7 @@
 
             try {
                 if (!db) {
-                    showToast('تعذر الاتصال بـ Firebase Firestore', 'error');
+                    showToast('تعذر الاتصال بـ Firebase Firestore (تأكد من تهيئة Firebase)', 'error');
                     return;
                 }
 
@@ -304,8 +348,16 @@
                 updateKPIs();
                 applyFilters();
             } catch (err) {
-                console.error("Error loading requests:", err);
-                showToast('حدث خطأ أثناء قراءة الطلبات من Firestore', 'error');
+                console.error("Firestore read error:", err);
+                const reason = err && err.message ? ` (${err.message})` : '';
+                showToast(`حدث خطأ أثناء قراءة الطلبات من Firestore${reason}`, 'error');
+                document.getElementById('requests-list').innerHTML = `
+                    <div class="bg-rose-50 border border-rose-200 rounded-2xl p-5 text-xs text-rose-800 space-y-2">
+                        <div class="font-extrabold">تعذر قراءة الطلبات من Firestore</div>
+                        <div>تأكد من تفعيل Firestore Database في مشروع <strong>skybuild-a63fb</strong> ومن سماحية <strong>Rules</strong> للقراءة.</div>
+                        <div class="font-mono text-[11px] bg-white/70 p-2 rounded-lg border border-rose-200">${escapeHTML(err && err.message ? err.message : 'Permission / Network Error')}</div>
+                    </div>
+                `;
             } finally {
                 if (icon) icon.classList.remove('animate-spin');
             }
@@ -353,6 +405,7 @@
                     selectedRequestId = filteredRequests[0].id;
                 }
                 renderRequestDetail(selectedRequestId);
+                renderEngineeringBOQ(selectedRequestId);
             } else {
                 selectedRequestId = null;
                 document.getElementById('request-detail-panel').innerHTML = `
@@ -361,6 +414,7 @@
                         <div class="font-bold text-sm">لا توجد طلبات مطابقة للتصفية الحالية</div>
                     </div>
                 `;
+                document.getElementById('engineering-boq-panel').classList.add('hidden');
             }
         }
 
@@ -413,6 +467,7 @@
             selectedRequestId = id;
             renderRequestsList();
             renderRequestDetail(id);
+            renderEngineeringBOQ(id);
         }
 
         function renderRequestDetail(id) {
@@ -434,8 +489,7 @@
                 : `<div class="p-3 rounded-xl bg-silver-50 border border-silver-200 text-xs text-slate-500 text-center">لم يتم اختيار بنود تنفيذ محددة</div>`;
 
             panel.innerHTML = `
-                <div class="text-right space-y-6">
-                    <!-- Top Header & Status Controls -->
+                <div class="text-right space-y-5">
                     <div class="flex flex-wrap items-start justify-between gap-4 border-b border-silver-100 pb-4">
                         <div class="space-y-1">
                             <div class="text-[11px] font-bold text-slate-400">تاريخ التسجيل: ${escapeHTML(r.createdAtText)}</div>
@@ -468,68 +522,434 @@
                         </div>
                     </div>
 
-                    <!-- Client, Contract & 3D Summary -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                        <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
-                            <span class="text-slate-500 font-bold block">الموعد المفضل للمعاينة</span>
-                            <span class="font-extrabold text-obsidian-950">${escapeHTML(r.client.preferredDate || 'غير محدد')}</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-silver-50 border border-silver-200">
+                            <span class="text-slate-500 block">المكان والدور</span>
+                            <strong class="text-obsidian-950">${escapeHTML([r.unit.location, r.unit.floor].filter(Boolean).join(' — ') || '-')}</strong>
                         </div>
-                        <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
-                            <span class="text-slate-500 font-bold block">نظام التعاقد</span>
-                            <span class="font-extrabold text-obsidian-950">${escapeHTML(r.contract.label || 'غير محدد')}</span>
+                        <div class="p-3 rounded-xl bg-silver-50 border border-silver-200">
+                            <span class="text-slate-500 block">المساحة والحالة</span>
+                            <strong class="text-obsidian-950">${r.unit.area || 0} م² — ${escapeHTML(r.unit.condition || '-')}</strong>
                         </div>
-                        <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1 sm:col-span-2">
-                            <span class="text-slate-500 font-bold block">التصميم ثلاثي الأبعاد (3D)</span>
-                            <span class="font-extrabold text-indigo-800">${escapeHTML((r.design3D && r.design3D.summary) || 'غير مطلوب')}</span>
+                        <div class="p-3 rounded-xl bg-silver-50 border border-silver-200">
+                            <span class="text-slate-500 block">التقسيم</span>
+                            <strong class="text-obsidian-950">${escapeHTML([r.unit.rooms, r.unit.bathrooms].filter(Boolean).join(' — ') || '-')}</strong>
                         </div>
-                        ${r.client.notes ? `
-                            <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1 sm:col-span-2">
-                                <span class="text-amber-800 font-bold block">ملاحظات العميل</span>
-                                <span class="font-semibold text-amber-950">${escapeHTML(r.client.notes)}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-
-                    <!-- Unit Specs -->
-                    <div class="space-y-2.5">
-                        <h4 class="text-sm font-extrabold text-obsidian-950">بيانات ومواصفات الوحدة</h4>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
-                                <span class="text-slate-500 block">المكان</span>
-                                <strong class="text-obsidian-950">${escapeHTML(r.unit.location || '-')}</strong>
-                            </div>
-                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
-                                <span class="text-slate-500 block">الدور</span>
-                                <strong class="text-obsidian-950">${escapeHTML(r.unit.floor || '-')}</strong>
-                            </div>
-                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
-                                <span class="text-slate-500 block">المساحة</span>
-                                <strong class="text-obsidian-950">${r.unit.area || 0} م²</strong>
-                            </div>
-                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
-                                <span class="text-slate-500 block">حالة الاستلام</span>
-                                <strong class="text-obsidian-950">${escapeHTML(r.unit.condition || '-')}</strong>
-                            </div>
-                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
-                                <span class="text-slate-500 block">التقسيم</span>
-                                <strong class="text-obsidian-950">${escapeHTML([r.unit.rooms, r.unit.bathrooms].filter(Boolean).join(' — ') || '-')}</strong>
-                            </div>
-                            <div class="p-3 rounded-xl border border-silver-200 bg-white">
-                                <span class="text-slate-500 block">الأسانسير والخدمات</span>
-                                <strong class="text-obsidian-950">${escapeHTML([r.unit.elevator, Array.isArray(r.unit.utilities) ? r.unit.utilities.join('، ') : ''].filter(Boolean).join(' | ') || '-')}</strong>
-                            </div>
+                        <div class="p-3 rounded-xl bg-silver-50 border border-silver-200 sm:col-span-2">
+                            <span class="text-slate-500 block">نظام التعاقد والـ 3D</span>
+                            <strong class="text-obsidian-950">${escapeHTML(r.contract.label || '-')} | 3D: ${escapeHTML((r.design3D && r.design3D.summary) || 'غير مطلوب')}</strong>
+                        </div>
+                        <div class="p-3 rounded-xl bg-silver-50 border border-silver-200">
+                            <span class="text-slate-500 block">الموعد المفضل</span>
+                            <strong class="text-obsidian-950">${escapeHTML(r.client.preferredDate || 'غير محدد')}</strong>
                         </div>
                     </div>
 
-                    <!-- Scope Items -->
-                    <div class="space-y-2.5">
-                        <h4 class="text-sm font-extrabold text-obsidian-950">البنود المختارة (${r.selectedScope.length})</h4>
-                        <div class="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                    <details class="group border border-silver-200 rounded-xl bg-silver-50/50">
+                        <summary class="cursor-pointer p-3 text-xs font-extrabold text-obsidian-950 flex items-center justify-between">
+                            <span>عرض جميع البنود المختارة من العميل (${r.selectedScope.length})</span>
+                            <i class="ph ph-caret-down text-base text-slate-500"></i>
+                        </summary>
+                        <div class="p-3 pt-0 space-y-2 max-h-[260px] overflow-y-auto">
                             ${scopeCardsHTML}
                         </div>
+                    </details>
+                </div>
+            `;
+        }
+
+        // ===================================================================
+        // ENGINEERING QUANTITY & PRICING ENGINE LINKED TO CLIENT DATA
+        // ===================================================================
+        function extractBathCount(bathStr) {
+            const match = String(bathStr || '').match(/\d+/);
+            return match ? Math.max(parseInt(match[0], 10), 1) : 2;
+        }
+
+        function computeEngineeringBOQ(req) {
+            const area = Math.max(parseFloat(req.unit.area) || 0, 0);
+            const bathCount = extractBathCount(req.unit.bathrooms);
+            const selectedIds = new Set((req.selectedScope || []).map(s => s.id));
+            const wasteMult = 1 + (Math.max(parseFloat(boqParams.wastePct) || 0, 0) / 100);
+
+            // المساحات الهندسية المشتقة من مساحة الوحدة
+            const wallsArea = area * boqParams.wallFactor;
+            const ceilingArea = area * boqParams.ceilingFactor;
+            const totalPlasterArea = wallsArea + ceilingArea;
+            const floorTileArea = area * wasteMult;
+
+            const itemAnalyses = [];
+            let totalCementBags = 0;
+            let totalSandM3 = 0;
+            let totalGroutKg = 0;
+            let totalMaterialsCost = 0;
+            let totalLaborCost = 0;
+
+            // 1. تحليل بند المحارة (حوائط + أسقف)
+            if (selectedIds.has('plastering')) {
+                const cementBags = Math.ceil(totalPlasterArea * boqParams.plasterCementBagsPerM2);
+                const sandM3 = +(totalPlasterArea * boqParams.plasterSandM3PerM2).toFixed(2);
+                const matCost = Math.round((cementBags * boqParams.cementBagPrice) + (sandM3 * boqParams.sandM3Price));
+                const labCost = Math.round(totalPlasterArea * boqParams.plasterLaborRate);
+
+                totalCementBags += cementBags;
+                totalSandM3 = +(totalSandM3 + sandM3).toFixed(2);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+
+                itemAnalyses.push({
+                    id: 'plastering',
+                    title: 'بند المحارة (حوائط + أسقف)',
+                    qtyLabel: `${totalPlasterArea.toFixed(1)} م² إجمالي (${wallsArea.toFixed(1)} حوائط + ${ceilingArea.toFixed(1)} سقف)`,
+                    materials: [
+                        `أسمنت: ${cementBags} شيكارة`,
+                        `رمل: ${sandM3} م³`
+                    ],
+                    matCost,
+                    labCost
+                });
+            }
+
+            // 2. تحليل بند سيراميك / بورسلين الأرضيات
+            if (selectedIds.has('floor_ceramic')) {
+                const cementBags = Math.ceil(floorTileArea * boqParams.floorCementBagsPerM2);
+                const sandM3 = +(floorTileArea * boqParams.floorSandM3PerM2).toFixed(2);
+                const groutKg = +(floorTileArea * boqParams.floorGroutKgPerM2).toFixed(1);
+                const tileCost = Math.round(floorTileArea * boqParams.floorTileRate);
+                const mونةCost = Math.round((cementBags * boqParams.cementBagPrice) + (sandM3 * boqParams.sandM3Price) + (groutKg * boqParams.groutKgPrice));
+                const matCost = tileCost + mونةCost;
+                const labCost = Math.round(floorTileArea * boqParams.floorLaborRate);
+
+                totalCementBags += cementBags;
+                totalSandM3 = +(totalSandM3 + sandM3).toFixed(2);
+                totalGroutKg = +(totalGroutKg + groutKg).toFixed(1);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+
+                itemAnalyses.push({
+                    id: 'floor_ceramic',
+                    title: 'بند سيراميك / بورسلين الأرضيات',
+                    qtyLabel: `${floorTileArea.toFixed(1)} م² (شامل ${boqParams.wastePct}% هالك من ${area} م²)`,
+                    materials: [
+                        `أسمنت: ${cementBags} شيكارة`,
+                        `رمل: ${sandM3} م³`,
+                        `مادة سقية: ${groutKg} كجم`,
+                        `سيراميك/بورسلين: ${floorTileArea.toFixed(1)} م²`
+                    ],
+                    matCost,
+                    labCost
+                });
+            }
+
+            // 3. تحليل بند سيراميك الحوائط (تقدير مسطح الحوائط للحمامات والمطبخ)
+            if (selectedIds.has('wall_ceramic')) {
+                const bathWallArea = +(bathCount * 26 + 18).toFixed(1); // تقدير مبدئي لحوائط الحمامات + المطبخ
+                const cementBags = Math.ceil(bathWallArea * boqParams.wallTileCementBagsPerM2);
+                const sandM3 = +(bathWallArea * boqParams.wallTileSandM3PerM2).toFixed(2);
+                const groutKg = +(bathWallArea * boqParams.wallTileGroutKgPerM2).toFixed(1);
+                const matCost = Math.round((bathWallArea * boqParams.wallTileRate) + (cementBags * boqParams.cementBagPrice) + (sandM3 * boqParams.sandM3Price) + (groutKg * boqParams.groutKgPrice));
+                const labCost = Math.round(bathWallArea * boqParams.wallTileLaborRate);
+
+                totalCementBags += cementBags;
+                totalSandM3 = +(totalSandM3 + sandM3).toFixed(2);
+                totalGroutKg = +(totalGroutKg + groutKg).toFixed(1);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+
+                itemAnalyses.push({
+                    id: 'wall_ceramic',
+                    title: 'بند سيراميك الحوائط (حمامات ومطبخ)',
+                    qtyLabel: `${bathWallArea} م² تقديري (${bathCount} حمام + مطبخ)`,
+                    materials: [
+                        `أسمنت: ${cementBags} شيكارة`,
+                        `رمل: ${sandM3} م³`,
+                        `مادة سقية: ${groutKg} كجم`
+                    ],
+                    matCost,
+                    labCost
+                });
+            }
+
+            // 4. تحليل الجبسمبورد
+            if (selectedIds.has('gypsum')) {
+                const gypsumArea = +(area * boqParams.gypsumAreaFactor).toFixed(1);
+                const matCost = Math.round(gypsumArea * boqParams.gypsumTotalRate * 0.65);
+                const labCost = Math.round(gypsumArea * boqParams.gypsumTotalRate * 0.35);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+                itemAnalyses.push({
+                    id: 'gypsum',
+                    title: 'بند الجبسمبورد والأسقف المعلقة',
+                    qtyLabel: `${gypsumArea} م² تقديري`,
+                    materials: [`ألواح وصاج جبسمبورد: ${gypsumArea} م²`],
+                    matCost,
+                    labCost
+                });
+            }
+
+            // 5. تحليل الدهانات
+            if (selectedIds.has('painting')) {
+                const paintArea = +(area * boqParams.paintCoatsAreaFactor).toFixed(1);
+                const matCost = Math.round(paintArea * boqParams.paintMaterialRate);
+                const labCost = Math.round(paintArea * boqParams.paintLaborRate);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+                itemAnalyses.push({
+                    id: 'painting',
+                    title: 'بند الدهانات والتأسيس',
+                    qtyLabel: `${paintArea} م² مسطح تشطيب تقديري`,
+                    materials: [`معجون وبرايمر وتشطيب: ${paintArea} م²`],
+                    matCost,
+                    labCost
+                });
+            }
+
+            // 6. تحليل تأسيس السباكة والكهرباء
+            if (selectedIds.has('plumbing_rough')) {
+                const matCost = Math.round(bathCount * boqParams.roughPlumbingPerBath * 0.65);
+                const labCost = Math.round(bathCount * boqParams.roughPlumbingPerBath * 0.35);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+                itemAnalyses.push({
+                    id: 'plumbing_rough',
+                    title: 'بند تأسيس السباكة',
+                    qtyLabel: `${bathCount} حمام + مطبخ`,
+                    materials: [`مواسير ووصلات تأسيس لـ ${bathCount} حمام`],
+                    matCost,
+                    labCost
+                });
+            }
+
+            if (selectedIds.has('elec_rough')) {
+                const matCost = Math.round(area * boqParams.roughElecPerM2 * 0.65);
+                const labCost = Math.round(area * boqParams.roughElecPerM2 * 0.35);
+                totalMaterialsCost += matCost;
+                totalLaborCost += labCost;
+                itemAnalyses.push({
+                    id: 'elec_rough',
+                    title: 'بند تأسيس الكهرباء',
+                    qtyLabel: `${area} م² مساحة الوحدة`,
+                    materials: [`أسلاك وخراطيم ولوحة لـ ${area} م²`],
+                    matCost,
+                    labCost
+                });
+            }
+
+            return {
+                area,
+                wallsArea,
+                ceilingArea,
+                totalPlasterArea,
+                floorTileArea,
+                itemAnalyses,
+                totals: {
+                    cementBags: totalCementBags,
+                    sandM3: totalSandM3,
+                    groutKg: totalGroutKg,
+                    materialsCost: totalMaterialsCost,
+                    laborCost: totalLaborCost,
+                    grandTotal: totalMaterialsCost + totalLaborCost
+                }
+            };
+        }
+
+        function renderEngineeringBOQ(id) {
+            const panel = document.getElementById('engineering-boq-panel');
+            const r = allRequests.find(item => item.id === id);
+            if (!r) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            const boq = computeEngineeringBOQ(r);
+            lastCalculatedBOQ = { request: r, boq };
+
+            const rowsHTML = boq.itemAnalyses.length > 0
+                ? boq.itemAnalyses.map(row => `
+                    <div class="p-4 rounded-xl border border-silver-200 bg-silver-50/70 space-y-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <div class="text-sm font-extrabold text-obsidian-950">${escapeHTML(row.title)}</div>
+                                <div class="text-xs font-bold text-slate-600">${escapeHTML(row.qtyLabel)}</div>
+                            </div>
+                            <div class="text-left text-xs space-y-0.5">
+                                <div class="font-bold text-slate-700">خامات: <span class="text-obsidian-950">${row.matCost.toLocaleString('ar-EG')} ج.م</span></div>
+                                <div class="font-bold text-slate-700">مصنعية: <span class="text-obsidian-950">${row.labCost.toLocaleString('ar-EG')} ج.م</span></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            ${row.materials.map(m => `
+                                <span class="text-[11px] font-bold bg-white border border-silver-300 text-obsidian-900 px-2.5 py-1 rounded-lg">${escapeHTML(m)}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')
+                : `<div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 font-bold text-center">لم يحدد العميل بنوداً مشمولة ضمن الحاسبة التلقائية بعد، يمكنك تعديل المعاملات أو مراجعة بنود الطلب أعلاه.</div>`;
+
+            panel.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-silver-100 pb-4">
+                    <div>
+                        <span class="text-[11px] font-extrabold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full">أداة التحليل الهندسي وحصر الخامات</span>
+                        <h3 class="text-lg font-extrabold text-obsidian-950 mt-1">تحليل بنود وأسعار طلب: ${escapeHTML(r.client.name || 'العميل')} (${boq.area} م²)</h3>
+                    </div>
+                    <button type="button" onclick="exportBOQToExcel()" class="flex items-center gap-1.5 bg-obsidian-950 hover:bg-obsidian-800 text-amber-400 px-3.5 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer">
+                        <i class="ph ph-download-simple text-base"></i>
+                        <span>تصدير تحليل البند Excel</span>
+                    </button>
+                </div>
+
+                <!-- Derived Areas Strip (Floor, Walls * Factor, Ceiling, Total Plaster) -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3.5 rounded-xl bg-obsidian-950 text-white space-y-1">
+                        <span class="text-slate-400 block">مساحة الأرضيات</span>
+                        <strong class="text-base text-amber-400">${boq.area} م²</strong>
+                        <span class="text-[10px] text-slate-300 block">بالهالك (${boqParams.wastePct}%): ${boq.floorTileArea.toFixed(1)} م²</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
+                        <span class="text-slate-500 block">مساحة الحوائط التقريبية</span>
+                        <strong class="text-base text-obsidian-950">${boq.wallsArea.toFixed(1)} م²</strong>
+                        <span class="text-[10px] text-slate-500 block">المساحة × ${boqParams.wallFactor}</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-silver-50 border border-silver-200 space-y-1">
+                        <span class="text-slate-500 block">مساحة الأسقف</span>
+                        <strong class="text-base text-obsidian-950">${boq.ceilingArea.toFixed(1)} م²</strong>
+                        <span class="text-[10px] text-slate-500 block">مطابقة لمساحة الوحدة</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-300 space-y-1">
+                        <span class="text-amber-900 font-bold block">إجمالي مسطح المحارة</span>
+                        <strong class="text-base text-amber-950">${boq.totalPlasterArea.toFixed(1)} م²</strong>
+                        <span class="text-[10px] text-amber-800 block">حوائط + أسقف</span>
+                    </div>
+                </div>
+
+                <!-- Aggregated Materials & Cost Totals -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3.5 rounded-xl border border-silver-200 bg-white">
+                        <span class="text-slate-500 block">إجمالي الأسمنت المطلوب</span>
+                        <strong class="text-base text-obsidian-950">${boq.totals.cementBags} شيكارة</strong>
+                        <span class="text-[10px] text-slate-400 block">سعر الشيكارة: ${boqParams.cementBagPrice} ج.م</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-silver-200 bg-white">
+                        <span class="text-slate-500 block">إجمالي الرمل المطلوب</span>
+                        <strong class="text-base text-obsidian-950">${boq.totals.sandM3} م³</strong>
+                        <span class="text-[10px] text-slate-400 block">سعر المتر: ${boqParams.sandM3Price} ج.م</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-silver-200 bg-white">
+                        <span class="text-slate-500 block">إجمالي مادة السقية</span>
+                        <strong class="text-base text-obsidian-950">${boq.totals.groutKg} كجم</strong>
+                        <span class="text-[10px] text-slate-400 block">سعر الكجم: ${boqParams.groutKgPrice} ج.م</span>
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/70">
+                        <span class="text-emerald-800 font-bold block">إجمالي تقديري (خامات + مصنعية)</span>
+                        <strong class="text-base text-emerald-950">${boq.totals.grandTotal.toLocaleString('ar-EG')} ج.م</strong>
+                        <span class="text-[10px] text-emerald-700 block">خامات: ${boq.totals.materialsCost.toLocaleString('ar-EG')} | مصنعية: ${boq.totals.laborCost.toLocaleString('ar-EG')}</span>
+                    </div>
+                </div>
+
+                <!-- Editable Engineering Factors & Unit Prices -->
+                <details class="border border-silver-200 rounded-xl bg-silver-50/50">
+                    <summary class="cursor-pointer p-3 text-xs font-extrabold text-obsidian-950 flex items-center justify-between">
+                        <span>تعديل معاملات الحصر والأسعار الهندسية</span>
+                        <i class="ph ph-sliders text-base text-amber-600"></i>
+                    </summary>
+                    <div class="p-4 pt-2 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs border-t border-silver-200">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">معامل الحوائط (× المساحة)</label>
+                            <input type="number" step="0.1" value="${boqParams.wallFactor}" onchange="updateBoqParam('wallFactor', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">نسبة الهالك (%)</label>
+                            <input type="number" step="1" value="${boqParams.wastePct}" onchange="updateBoqParam('wastePct', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">سعر شيكارة الأسمنت</label>
+                            <input type="number" step="5" value="${boqParams.cementBagPrice}" onchange="updateBoqParam('cementBagPrice', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">سعر م³ الرمل</label>
+                            <input type="number" step="5" value="${boqParams.sandM3Price}" onchange="updateBoqParam('sandM3Price', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">مصنعية محارة / م²</label>
+                            <input type="number" step="5" value="${boqParams.plasterLaborRate}" onchange="updateBoqParam('plasterLaborRate', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">سعر متر أرضيات / م²</label>
+                            <input type="number" step="10" value="${boqParams.floorTileRate}" onchange="updateBoqParam('floorTileRate', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">مصنعية أرضيات / م²</label>
+                            <input type="number" step="5" value="${boqParams.floorLaborRate}" onchange="updateBoqParam('floorLaborRate', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">سعر كجم مادة السقية</label>
+                            <input type="number" step="1" value="${boqParams.groutKgPrice}" onchange="updateBoqParam('groutKgPrice', this.value)" class="w-full bg-white border border-silver-300 rounded-lg px-2.5 py-1.5 font-bold">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Detailed Item Breakdown -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-extrabold text-obsidian-950">تحليل البنود المرتبطة بطلب العميل</h4>
+                    <div class="space-y-2.5">
+                        ${rowsHTML}
                     </div>
                 </div>
             `;
+        }
+
+        function updateBoqParam(key, val) {
+            const num = parseFloat(val);
+            if (!Number.isNaN(num) && num >= 0) {
+                boqParams[key] = num;
+                if (selectedRequestId) {
+                    renderEngineeringBOQ(selectedRequestId);
+                }
+            }
+        }
+
+        function exportBOQToExcel() {
+            if (!lastCalculatedBOQ) {
+                showToast('اختر طلباً أولاً لتصدير تحليله الهندسي', 'error');
+                return;
+            }
+
+            const { request: r, boq } = lastCalculatedBOQ;
+            const headers = ['البند الهندسي', 'الكمية / المسطح', 'تفاصيل الخامات', 'تكلفة الخامات (ج.م)', 'تكلفة المصنعية (ج.م)', 'الإجمالي (ج.م)'];
+            const rows = boq.itemAnalyses.map(item => [
+                item.title,
+                item.qtyLabel,
+                item.materials.join(' | '),
+                item.matCost,
+                item.labCost,
+                item.matCost + item.labCost
+            ]);
+
+            rows.push([
+                'الإجمالي العام',
+                `مساحة الوحدة: ${boq.area} م² | إجمالي محارة: ${boq.totalPlasterArea.toFixed(1)} م²`,
+                `أسمنت: ${boq.totals.cementBags} شيكارة | رمل: ${boq.totals.sandM3} م³ | سقية: ${boq.totals.groutKg} كجم`,
+                boq.totals.materialsCost,
+                boq.totals.laborCost,
+                boq.totals.grandTotal
+            ]);
+
+            const csvContent = '\uFEFF' + [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+                .join('\n');
+
+            const safeName = (r.client.name || 'client').replace(/[^\w\u0600-\u06FF-]+/g, '_');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `skybuild-boq-${safeName}-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('تم تصدير جدول التحليل الهندسي إلى Excel', 'success');
         }
 
         async function updateRequestStatus(id, newStatus) {
@@ -643,12 +1063,12 @@
             const toast = document.createElement('div');
             const bg = type === 'error' ? 'bg-rose-700' : 'bg-obsidian-900 border border-amber-500/40';
             toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all duration-300`;
-            toast.innerHTML = `<i class="ph ${type === 'error' ? 'ph-warning-circle text-amber-300' : 'ph-check-circle text-emerald-400'} text-lg"></i><span>${escapeHTML(msg)}</span>`;
+            toast.innerHTML = `<i class="ph ${type === 'error' ? 'ph-warning-circle text-amber-300' : 'ph-check-circle text-emerald-400'} text-lg shrink-0"></i><span>${escapeHTML(msg)}</span>`;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            }, 4500);
         }
 
         document.addEventListener('DOMContentLoaded', loadRequests);
