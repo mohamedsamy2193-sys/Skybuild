@@ -3,47 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBuild | أداة تحليل التكاليف الهندسية التفصيلية</title>
+  <title>SkyBuild for Design & Contracting | لوحة المهندس وتحليل التكاليف</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
   <style>
     :root {
-      --bg: #f6f8fa;
-      --surface: #ffffff;
-      --surface-warm: #faf7f2;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --muted: #64748b;
-      --sky: #0284c7;
-      --sky-dark: #0369a1;
-      --sky-light: #e0f2fe;
-      --wood: #9a6b43;
-      --success: #0d9488;
-      --danger: #dc2626;
-      --radius: 14px;
-      --shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+      --bg: #F3F4F6;
+      --surface: #FFFFFF;
+      --surface-soft: #F9FAFB;
+      --surface-warm: #FFFBEB;
+      --border: #E5E7EB;
+      --border-strong: #D1D5DB;
+      --text: #111827;
+      --muted: #6B7280;
+      --obsidian: #090D16;
+      --slate-dark: #111827;
+      --gold: #D97706;
+      --gold-dark: #B45309;
+      --emerald: #059669;
+      --rose: #DC2626;
+      --radius: 16px;
+      --shadow: 0 4px 18px rgba(9, 13, 22, 0.05);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Cairo", "Segoe UI", Tahoma, Arial, sans-serif;
-      background: var(--bg);
+      font-family: "Cairo", "Tajawal", sans-serif;
+      background-color: var(--bg);
       color: var(--text);
-      line-height: 1.6;
-      padding-bottom: 92px;
+      line-height: 1.65;
+      padding-bottom: 96px;
     }
 
-    /* ترويسة SkyBuild + الشريط المتحرك */
+    button, select, input {
+      font-family: inherit;
+    }
+
+    /* ===================================================================== */
+    /* SKYBUILD BRANDED HEADER + MOVING SLOGAN STRIP                         */
+    /* ===================================================================== */
     .sb-header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 40;
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 2px 10px rgba(9, 13, 22, 0.04);
     }
 
     .sb-header-inner {
@@ -93,33 +103,32 @@
       font-style: italic;
       font-weight: 800;
       font-size: 26px;
-      color: #090d16;
+      color: var(--obsidian);
       letter-spacing: -0.02em;
     }
 
     .sb-build {
       font-weight: 700;
       font-size: 26px;
-      color: #090d16;
+      color: var(--obsidian);
       letter-spacing: -0.02em;
-      position: relative;
       padding-bottom: 4px;
-      border-bottom: 3px solid #090d16;
+      border-bottom: 3px solid var(--obsidian);
     }
 
     .sb-sub {
       font-weight: 600;
       font-size: 11px;
-      color: #475569;
+      color: #4B5563;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       margin-top: 4px;
     }
 
     .sb-marquee {
-      background: #090d16;
-      color: #ffffff;
-      border-top: 1px solid #1e293b;
+      background: var(--obsidian);
+      color: #FFFFFF;
+      border-top: 1px solid #1F2937;
       overflow: hidden;
       padding: 7px 0;
     }
@@ -139,7 +148,7 @@
     }
 
     .sb-marquee-gold {
-      color: #fbbf24;
+      color: #FBBF24;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -150,6 +159,9 @@
       100% { transform: translateX(100%); }
     }
 
+    /* ===================================================================== */
+    /* BUTTONS & LAYOUT                                                      */
+    /* ===================================================================== */
     .header-actions {
       display: flex;
       flex-wrap: wrap;
@@ -157,16 +169,12 @@
       align-items: center;
     }
 
-    button, select, input {
-      font-family: inherit;
-    }
-
     .btn {
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 9px 14px;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 12.5px;
+      font-weight: 800;
       cursor: pointer;
       transition: 0.18s ease;
       display: inline-flex;
@@ -175,17 +183,19 @@
       text-decoration: none;
     }
 
-    .btn-primary { background: var(--sky); color: #fff; }
-    .btn-primary:hover { background: var(--sky-dark); }
-    .btn-light { background: #fff; color: var(--text); border: 1px solid var(--border); }
-    .btn-light:hover { background: #f1f5f9; }
-    .btn-phone { background: #f1f5f9; color: var(--text); border: 1px solid #cbd5e1; }
-    .btn-phone:hover { background: #e2e8f0; }
-    .btn-whatsapp { background: #059669; color: #fff; }
+    .btn-dark { background: var(--obsidian); color: #FFFFFF; }
+    .btn-dark:hover { background: #1F2937; }
+    .btn-gold { background: var(--gold); color: #FFFFFF; }
+    .btn-gold:hover { background: var(--gold-dark); }
+    .btn-light { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-light:hover { background: var(--surface-soft); border-color: var(--border-strong); }
+    .btn-phone { background: #F3F4F6; color: var(--obsidian); border: 1px solid var(--border-strong); }
+    .btn-phone:hover { background: #E5E7EB; }
+    .btn-whatsapp { background: var(--emerald); color: #FFFFFF; }
     .btn-whatsapp:hover { background: #047857; }
-    .btn-danger { background: #fee2e2; color: var(--danger); }
-    .btn-danger:hover { background: #fecaca; }
-    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-danger { background: #FEE2E2; color: var(--rose); }
+    .btn-danger:hover { background: #FECACA; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 9px; }
 
     .container {
       max-width: 1380px;
@@ -193,26 +203,93 @@
       padding: 0 20px;
     }
 
-    .global-panel {
+    .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px;
       box-shadow: var(--shadow);
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .panel-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 14px;
+    .card-featured {
+      border: 2px solid var(--slate-dark);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .section-title-wrap {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
 
+    .step-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--obsidian);
+      color: #FBBF24;
+      font-size: 12px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--obsidian);
+    }
+
+    /* ===================================================================== */
+    /* DASHBOARD KPI CARDS & REQUESTS TABLE                                  */
+    /* ===================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .kpi-val { font-size: 20px; font-weight: 800; color: var(--obsidian); }
+    .kpi-val.gold { color: var(--gold-dark); }
+    .kpi-val.emerald { color: var(--emerald); }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+    .st-new { background: #FEF3C7; color: #92400E; }
+    .st-visit { background: #E0E7FF; color: #1E40AF; }
+    .st-quoted { background: #D1FAE5; color: #065F46; }
+
+    /* ===================================================================== */
+    /* FORMS, NAV PILLS & ITEM CARDS                                         */
+    /* ===================================================================== */
     .grid-4 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -227,23 +304,25 @@
 
     .field label {
       font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
+      font-weight: 700;
+      color: #374151;
     }
 
     .field input, .field select {
       padding: 9px 11px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
       font-size: 13.5px;
-      background: #fff;
+      background: var(--surface-soft);
       color: var(--text);
+      transition: 0.15s ease;
     }
 
     .field input:focus, .field select:focus {
       outline: none;
-      border-color: var(--sky);
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+      background: #FFFFFF;
+      border-color: var(--obsidian);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
     }
 
     .items-nav {
@@ -262,60 +341,39 @@
       background: var(--surface);
       color: var(--text);
       font-size: 12.5px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      transition: 0.15s ease;
     }
+
+    .nav-pill:hover { border-color: var(--obsidian); }
 
     .nav-pill.active {
-      background: var(--sky);
-      color: #fff;
-      border-color: var(--sky);
-    }
-
-    .item-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .item-header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 18px;
-    }
-
-    .item-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      background: var(--obsidian);
+      color: #FFFFFF;
+      border-color: var(--obsidian);
     }
 
     .item-num {
-      background: var(--sky-light);
-      color: var(--sky);
+      background: var(--surface-warm);
+      color: var(--gold-dark);
+      border: 1px solid #FDE68A;
       font-weight: 800;
       font-size: 13px;
       padding: 5px 11px;
-      border-radius: 8px;
+      border-radius: 9px;
     }
 
     .item-total-box {
-      background: var(--surface-warm);
-      border: 1px solid #eadfd0;
+      background: var(--obsidian);
+      color: #FFFFFF;
       padding: 8px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--wood);
+      border-radius: 11px;
+      font-weight: 800;
+      font-size: 13.5px;
     }
+
+    .item-total-box strong { color: #FBBF24; }
 
     .sub-section {
       margin-top: 18px;
@@ -325,8 +383,8 @@
 
     .sub-title {
       font-size: 13.5px;
-      font-weight: 700;
-      color: #1e293b;
+      font-weight: 800;
+      color: var(--obsidian);
       margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
@@ -344,12 +402,12 @@
 
     th, td {
       padding: 9px 10px;
-      border-bottom: 1px solid #edf2f7;
+      border-bottom: 1px solid #F1F5F9;
       text-align: right;
     }
 
     th {
-      background: #f8fafc;
+      background: var(--surface-soft);
       color: var(--muted);
       font-weight: 700;
       font-size: 12px;
@@ -358,42 +416,49 @@
     td input, td select {
       width: 100%;
       padding: 6px 8px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
       font-size: 12.5px;
+      background: #FFFFFF;
     }
 
-    .num-col { font-weight: 700; color: var(--text); white-space: nowrap; }
+    .num-col { font-weight: 800; color: var(--obsidian); white-space: nowrap; }
 
     .note-box {
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
-      color: #0369a1;
+      background: var(--surface-warm);
+      border: 1px solid #FDE68A;
+      color: #78350F;
       padding: 10px 14px;
-      border-radius: 10px;
+      border-radius: 11px;
       font-size: 12.5px;
       margin-top: 10px;
+      font-weight: 600;
     }
 
     .warn-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      color: #92400e;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #991B1B;
       padding: 10px 14px;
-      border-radius: 10px;
+      border-radius: 11px;
       font-size: 12.5px;
       margin-top: 10px;
+      font-weight: 600;
     }
 
+    /* ===================================================================== */
+    /* STICKY SUMMARY BAR & MODAL                                            */
+    /* ===================================================================== */
     .sticky-summary {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0f172a;
-      color: #fff;
+      background: var(--obsidian);
+      color: #FFFFFF;
       padding: 13px 24px;
-      box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.18);
+      border-top: 2px solid var(--gold);
+      box-shadow: 0 -6px 24px rgba(9, 13, 22, 0.2);
       z-index: 50;
     }
 
@@ -414,12 +479,12 @@
       font-size: 13.5px;
     }
 
-    .summary-stats strong { color: #38bdf8; font-size: 15px; }
+    .summary-stats strong { color: #FBBF24; font-size: 15px; }
 
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(9, 13, 22, 0.6);
       display: none;
       place-items: center;
       z-index: 100;
@@ -429,26 +494,32 @@
     .modal-backdrop.open { display: grid; }
 
     .modal {
-      background: #fff;
+      background: var(--surface);
       border-radius: var(--radius);
-      max-width: 820px;
+      max-width: 860px;
       width: 100%;
       max-height: 85vh;
       overflow-y: auto;
       padding: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
     }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F3F4F6; }
+    ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
 
     @media print {
       .sb-header, .sticky-summary, .no-print, .items-nav { display: none !important; }
-      body { background: #fff; padding-bottom: 0; }
-      .item-card, .global-panel { box-shadow: none; break-inside: avoid; }
+      body { background: #FFFFFF; padding-bottom: 0; }
+      .card { box-shadow: none; break-inside: avoid; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ترويسة SkyBuild + الشريط المتحرك -->
+  <!-- ===================================================================== -->
+  <!-- SKYBUILD BRANDED HEADER + MOVING SLOGAN STRIP                         -->
+  <!-- ===================================================================== -->
   <header class="sb-header">
     <div class="sb-header-inner">
       <a href="#" class="sb-logo-link">
@@ -468,12 +539,24 @@
       </a>
 
       <div class="header-actions no-print">
-        <button class="btn btn-light" onclick="openReportModal()">📊 ملخص التقرير</button>
-        <button class="btn btn-light" onclick="exportJSON()">💾 تصدير JSON</button>
-        <button class="btn btn-light" onclick="window.print()">🖨️ طباعة</button>
-        <button class="btn btn-danger" onclick="resetAllData()">↺ إعادة ضبط</button>
+        <button class="btn btn-light" onclick="openReportModal()">
+          <i class="ph ph-table" style="color:#D97706;"></i>
+          <span>ملخص التقرير</span>
+        </button>
+        <button class="btn btn-light" onclick="exportJSON()">
+          <i class="ph ph-download-simple" style="color:#090D16;"></i>
+          <span>تصدير JSON</span>
+        </button>
+        <button class="btn btn-light" onclick="window.print()">
+          <i class="ph ph-printer"></i>
+          <span>طباعة</span>
+        </button>
+        <button class="btn btn-danger" onclick="resetAllData()">
+          <i class="ph ph-arrow-counter-clockwise"></i>
+          <span>إعادة ضبط</span>
+        </button>
         <a href="tel:01060728015" class="btn btn-phone">
-          <i class="ph ph-phone-call" style="color:#d97706;"></i>
+          <i class="ph ph-phone-call" style="color:#D97706;"></i>
           <span dir="ltr">01060728015</span>
         </a>
         <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
@@ -489,27 +572,67 @@
           <i class="ph ph-buildings"></i>
           <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
         </span>
-        <span style="color:#64748b;">•</span>
-        <span>للتواصل والاستفسار: <strong dir="ltr">01060728015</strong></span>
-        <span style="color:#64748b;">•</span>
+        <span style="color:#6B7280;">•</span>
+        <span>لوحة المهندس — متابعة طلبات المعاينة وتحليل التكاليف التفصيلي (16 بنداً)</span>
+        <span style="color:#6B7280;">•</span>
         <span class="sb-marquee-gold">
-          <i class="ph ph-compass-tool"></i>
-          <span>أداة تحليل التكاليف الهندسية التفصيلية — 16 بنداً</span>
+          <i class="ph ph-phone"></i>
+          <span>للتواصل والاستفسار: <strong dir="ltr">01060728015</strong></span>
         </span>
       </div>
     </div>
   </header>
 
   <div class="container">
-    <!-- بيانات الوحدة والمصاريف الإضافية المشتركة -->
-    <section class="global-panel">
-      <div class="panel-title">
-        <span>بيانات الوحدة والمصاريف الإضافية الثابتة على كل البنود</span>
-        <span style="font-size:12px;color:var(--success);font-weight:600;">✓ يتم الحفظ تلقائياً</span>
+
+    <!-- ===================================================================== -->
+    <!-- DASHBOARD: INCOMING CLIENT REQUESTS & OVERVIEW                        -->
+    <!-- ===================================================================== -->
+    <section class="card card-featured">
+      <div class="section-head">
+        <div class="section-title-wrap">
+          <span class="step-badge"><i class="ph ph-kanban"></i></span>
+          <h2 class="section-title">لوحة المعلومات — طلبات المعاينة والعملاء</h2>
+        </div>
+        <button class="btn btn-gold btn-sm no-print" onclick="addSampleRequest()">+ إضافة طلب معاينة جديد</button>
       </div>
+
+      <div class="kpi-grid" id="dashboardKpis"></div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>العميل</th>
+              <th>الهاتف</th>
+              <th>المكان / الدور</th>
+              <th>المساحة</th>
+              <th>نظام التعاقد</th>
+              <th>3D</th>
+              <th>الحالة</th>
+              <th class="no-print">إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="requestsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- GLOBAL UNIT & SHARED OVERHEAD                                         -->
+    <!-- ===================================================================== -->
+    <section class="card">
+      <div class="section-head">
+        <div class="section-title-wrap">
+          <span class="step-badge"><i class="ph ph-sliders-horizontal"></i></span>
+          <h2 class="section-title">بيانات الوحدة والمصاريف الإضافية الثابتة على كل البنود</h2>
+        </div>
+        <span style="font-size:12px;color:var(--emerald);font-weight:800;">✓ يتم الحفظ تلقائياً في المتصفح</span>
+      </div>
+
       <div class="grid-4">
         <div class="field">
-          <label>اسم العميل / المشروع</label>
+          <label>اسم العميل / المشروع النشط</label>
           <input type="text" id="clientName" oninput="updateGlobal('clientName', this.value)" placeholder="مثال: تشطيب شقة - 6 أكتوبر" />
         </div>
         <div class="field">
@@ -530,7 +653,7 @@
     <!-- شريط التنقل السريع بين البنود -->
     <div class="items-nav no-print" id="itemsNav"></div>
 
-    <!-- حاوية البنود -->
+    <!-- حاوية البنود الـ 16 -->
     <main id="itemsContainer"></main>
   </div>
 
@@ -543,7 +666,7 @@
         <div>إجمالي المصاريف الإضافية: <strong id="sumOverhead">0</strong> ج.م</div>
         <div>الإجمالي الكلي للمشروع: <strong id="sumGrand">0</strong> ج.م</div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="openReportModal()">عرض الجدول التجميعي</button>
+      <button class="btn btn-gold btn-sm" onclick="openReportModal()">عرض الجدول التجميعي</button>
     </div>
   </div>
 
@@ -551,7 +674,7 @@
   <div class="modal-backdrop" id="reportModal" onclick="if(event.target===this)closeReportModal()">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3>ملخص تكاليف البنود الـ 16 — SkyBuild</h3>
+        <h3 style="font-weight:800;font-size:17px;">ملخص تكاليف البنود الـ 16 — SkyBuild</h3>
         <button class="btn btn-light btn-sm" onclick="closeReportModal()">إغلاق ✕</button>
       </div>
       <div id="reportContent"></div>
@@ -559,20 +682,55 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "skybuild_cost_analysis_v1";
+    const STORAGE_KEY = "skybuild_engineer_suite_v1";
     const UNITS = ["م²", "م.ط", "عدد", "شكارة", "لتر", "متر", "يومية", "مقطوعية", "قطعة", "جركن", "م³"];
 
     const DEFAULT_STATE = {
-      clientName: "مشروع سكني — SkyBuild",
+      clientName: "أ. محمد محمود — تشطيب شقة (6 أكتوبر)",
       unitArea: 140,
       plasterFactor: 3,
       commonOverhead: 1500,
       activeTab: "all",
+      requests: [
+        {
+          id: "req-1",
+          client: "أ. محمد محمود",
+          phone: "01012345678",
+          location: "6 أكتوبر — الحي المتميز",
+          floor: "الدور الثالث",
+          area: 140,
+          contract: "تشطيب كامل (Cost Plus)",
+          has3D: "نعم (مع التنفيذ)",
+          status: "new"
+        },
+        {
+          id: "req-2",
+          client: "م. سارة حسن",
+          phone: "01198765432",
+          location: "القاهرة — التجمع الخامس",
+          floor: "الدور الثاني",
+          area: 185,
+          contract: "إشراف هندسي فقط",
+          has3D: "3D فقط",
+          status: "visit"
+        },
+        {
+          id: "req-3",
+          client: "أ. كريم عادل",
+          phone: "01255443322",
+          location: "6 أكتوبر — كمبوند غرب سوميد",
+          floor: "أرضي بحديقة",
+          area: 220,
+          contract: "تشطيب كامل (Fixed Cost)",
+          has3D: "نعم (مودرن)",
+          status: "quoted"
+        }
+      ],
       items: [
         {
           id: "masonry",
           num: "01",
-          name: "أعمال المباني (هدم وبناء)",
+          name: "أعمال المباني (هدم وإزالة مخلفات + بناء)",
           type: "masonry",
           demolitionCost: 4500,
           buildCost: 14000,
@@ -817,6 +975,92 @@
 
     function fmt(n) {
       return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
+    function renderDashboard() {
+      const totalReqs = state.requests.length;
+      const newReqs = state.requests.filter(r => r.status === "new").length;
+      const visitReqs = state.requests.filter(r => r.status === "visit").length;
+      const quotedReqs = state.requests.filter(r => r.status === "quoted").length;
+
+      document.getElementById("dashboardKpis").innerHTML = `
+        <div class="kpi-box">
+          <span class="kpi-label">إجمالي الطلبات الواردة</span>
+          <span class="kpi-val">${totalReqs}</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">طلبات جديدة</span>
+          <span class="kpi-val gold">${newReqs}</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">معاينة / زيارة مجدولة</span>
+          <span class="kpi-val">${visitReqs}</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">تم إعداد المقايسة</span>
+          <span class="kpi-val emerald">${quotedReqs}</span>
+        </div>
+      `;
+
+      const statusLabel = s => s === "new" ? "جديد" : s === "visit" ? "معاينة" : "تم التسعير";
+      const statusClass = s => s === "new" ? "st-new" : s === "visit" ? "st-visit" : "st-quoted";
+
+      document.getElementById("requestsTableBody").innerHTML = state.requests.map(req => `
+        <tr>
+          <td style="font-weight:800;">${req.client}</td>
+          <td dir="ltr" style="text-align:right;">${req.phone}</td>
+          <td>${req.location} — ${req.floor}</td>
+          <td class="num-col">${req.area} م²</td>
+          <td>${req.contract}</td>
+          <td>${req.has3D}</td>
+          <td>
+            <select onchange="updateRequestStatus('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
+              <option value="new" ${req.status === "new" ? "selected" : ""}>جديد</option>
+              <option value="visit" ${req.status === "visit" ? "selected" : ""}>معاينة</option>
+              <option value="quoted" ${req.status === "quoted" ? "selected" : ""}>تم التسعير</option>
+            </select>
+            <span class="status-pill ${statusClass(req.status)}" style="margin-right:6px;">${statusLabel(req.status)}</span>
+          </td>
+          <td class="no-print">
+            <button class="btn btn-dark btn-sm" onclick="loadRequestIntoEstimator('${req.id}')">فتح المقايسة</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function updateRequestStatus(id, status) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      r.status = status;
+      saveState();
+      renderDashboard();
+    }
+
+    function loadRequestIntoEstimator(id) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      state.clientName = `${r.client} — ${r.location}`;
+      state.unitArea = +r.area || state.unitArea;
+      saveState();
+      syncGlobalInputs();
+      renderAll();
+    }
+
+    function addSampleRequest() {
+      const idx = state.requests.length + 1;
+      state.requests.unshift({
+        id: "req-" + Date.now(),
+        client: `عميل جديد #${idx}`,
+        phone: "01060728015",
+        location: "القاهرة / 6 أكتوبر",
+        floor: "الدور الأول",
+        area: 150,
+        contract: "تشطيب كامل (Cost Plus)",
+        has3D: "حسب الطلب",
+        status: "new"
+      });
+      saveState();
+      renderDashboard();
     }
 
     function calcItemBreakdown(item) {
@@ -1212,13 +1456,13 @@
       container.innerHTML = visibleItems.map(item => {
         const b = calcItemBreakdown(item);
         return `
-          <section class="item-card" id="card-${item.id}">
-            <div class="item-header">
-              <div class="item-title-wrap">
+          <section class="card" id="card-${item.id}">
+            <div class="section-head">
+              <div class="section-title-wrap">
                 <span class="item-num">بند ${item.num}</span>
-                <h2>${item.name}</h2>
+                <h2 class="section-title">${item.name}</h2>
               </div>
-              <div class="item-total-box">إجمالي البند: ${fmt(b.grand)} ج.م</div>
+              <div class="item-total-box">إجمالي البند: <strong>${fmt(b.grand)}</strong> ج.م</div>
             </div>
 
             ${renderSpecificLogic(item)}
@@ -1228,7 +1472,7 @@
               <div>خامات البند: <strong>${fmt(b.matTotal)} ج.م</strong></div>
               <div>مصنعيات البند: <strong>${fmt(b.laborTotal)} ج.م</strong></div>
               <div>مصاريف إضافية ثابتة: <strong>${fmt(b.overhead)} ج.م</strong></div>
-              <div style="color:var(--sky);font-weight:700;">صافي البند: ${fmt(b.grand)} ج.م</div>
+              <div style="color:var(--gold-dark);font-weight:800;">صافي البند: ${fmt(b.grand)} ج.م</div>
             </div>
           </section>
         `;
@@ -1423,6 +1667,7 @@
     }
 
     function renderAll() {
+      renderDashboard();
       renderNav();
       renderItems();
       updateStickySummary();
