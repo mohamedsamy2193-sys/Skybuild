@@ -638,108 +638,48 @@
         }
 
         // ===================================================================
-        // 2. HELPER FOR RELIABLE EMBEDDED ARCHITECTURAL SVG PREVIEWS
-        // ===================================================================
-        function makeStyleSvgDataUri(bgTop, bgBottom, accent, detailType) {
-            let scene = '';
-            if (detailType === 'modern') {
-                scene = `
-                    <rect x="30" y="110" width="240" height="8" rx="4" fill="#CBD5E1"/>
-                    <rect x="45" y="76" width="120" height="34" rx="6" fill="${accent}"/>
-                    <rect x="52" y="68" width="106" height="10" rx="4" fill="#F8FAFC"/>
-                    <rect x="185" y="45" width="75" height="65" rx="4" fill="#1E293B"/>
-                    <rect x="193" y="54" width="59" height="45" rx="2" fill="#334155"/>
-                    <line x1="60" y1="22" x2="240" y2="22" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
-                `;
-            } else if (detailType === 'newclassic') {
-                scene = `
-                    <rect x="25" y="25" width="250" height="88" fill="#F8FAFC"/>
-                    <rect x="40" y="36" width="52" height="62" fill="none" stroke="#CBD5E1" stroke-width="2"/>
-                    <rect x="45" y="41" width="42" height="52" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
-                    <rect x="105" y="36" width="90" height="62" fill="none" stroke="#CBD5E1" stroke-width="2"/>
-                    <rect x="208" y="36" width="52" height="62" fill="none" stroke="#CBD5E1" stroke-width="2"/>
-                    <rect x="65" y="82" width="170" height="28" rx="5" fill="${accent}"/>
-                    <circle cx="150" cy="24" r="7" fill="#F59E0B"/>
-                `;
-            } else if (detailType === 'classic') {
-                scene = `
-                    <rect x="20" y="20" width="260" height="94" fill="#FFFBEB"/>
-                    <path d="M20 32 Q150 18 280 32" fill="none" stroke="#B45309" stroke-width="3"/>
-                    <rect x="45" y="42" width="70" height="56" rx="12" fill="none" stroke="#D97706" stroke-width="2"/>
-                    <rect x="185" y="42" width="70" height="56" rx="12" fill="none" stroke="#D97706" stroke-width="2"/>
-                    <rect x="75" y="82" width="150" height="28" rx="4" fill="${accent}"/>
-                `;
-            } else if (detailType === 'newmodern') {
-                scene = `
-                    <rect x="20" y="20" width="260" height="94" fill="#F1F5F9"/>
-                    <rect x="175" y="20" width="105" height="94" fill="#B45309" opacity="0.22"/>
-                    <line x1="195" y1="20" x2="195" y2="114" stroke="#92400E" stroke-width="2"/>
-                    <line x1="215" y1="20" x2="215" y2="114" stroke="#92400E" stroke-width="2"/>
-                    <line x1="235" y1="20" x2="235" y2="114" stroke="#92400E" stroke-width="2"/>
-                    <rect x="42" y="76" width="115" height="34" rx="7" fill="${accent}"/>
-                `;
-            } else {
-                scene = `
-                    <rect x="20" y="20" width="260" height="94" fill="#FEF3C7"/>
-                    <circle cx="238" cy="86" r="22" fill="#15803D" opacity="0.25"/>
-                    <path d="M238 108 L238 66 M238 80 L224 70 M238 86 L252 75" stroke="#166534" stroke-width="3" stroke-linecap="round"/>
-                    <rect x="48" y="80" width="128" height="30" rx="10" fill="${accent}"/>
-                    <rect x="85" y="34" width="60" height="24" rx="12" fill="#FDE68A" stroke="#D97706" stroke-width="2"/>
-                `;
-            }
-
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 130">
-                <defs>
-                    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="${bgTop}"/>
-                        <stop offset="100%" stop-color="${bgBottom}"/>
-                    </linearGradient>
-                </defs>
-                <rect width="300" height="130" fill="url(#g)"/>
-                ${scene}
-                <rect x="0" y="112" width="300" height="18" fill="#0F172A" opacity="0.85"/>
-            </svg>`;
-            return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-        }
-
-        // ===================================================================
-        // 3. 3D DESIGN STYLES DATA (NEW CLASSIC & NEW MODERN)
+        // 2. 3D DESIGN STYLES ARRAY WITH SKYBUILD GITHUB PAGES IMAGES
         // ===================================================================
         const DESIGN_STYLES = [
             {
                 id: 'modern',
                 name: 'مودرن (Modern)',
                 desc: 'خطوط بسيطة، ألوان هادئة، وإضاءات مخفية عصرية',
-                img: makeStyleSvgDataUri('#E2E8F0', '#CBD5E1', '#0F172A', 'modern')
+                icon: 'ph-sliders-horizontal',
+                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/modern.jpg'
             },
             {
                 id: 'newclassic',
                 name: 'نيو كلاسيك (New Classic)',
                 desc: 'دمج الفخامة الكلاسيكية والبانوهات مع البساطة الحديثة',
-                img: makeStyleSvgDataUri('#F8FAFC', '#E2E8F0', '#334155', 'newclassic')
+                icon: 'ph-columns',
+                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/neo classic.jpg'
             },
             {
                 id: 'classic',
                 name: 'كلاسيك (Classic)',
                 desc: 'زخارف غنية، تفاصيل فاخرة، وأخشاب كلاسيكية راقية',
-                img: makeStyleSvgDataUri('#FEF3C7', '#FDE68A', '#78350F', 'classic')
+                icon: 'ph-crown',
+                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/classic.jpg'
             },
             {
                 id: 'newmodern',
                 name: 'نيو مودرن (New Modern)',
                 desc: 'لمسات جريئة تجمع بين الدفء الخشبي والتصميم المعاصر',
-                img: makeStyleSvgDataUri('#F1F5F9', '#E2E8F0', '#1E293B', 'newmodern')
+                icon: 'ph-sparkle',
+                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/neo modern.jpg'
             },
             {
                 id: 'bohemian',
                 name: 'بوهيمي (Bohemian)',
                 desc: 'خامات طبيعية، ألوان دافئة، ونباتات وإحساس مريح',
-                img: makeStyleSvgDataUri('#FFEDD5', '#FED7AA', '#9A3412', 'bohemian')
+                icon: 'ph-flower-lotus',
+                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/bohemain.jpg'
             }
         ];
 
         // ===================================================================
-        // 4. DATA SCHEMA FOR ALL 16 INTERACTIVE FINISHING ITEMS
+        // 3. DATA SCHEMA FOR ALL 16 INTERACTIVE FINISHING ITEMS
         // ===================================================================
         const SCOPE_ITEMS = [
             {
@@ -980,27 +920,41 @@
         ];
 
         // ===================================================================
-        // 5. UI RENDERING & INTERACTIVE HANDLERS
+        // 4. UI RENDERING & INTERACTIVE HANDLERS
         // ===================================================================
         function renderDesignStyles() {
             const grid = document.getElementById('design-styles-grid');
-            grid.innerHTML = DESIGN_STYLES.map((style, idx) => `
-                <label class="cursor-pointer group">
-                    <input type="radio" name="design-3d-style" value="${style.name}" ${idx === 0 ? 'checked' : ''} onchange="updateLiveSummary()" class="peer sr-only">
-                    <div class="rounded-xl border-2 border-silver-200 bg-white overflow-hidden peer-checked:border-gold-600 peer-checked:ring-2 peer-checked:ring-amber-400/40 transition shadow-2xs">
-                        <div class="relative h-28 w-full overflow-hidden bg-slate-100">
-                            <img src="${style.img}" alt="${style.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                            <span class="absolute top-2 right-2 bg-obsidian-950/85 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
-                                ${style.name.split(' (')[0]}
-                            </span>
+            grid.innerHTML = DESIGN_STYLES.map((style, idx) => {
+                const encodedImg = encodeURI(style.img);
+                const hasImg = Boolean(style.img && style.img.trim());
+                const mediaBlock = hasImg
+                    ? `<img src="${encodedImg}" alt="${style.name}" loading="lazy" onerror="this.parentElement.innerHTML = getStyleFallbackHTML('${style.icon}', '${style.name.split(' (')[0]}')" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
+                    : getStyleFallbackHTML(style.icon, style.name.split(' (')[0]);
+
+                return `
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="design-3d-style" value="${style.name}" ${idx === 0 ? 'checked' : ''} onchange="updateLiveSummary()" class="peer sr-only">
+                        <div class="h-full rounded-xl border-2 border-silver-200 bg-white overflow-hidden peer-checked:border-gold-600 peer-checked:ring-2 peer-checked:ring-amber-400/40 transition shadow-2xs flex flex-col">
+                            <div class="relative h-24 w-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 shrink-0">
+                                ${mediaBlock}
+                            </div>
+                            <div class="p-2.5 space-y-0.5 flex-1">
+                                <div class="font-extrabold text-xs text-obsidian-950">${style.name}</div>
+                                <p class="text-[10px] text-slate-500 leading-snug">${style.desc}</p>
+                            </div>
                         </div>
-                        <div class="p-2.5 space-y-0.5">
-                            <div class="font-extrabold text-xs text-obsidian-950">${style.name}</div>
-                            <p class="text-[10px] text-slate-500 leading-snug">${style.desc}</p>
-                        </div>
-                    </div>
-                </label>
-            `).join('');
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function getStyleFallbackHTML(icon, shortName) {
+            return `
+                <div class="w-full h-full flex flex-col items-center justify-center gap-1 text-amber-400 px-2 text-center">
+                    <i class="ph ${icon} text-2xl"></i>
+                    <span class="text-[10px] font-bold text-slate-200">${shortName}</span>
+                </div>
+            `;
         }
 
         function handle3DToggle() {
@@ -1175,7 +1129,7 @@
         }
 
         // ===================================================================
-        // 6. COLLECT STRUCTURED DATA & UPDATE LIVE SUMMARY
+        // 5. COLLECT STRUCTURED DATA & UPDATE LIVE SUMMARY
         // ===================================================================
         function collectFormData() {
             const scopeVal = document.querySelector('input[name="contract-scope"]:checked').value;
@@ -1293,7 +1247,7 @@
         }
 
         // ===================================================================
-        // 7. CLOUD SUBMISSION (FIREBASE FIRESTORE) + WHATSAPP REDIRECT
+        // 6. CLOUD SUBMISSION (FIREBASE FIRESTORE) + WHATSAPP REDIRECT
         // ===================================================================
         async function submitInspectionRequest(e) {
             e.preventDefault();
