@@ -229,6 +229,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .step-badge {
@@ -596,7 +597,7 @@
         <div class="section-title-wrap">
           <span class="step-badge"><i class="ph ph-kanban"></i></span>
           <h2 class="section-title">لوحة المعلومات — طلبات المعاينة والعملاء</h2>
-          <span id="firestoreSyncBadge" class="sync-badge sync-local">وضع محلي (أضف Firebase Config للمزامنة المباشرة)</span>
+          <span id="firestoreSyncBadge" class="sync-badge sync-local">جاري الاتصال بـ Firestore...</span>
         </div>
         <button class="btn btn-gold btn-sm no-print" onclick="addSampleRequest()">+ إضافة طلب معاينة</button>
       </div>
@@ -678,14 +679,14 @@
   </div>
 
   <script>
-    // ضع هنا إعدادات مشروع Firebase نفسه المستخدم في صفحة العميل
-    const FIREBASE_CONFIG = {
-      apiKey: "",
-      authDomain: "",
-      projectId: "",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: ""
+    const firebaseConfig = {
+      apiKey: "AIzaSyBs5O6-3V67a-LqRF9yWr1JWJnPBSrGFhg",
+      authDomain: "skybuild-a63fb.firebaseapp.com",
+      projectId: "skybuild-a63fb",
+      storageBucket: "skybuild-a63fb.firebasestorage.app",
+      messagingSenderId: "311610298789",
+      appId: "1:311610298789:web:442581f4e18f9aba11184c",
+      measurementId: "G-TL1THMTTC8"
     };
     const FIRESTORE_COLLECTION = "inspection_requests";
 
@@ -698,30 +699,7 @@
       plasterFactor: 3,
       commonOverhead: 1500,
       activeTab: "all",
-      requests: [
-        {
-          id: "req-1",
-          client: "أ. محمد محمود",
-          phone: "01012345678",
-          location: "6 أكتوبر — الحي المتميز",
-          floor: "الدور الثالث",
-          area: 140,
-          contract: "تشطيب كامل (Cost Plus)",
-          has3D: "نعم (مع التنفيذ)",
-          status: "new"
-        },
-        {
-          id: "req-2",
-          client: "م. سارة حسن",
-          phone: "01198765432",
-          location: "القاهرة — التجمع الخامس",
-          floor: "الدور الثاني",
-          area: 185,
-          contract: "إشراف هندسي فقط",
-          has3D: "3D فقط",
-          status: "visit"
-        }
-      ],
+      requests: [],
       items: [
         {
           id: "masonry",
@@ -999,21 +977,15 @@
 
     function initFirestoreListener() {
       const badge = document.getElementById("firestoreSyncBadge");
-      if (!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.projectId) {
-        badge.className = "sync-badge sync-local";
-        badge.innerHTML = '<i class="ph ph-hard-drives"></i> وضع محلي (أضف Firebase Config للمزامنة المباشرة)';
-        return;
-      }
-
       try {
         if (!firebase.apps.length) {
-          firebase.initializeApp(FIREBASE_CONFIG);
+          firebase.initializeApp(firebaseConfig);
         }
         db = firebase.firestore();
         isFirestoreConnected = true;
 
         badge.className = "sync-badge sync-live";
-        badge.innerHTML = '<i class="ph ph-broadcast"></i> متصل بـ Firestore — استقبال تلقائي';
+        badge.innerHTML = '<i class="ph ph-broadcast"></i> متصل بـ Firestore (skybuild-a63fb) — استقبال تلقائي';
 
         db.collection(FIRESTORE_COLLECTION)
           .onSnapshot(snapshot => {
@@ -1024,10 +996,12 @@
           }, err => {
             console.error("Firestore listener error:", err);
             badge.className = "sync-badge sync-local";
-            badge.innerHTML = '<i class="ph ph-warning"></i> تعذر الاتصال بـ Firestore (وضع محلي)';
+            badge.innerHTML = '<i class="ph ph-warning"></i> تحقق من قواعد Firestore أو الاتصال';
           });
       } catch (e) {
         console.error("Firebase init error:", e);
+        badge.className = "sync-badge sync-local";
+        badge.innerHTML = '<i class="ph ph-warning"></i> تعذر تهيئة Firebase';
       }
     }
 
@@ -1061,7 +1035,7 @@
 
       if (!state.requests.length) {
         document.getElementById("requestsTableBody").innerHTML = `
-          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px;">لا توجد طلبات واردة حالياً</td></tr>
+          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px;">لا توجد طلبات واردة في قاعدة البيانات حالياً</td></tr>
         `;
         return;
       }
@@ -1554,7 +1528,7 @@
               <div>خامات البند: <strong>${fmt(b.matTotal)} ج.م</strong></div>
               <div>مصنعيات البند: <strong>${fmt(b.laborTotal)} ج.م</strong></div>
               <div>مصاريف إضافية ثابتة: <strong>${fmt(b.overhead)} ج.م</strong></div>
-              <div style="color:var(--gold-dark);font-weight:800;">صافي البند: ${fmt(b.grand)} ج.م</div>
+              <div style="color:var(--gold-dark);font-weight:800;">صافي البند: <strong>${fmt(b.grand)}</strong> ج.م</div>
             </div>
           </section>
         `;
