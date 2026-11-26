@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkyBuild for Design & Contracting | طلب معاينة ومقايسة تشطيب</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts: Cairo, Tajawal & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    
+
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -47,6 +47,15 @@
                             600: '#B45309',
                             700: '#92400E',
                         }
+                    },
+                    keyframes: {
+                        marqueeRTL: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' }
+                        }
+                    },
+                    animation: {
+                        'marquee-rtl': 'marqueeRTL 22s linear infinite'
                     }
                 }
             }
@@ -78,6 +87,9 @@
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #F3F4F6; }
         ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
@@ -85,14 +97,15 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-obsidian-900 selection:text-white">
 
-    <!-- Toast Container -->
+    <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2"></div>
 
     <!-- ===================================================================== -->
-    <!-- SKYBUILD BRANDED HEADER                                               -->
+    <!-- SKYBUILD BRANDED HEADER + MOVING SLOGAN STRIP UNDER LOGO              -->
     <!-- ===================================================================== -->
     <header class="bg-white border-b border-silver-200 sticky top-0 z-40 shadow-xs">
-        <div class="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+        <div class="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand Logo -->
             <a href="#" class="flex items-center gap-3.5 group" dir="ltr">
                 <svg class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="62" cy="60" r="50" fill="#F1F5F9"/>
@@ -114,9 +127,36 @@
                 </div>
             </a>
 
-            <div class="hidden sm:flex items-center gap-2 text-xs font-bold text-slate-600 bg-silver-100 px-3.5 py-2 rounded-xl border border-silver-200">
-                <i class="ph ph-compass-tool text-lg text-gold-600"></i>
-                <span>نموذج طلب معاينة وتحديد بنود التشطيب</span>
+            <!-- Quick Contact Buttons (Phone & WhatsApp) -->
+            <div class="flex items-center gap-2">
+                <a href="tel:01060728015" class="flex items-center gap-1.5 bg-silver-100 hover:bg-silver-200 text-obsidian-950 border border-silver-300 px-3 py-2 rounded-xl text-xs font-extrabold transition">
+                    <i class="ph ph-phone-call text-base text-gold-600"></i>
+                    <span dir="ltr">01060728015</span>
+                </a>
+                <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition shadow-xs">
+                    <i class="ph ph-whatsapp-logo text-base"></i>
+                    <span>واتساب</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Moving Strip Under Logo -->
+        <div class="bg-obsidian-950 text-white border-t border-slate-800 overflow-hidden py-2">
+            <div class="marquee-track whitespace-nowrap animate-marquee-rtl inline-flex items-center gap-8 text-xs sm:text-sm font-bold">
+                <span class="inline-flex items-center gap-2 text-amber-400">
+                    <i class="ph ph-buildings text-base"></i>
+                    <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
+                </span>
+                <span class="text-slate-500">•</span>
+                <span class="inline-flex items-center gap-2 text-slate-200">
+                    <i class="ph ph-phone text-base text-amber-400"></i>
+                    <span>للتواصل والاستفسار: <strong dir="ltr">01060728015</strong></span>
+                </span>
+                <span class="text-slate-500">•</span>
+                <span class="inline-flex items-center gap-2 text-amber-400">
+                    <i class="ph ph-compass-tool text-base"></i>
+                    <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
+                </span>
             </div>
         </div>
     </header>
@@ -129,8 +169,8 @@
         <div class="max-w-[1280px] mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="space-y-2.5 max-w-2xl">
                 <div class="inline-flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1 rounded-full text-xs font-semibold text-amber-300">
-                    <i class="ph ph-buildings text-sm"></i>
-                    <span>سكاي بيلد للتصميم والمقاولات</span>
+                    <i class="ph ph-sparkle text-sm"></i>
+                    <span>نصمم ونبني تجربة متكاملة تناسبك</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight">
                     حدد تفاصيل وحدتك وبنود التشطيب المطلوبة لطلب <span class="text-amber-400">معاينة هندسية</span>
@@ -142,7 +182,7 @@
             <div class="bg-white/5 border border-white/10 rounded-2xl p-4 text-xs space-y-2 shrink-0">
                 <div class="flex items-center gap-2 text-amber-400 font-bold"><i class="ph ph-check-circle text-base"></i> شفافية كاملة في نظام Cost Plus</div>
                 <div class="flex items-center gap-2 text-slate-200"><i class="ph ph-check-circle text-amber-400 text-base"></i> إشراف هندسي دقيق واستلام كل بند</div>
-                <div class="flex items-center gap-2 text-slate-200"><i class="ph ph-check-circle text-amber-400 text-base"></i> حصر دقيق للكميات بعد المعاينة</div>
+                <div class="flex items-center gap-2 text-slate-200"><i class="ph ph-check-circle text-amber-400 text-base"></i> خصومات خاصة على التصميم 3D مع التنفيذ</div>
             </div>
         </div>
     </section>
@@ -153,11 +193,11 @@
     <main class="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-8">
         <form id="inspection-form" onsubmit="submitInspectionRequest(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- RIGHT COLUMN (7 Cols): Ordered Sections -->
+            <!-- RIGHT COLUMN (7 Cols) -->
             <div class="lg:col-span-7 space-y-6">
 
                 <!-- ========================================================= -->
-                <!-- SECTION 1: CLIENT DATA & INSPECTION REQUEST (FIRST)       -->
+                <!-- SECTION 1: CLIENT DATA & INSPECTION REQUEST               -->
                 <!-- ========================================================= -->
                 <div class="bg-white rounded-2xl border-2 border-obsidian-900 p-5 sm:p-6 shadow-xs space-y-4">
                     <div class="flex items-center justify-between border-b border-silver-100 pb-3">
@@ -175,7 +215,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">رقم الموبايل / واتساب <span class="text-rose-600">*</span></label>
-                            <input type="tel" id="lead-phone" required oninput="updateLiveSummary()" placeholder="01060728015" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
+                            <input type="tel" id="lead-phone" required oninput="updateLiveSummary()" placeholder="010xxxxxxxx" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
                         </div>
                     </div>
 
@@ -192,7 +232,7 @@
                 </div>
 
                 <!-- ========================================================= -->
-                <!-- SECTION 2: CONTRACTING SYSTEM (SECOND)                    -->
+                <!-- SECTION 2: CONTRACTING SYSTEM                             -->
                 <!-- ========================================================= -->
                 <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-4">
                     <div class="border-b border-silver-100 pb-3">
@@ -203,7 +243,6 @@
                         <p class="text-xs text-slate-500 mt-1">حدد هل تحتاج تنفيذ متكامل للوحدة أم إشراف هندسي فقط</p>
                     </div>
 
-                    <!-- Primary Scope Choice: Full Finishing vs Supervision Only -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label class="cursor-pointer">
                             <input type="radio" name="contract-scope" value="full" checked onchange="handleContractScopeChange()" class="peer sr-only">
@@ -228,7 +267,7 @@
                         </label>
                     </div>
 
-                    <!-- Sub-option A: If Full Finishing -> Choose Cost Plus vs Fixed Cost -->
+                    <!-- Full Finishing Pricing Models -->
                     <div id="full-finishing-options" class="bg-silver-50 border border-silver-200 rounded-xl p-4 space-y-2.5">
                         <label class="block text-xs font-extrabold text-obsidian-900">اختر نظام المحاسبة للتنفيذ الكامل:</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -256,7 +295,7 @@
                         </div>
                     </div>
 
-                    <!-- Sub-option B: If Supervision Only -> Mandatory Notice -->
+                    <!-- Supervision Only Notice -->
                     <div id="supervision-notice" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
                         <i class="ph ph-info text-2xl text-gold-600 shrink-0 mt-0.5"></i>
                         <div class="space-y-1">
@@ -269,17 +308,86 @@
                 </div>
 
                 <!-- ========================================================= -->
-                <!-- SECTION 3: UNIT DETAILS (WITH NEW FIELDS)                 -->
+                <!-- SECTION 3: OPTIONAL 3D DESIGN WITH STYLE IMAGES           -->
+                <!-- ========================================================= -->
+                <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-silver-100 pb-3">
+                        <div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">3</span>
+                                <span>التصميم الداخلي ثلاثي الأبعاد (3D Design)</span>
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">أوبشن اختياري — تخيّل وحدتك بالكامل قبل التنفيذ</p>
+                        </div>
+                        <span class="text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
+                            خصومات خاصة عند التنفيذ مع SkyBuild
+                        </span>
+                    </div>
+
+                    <!-- Toggle 3D Design -->
+                    <label class="flex items-center justify-between p-4 rounded-xl border-2 border-silver-200 bg-silver-50 cursor-pointer hover:border-obsidian-900 transition">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="design-3d-enabled" onchange="handle3DToggle()" class="w-5 h-5 rounded accent-obsidian-950 cursor-pointer">
+                            <div>
+                                <span class="font-extrabold text-sm text-obsidian-950 block">أرغب في إضافة خدمة التصميم ثلاثي الأبعاد (3D)</span>
+                                <span class="text-xs text-slate-600">توزيع الأثاث، الإضاءة، الألوان، واللقطات الواقعية قبل البدء</span>
+                            </div>
+                        </div>
+                        <i class="ph ph-cube text-2xl text-gold-600"></i>
+                    </label>
+
+                    <!-- Expandable 3D Options -->
+                    <div id="design-3d-panel" class="hidden space-y-5 pt-2">
+                        <!-- 3D Mode Selection -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-extrabold text-obsidian-900">حدد باقة التصميم الـ 3D المطلوبة:</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="design-3d-mode" value="تصميم 3D بجانب التنفيذ (شامل الخصم الخاص)" checked onchange="updateLiveSummary()" class="peer sr-only">
+                                    <div class="p-3.5 rounded-xl border-2 border-silver-200 bg-white peer-checked:border-gold-600 peer-checked:bg-amber-50/60 transition space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">تصميم 3D مع التنفيذ</span>
+                                            <span class="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">خصم وأسعار خاصة</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600">تتمتع بخصومات وأسعار خاصة جداً على التصميم الـ 3D عند تنفيذ التشطيب مع SkyBuild.</p>
+                                    </div>
+                                </label>
+
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="design-3d-mode" value="تصميم 3D فقط (لوحات تنفيذية ولقطات واقعية)" onchange="updateLiveSummary()" class="peer sr-only">
+                                    <div class="p-3.5 rounded-xl border-2 border-silver-200 bg-white peer-checked:border-gold-600 peer-checked:bg-amber-50/60 transition space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">تصميم 3D فقط</span>
+                                            <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">باقة مستقلة</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-600">استلام ملفات التصميم واللقطات الواقعية واللوحات التنفيذية بالكامل.</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 3D Interior Style Selection with Visual Cards -->
+                        <div class="space-y-2.5">
+                            <label class="block text-xs font-extrabold text-obsidian-900">اختر طراز التصميم المفضل (Interior Style):</label>
+                            <div id="design-styles-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <!-- Style cards injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================= -->
+                <!-- SECTION 4: UNIT DETAILS                                   -->
                 <!-- ========================================================= -->
                 <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-5">
                     <div class="border-b border-silver-100 pb-3">
                         <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">3</span>
+                            <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">4</span>
                             <span>بيانات ومواصفات الوحدة</span>
                         </h2>
                     </div>
 
-                    <!-- Location & Floor (NEW) -->
+                    <!-- Location & Floor -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">مكان الوحدة (المدينة / الحي / اسم الكمبوند) <span class="text-rose-600">*</span></label>
@@ -287,11 +395,11 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">الدور الكام <span class="text-rose-600">*</span></label>
-                            <input type="text" id="unit-floor" required oninput="updateLiveSummary()" placeholder="مثال: الدور الثالث / أرضي بحديقة" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
+                            <input type="text" id="unit-floor" required oninput="updateLiveSummary()" placeholder="مثال: الدور الثالث / أرضي" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
                         </div>
                     </div>
 
-                    <!-- Elevator & Utilities (NEW) -->
+                    <!-- Elevator & Utilities -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-silver-50 border border-silver-200 rounded-xl p-4">
                         <div>
                             <label class="block text-xs font-extrabold text-obsidian-900 mb-2">هل يوجد أسانسير يعمل بالعقار؟</label>
@@ -378,13 +486,13 @@
                 </div>
 
                 <!-- ========================================================= -->
-                <!-- SECTION 4: 16 INTERACTIVE FINISHING SCOPE ITEMS           -->
+                <!-- SECTION 5: 16 INTERACTIVE FINISHING SCOPE ITEMS           -->
                 <!-- ========================================================= -->
                 <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-silver-100 pb-3">
                         <div>
                             <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">4</span>
+                                <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">5</span>
                                 <span>تحديد بنود التشطيب والتوصيف المطلوب</span>
                             </h2>
                             <p class="text-xs text-slate-500 mt-1">اختر البنود المطلوبة وحدد مواصفات كل بند بدقة</p>
@@ -403,7 +511,7 @@
             </div>
 
             <!-- LEFT COLUMN (5 Cols): Sticky Live Summary & Submit Button -->
-            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
+            <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-5">
                 <div class="bg-obsidian-950 text-white rounded-2xl p-6 shadow-lg border border-slate-800 space-y-5">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                         <div>
@@ -417,20 +525,24 @@
 
                     <!-- Live Unit & Contract Overview -->
                     <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2.5 text-xs">
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">نظام التعاقد:</span>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-slate-400 shrink-0">نظام التعاقد:</span>
                             <span id="sum-contract" class="font-bold text-amber-400 text-left">تشطيب كامل (Cost Plus)</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">مكان الوحدة والدور:</span>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-slate-400 shrink-0">التصميم 3D:</span>
+                            <span id="sum-3d" class="font-bold text-emerald-400 text-left">غير مطلوب</span>
+                        </div>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-slate-400 shrink-0">مكان الوحدة والدور:</span>
                             <span id="sum-location" class="font-bold text-white text-left">لم يُحدد بعد</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">المساحة والحالة:</span>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-slate-400 shrink-0">المساحة والحالة:</span>
                             <span id="sum-area-cond" class="font-bold text-white text-left">150 م² — طوب أحمر</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">الأسانسير والخدمات:</span>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-slate-400 shrink-0">الأسانسير والخدمات:</span>
                             <span id="sum-utils" class="font-bold text-slate-200 text-left">يوجد أسانسير | كهرباء، مياه</span>
                         </div>
                     </div>
@@ -438,7 +550,7 @@
                     <!-- Selected Items Preview List -->
                     <div class="space-y-2">
                         <span class="text-xs font-bold text-slate-300 block">البنود والتفاصيل المختارة:</span>
-                        <div id="sum-selected-list" class="max-h-[300px] overflow-y-auto space-y-2 pr-1">
+                        <div id="sum-selected-list" class="max-h-[260px] overflow-y-auto space-y-2 pr-1">
                             <!-- Dynamic preview -->
                         </div>
                     </div>
@@ -450,7 +562,7 @@
                             <span>إرسال طلب المعاينة والتوصيف</span>
                         </button>
                         <p class="text-[11px] text-slate-400 text-center leading-relaxed">
-                            سيتم تسجيل طلبك سحابياً في نظام <strong>SkyBuild</strong> وفتح محادثة واتساب مباشرة لتأكيد موعد المعاينة.
+                            سيتم حفظ طلبك سحابياً في نظام <strong>SkyBuild</strong> وفتح محادثة واتساب مباشرة لتأكيد موعد المعاينة.
                         </p>
                     </div>
                 </div>
@@ -460,13 +572,47 @@
     </main>
 
     <!-- ===================================================================== -->
+    <!-- FOOTER WITH DIRECT CONTACT & FACEBOOK PAGE LINK                       -->
+    <!-- ===================================================================== -->
+    <footer class="bg-obsidian-950 text-white border-t border-slate-800 mt-12">
+        <div class="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-right space-y-1">
+                <div class="font-brand font-extrabold text-xl tracking-tight">
+                    <span class="italic text-amber-400">Sky</span>Build <span class="text-xs font-normal text-slate-400">for Design &amp; Contracting</span>
+                </div>
+                <p class="text-xs text-slate-300 font-semibold">نصمم ونبني تجربة متكاملة تناسبك</p>
+            </div>
+
+            <!-- Contact & Social Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <a href="tel:01060728015" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/15 px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                    <i class="ph ph-phone-call text-lg text-amber-400"></i>
+                    <span dir="ltr">01060728015</span>
+                </a>
+                <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                    <i class="ph ph-whatsapp-logo text-lg"></i>
+                    <span>تواصل واتساب</span>
+                </a>
+                <a id="footer-fb-link" href="https://www.facebook.com/share/19LHe2zZbL/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
+                    <i class="ph ph-facebook-logo text-lg"></i>
+                    <span>صفحتنا على فيسبوك</span>
+                </a>
+            </div>
+        </div>
+        <div class="border-t border-slate-900 py-3 text-center text-[11px] text-slate-500">
+            © 2026 SkyBuild for Design &amp; Contracting. جميع الحقوق محفوظة.
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
     <!-- JAVASCRIPT LOGIC & FIREBASE CLOUD SYNC                                -->
     <!-- ===================================================================== -->
     <script>
         // ===================================================================
-        // 1. CONFIGURATION (PUT YOUR WHATSAPP NUMBER HERE)
+        // 1. CONTACT, SOCIAL & FIREBASE CONFIGURATION
         // ===================================================================
-        const WHATSAPP_NUMBER = "201000000000"; // استبدله برقمك بصيغة دولية بدون + مثل 201012345678
+        const WHATSAPP_NUMBER = "201060728015";
+        const FACEBOOK_PAGE_URL = "https://www.facebook.com/share/19LHe2zZbL/?mibextid=wwXIfr";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBs5O6-3V67a-LqRF9yWr1JWJnPBSrGFhg",
@@ -478,7 +624,6 @@
             measurementId: "G-TL1THMTTC8"
         };
 
-        // Initialize Firebase Safely
         let db = null;
         try {
             if (!firebase.apps.length) {
@@ -493,7 +638,43 @@
         }
 
         // ===================================================================
-        // 2. DATA SCHEMA FOR ALL 16 INTERACTIVE FINISHING ITEMS
+        // 2. 3D DESIGN STYLES DATA WITH REFERENCE IMAGES
+        // ===================================================================
+        const DESIGN_STYLES = [
+            {
+                id: 'modern',
+                name: 'مودرن (Modern)',
+                desc: 'خطوط بسيطة، ألوان هادئة، وإضاءات مخفية عصرية',
+                img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'neoclassic',
+                name: 'نيو كلاسيك (Neo Classic)',
+                desc: 'دمج الفخامة الكلاسيكية والبانوهات مع البساطة الحديثة',
+                img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'classic',
+                name: 'كلاسيك (Classic)',
+                desc: 'زخارف غنية، تفاصيل فاخرة، وأخشاب كلاسيكية راقية',
+                img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'neomodern',
+                name: 'نيو مودرن (Neo Modern)',
+                desc: 'لمسات جريئة تجمع بين الدفء الخشبي والتصميم المعاصر',
+                img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'bohemian',
+                name: 'بوهيمي (Bohemian)',
+                desc: 'خامات طبيعية، ألوان دافئة، ونباتات وإحساس مريح',
+                img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=600&q=80'
+            }
+        ];
+
+        // ===================================================================
+        // 3. DATA SCHEMA FOR ALL 16 INTERACTIVE FINISHING ITEMS
         // ===================================================================
         const SCOPE_ITEMS = [
             {
@@ -734,8 +915,40 @@
         ];
 
         // ===================================================================
-        // 3. UI RENDERING & INTERACTIVE HANDLERS
+        // 4. UI RENDERING & INTERACTIVE HANDLERS
         // ===================================================================
+        function renderDesignStyles() {
+            const grid = document.getElementById('design-styles-grid');
+            grid.innerHTML = DESIGN_STYLES.map((style, idx) => `
+                <label class="cursor-pointer group">
+                    <input type="radio" name="design-3d-style" value="${style.name}" ${idx === 0 ? 'checked' : ''} onchange="updateLiveSummary()" class="peer sr-only">
+                    <div class="rounded-xl border-2 border-silver-200 bg-white overflow-hidden peer-checked:border-gold-600 peer-checked:ring-2 peer-checked:ring-amber-400/40 transition shadow-2xs">
+                        <div class="relative h-28 w-full overflow-hidden bg-slate-200">
+                            <img src="${style.img}" alt="${style.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <span class="absolute top-2 right-2 bg-obsidian-950/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                ${style.name.split(' ')[0]}
+                            </span>
+                        </div>
+                        <div class="p-2.5 space-y-0.5">
+                            <div class="font-extrabold text-xs text-obsidian-950">${style.name}</div>
+                            <p class="text-[10px] text-slate-500 leading-snug">${style.desc}</p>
+                        </div>
+                    </div>
+                </label>
+            `).join('');
+        }
+
+        function handle3DToggle() {
+            const enabled = document.getElementById('design-3d-enabled').checked;
+            const panel = document.getElementById('design-3d-panel');
+            if (enabled) {
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+            }
+            updateLiveSummary();
+        }
+
         function renderScopeItems() {
             const container = document.getElementById('scope-items-container');
             container.innerHTML = '';
@@ -897,7 +1110,7 @@
         }
 
         // ===================================================================
-        // 4. COLLECT STRUCTURED DATA & UPDATE LIVE SUMMARY
+        // 5. COLLECT STRUCTURED DATA & UPDATE LIVE SUMMARY
         // ===================================================================
         function collectFormData() {
             const scopeVal = document.querySelector('input[name="contract-scope"]:checked').value;
@@ -905,6 +1118,10 @@
             const contractLabel = scopeVal === 'full'
                 ? `تشطيب كامل (إشراف وتنفيذ) — نظام ${pricingModel}`
                 : 'إشراف هندسي فقط (زيارات محددة عند استلام كل بند)';
+
+            const design3DEnabled = document.getElementById('design-3d-enabled').checked;
+            const design3DMode = document.querySelector('input[name="design-3d-mode"]:checked')?.value || '';
+            const design3DStyle = document.querySelector('input[name="design-3d-style"]:checked')?.value || '';
 
             const elevator = document.querySelector('input[name="unit-elevator"]:checked')?.value || '';
             const noneUtil = document.getElementById('utility-none').checked;
@@ -961,6 +1178,12 @@
                     pricingModel: scopeVal === 'full' ? pricingModel : 'إشراف فقط',
                     label: contractLabel
                 },
+                design3D: {
+                    enabled: design3DEnabled,
+                    mode: design3DEnabled ? design3DMode : 'غير مطلوب',
+                    style: design3DEnabled ? design3DStyle : '',
+                    summary: design3DEnabled ? `${design3DMode} — طراز ${design3DStyle}` : 'غير مطلوب'
+                },
                 unit: {
                     location: document.getElementById('unit-location').value.trim(),
                     floor: document.getElementById('unit-floor').value.trim(),
@@ -980,6 +1203,7 @@
 
             document.getElementById('summary-items-count').textContent = `${data.selectedScope.length} بنود مختارة`;
             document.getElementById('sum-contract').textContent = data.contract.label;
+            document.getElementById('sum-3d').textContent = data.design3D.summary;
 
             const locText = [data.unit.location, data.unit.floor].filter(Boolean).join(' — ');
             document.getElementById('sum-location').textContent = locText || 'لم يُحدد بعد';
@@ -1004,14 +1228,14 @@
         }
 
         // ===================================================================
-        // 5. CLOUD SUBMISSION (FIREBASE FIRESTORE) + WHATSAPP REDIRECT
+        // 6. CLOUD SUBMISSION (FIREBASE FIRESTORE) + WHATSAPP REDIRECT
         // ===================================================================
         async function submitInspectionRequest(e) {
             e.preventDefault();
             const data = collectFormData();
 
-            if (data.selectedScope.length === 0) {
-                showToast('يرجى اختيار بند واحد على الأقل من بنود التشطيب', 'error');
+            if (data.selectedScope.length === 0 && !data.design3D.enabled) {
+                showToast('يرجى اختيار بند واحد على الأقل من بنود التشطيب أو تفعيل التصميم الـ 3D', 'error');
                 return;
             }
 
@@ -1021,7 +1245,6 @@
             btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i><span>جاري حفظ الطلب سحابياً...</span>`;
 
             try {
-                // Save to Firebase Firestore
                 if (db) {
                     await db.collection('inspection_requests').add({
                         ...data,
@@ -1033,8 +1256,9 @@
 
                 showToast('تم تسجيل طلب المعاينة في نظام SkyBuild بنجاح!', 'success');
 
-                // Build Clean WhatsApp Message
-                const scopeLines = data.selectedScope.map((s, i) => `${i + 1}. *${s.title}*: ${s.summaryText}`).join('\n');
+                const scopeLines = data.selectedScope.length > 0
+                    ? data.selectedScope.map((s, i) => `${i + 1}. *${s.title}*: ${s.summaryText}`).join('\n')
+                    : '• طلب تصميم 3D فقط بدون بنود تنفيذ حالياً';
 
                 const message = [
                     `*طلب معاينة هندسية جديد — SkyBuild*`,
@@ -1048,7 +1272,10 @@
                     `*2. نظام التعاقد:*`,
                     `• ${data.contract.label}`,
                     ``,
-                    `*3. بيانات الوحدة:*`,
+                    `*3. التصميم ثلاثي الأبعاد (3D):*`,
+                    `• ${data.design3D.summary}`,
+                    ``,
+                    `*4. بيانات الوحدة:*`,
                     `• المكان: ${data.unit.location}`,
                     `• الدور: ${data.unit.floor}`,
                     `• الأسانسير: ${data.unit.elevator}`,
@@ -1056,7 +1283,7 @@
                     `• المساحة: ${data.unit.area} م² | الحالة: ${data.unit.condition}`,
                     `• التقسيم: ${data.unit.rooms} — ${data.unit.bathrooms}`,
                     ``,
-                    `*4. البنود المطلوبة (${data.selectedScope.length} بند):*`,
+                    `*5. البنود المطلوبة (${data.selectedScope.length} بند):*`,
                     scopeLines
                 ].filter(line => line !== null).join('\n');
 
@@ -1089,6 +1316,8 @@
 
         // Initialize Page
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('footer-fb-link').href = FACEBOOK_PAGE_URL;
+            renderDesignStyles();
             renderScopeItems();
             updateLiveSummary();
         });
