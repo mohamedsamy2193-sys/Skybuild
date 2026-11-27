@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBuild | الداشبورد والتحليل الهندسي للمقايسات</title>
+  <title>SkyBuild | لوحة بيانات الطلب والداشبورد والتحليل الهندسي</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -50,7 +50,7 @@
     }
 
     .topbar-inner {
-      max-width: 1280px;
+      max-width: 1300px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
@@ -78,7 +78,6 @@
     }
 
     .btn-gold { background: var(--gold); color: #fff; }
-    .btn-dark { background: var(--dark); color: #fff; }
     .btn-light { background: #fff; color: var(--text); border: 1px solid var(--border); }
     .btn-green { background: var(--green); color: #fff; }
     .btn-red { background: #fee2e2; color: var(--red); }
@@ -86,7 +85,7 @@
     .btn-blue { background: #dbeafe; color: var(--blue); }
     .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
 
-    .wrap { max-width: 1280px; margin: 20px auto; padding: 0 16px; }
+    .wrap { max-width: 1300px; margin: 20px auto; padding: 0 16px; }
 
     .card {
       background: var(--card);
@@ -185,11 +184,18 @@
       font-weight: 700;
     }
 
+    .sec-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--gold);
+      margin: 12px 0 8px;
+    }
+
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .info-box {
@@ -293,7 +299,7 @@
     }
 
     .footer-inner {
-      max-width: 1280px;
+      max-width: 1300px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
@@ -310,9 +316,9 @@
 
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand">Sky<span>Build</span> — الأداة الهندسية والداشبورد</div>
+      <div class="brand">Sky<span>Build</span> — لوحة بيانات الطلب والتحليل الهندسي</div>
       <div class="actions">
-        <button class="btn btn-gold btn-sm" onclick="recalcFromClient()">تحديث الكميات من مساحة العميل</button>
+        <button class="btn btn-gold btn-sm" onclick="recalcFromClient()">تحديث الكميات من بيانات العميل</button>
         <button class="btn btn-light btn-sm" onclick="window.print()">طباعة</button>
         <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="btn btn-green btn-sm">واتساب الشركة</a>
       </div>
@@ -320,7 +326,7 @@
   </header>
 
   <main class="wrap">
-    <!-- الداشبورد والمناطق -->
+    <!-- الداشبورد والمناطق والتحديد المتعدد -->
     <section class="card">
       <div class="card-title">
         <span>الطلبات الواردة وتقسيم المناطق</span>
@@ -357,7 +363,7 @@
             <tr>
               <th style="width:36px;"></th>
               <th>العميل</th>
-              <th>الهاتف</th>
+              <th>الموبايل / واتساب</th>
               <th>المنطقة</th>
               <th>العنوان / المساحة</th>
               <th>الحالة</th>
@@ -369,10 +375,10 @@
       </div>
     </section>
 
-    <!-- تفاصيل الطلب المختار -->
+    <!-- لوحة بيانات الطلب الكاملة (خطوات 1 إلى 4) -->
     <section class="card" id="dossierCard">
       <div class="card-title">
-        <span>بيانات الطلب المختار وإرسال المقايسة</span>
+        <span>لوحة بيانات الطلب المختار</span>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-gold btn-sm" onclick="saveQuote()">حفظ وإرسال المقايسة</button>
           <button class="btn btn-green btn-sm" onclick="sendWhatsApp()">إرسال واتساب</button>
@@ -381,7 +387,7 @@
       <div id="dossierContent"></div>
     </section>
 
-    <!-- إعدادات الوحدة والمعدلات القياسية -->
+    <!-- إعدادات الوحدة والمعدلات الهندسية -->
     <section class="card">
       <div class="card-title"><span>بيانات الوحدة والمعدلات الهندسية</span></div>
       <div class="form-grid">
@@ -390,7 +396,7 @@
           <input type="text" id="activeClient" oninput="state.clientName=this.value;saveLocal();" />
         </div>
         <div class="field">
-          <label>مساحة الوحدة / السقف (م²)</label>
+          <label>مساحة الوحدة الإجمالية / السقف (م²)</label>
           <input type="number" min="0" id="unitArea" oninput="state.unitArea=+this.value||0;saveLocal();recalcFromClient();" />
         </div>
         <div class="field">
@@ -435,7 +441,7 @@
 
     const ZONES = ["مدينة نصر", "التجمع الخامس", "المعادي", "المقطم", "البساتين", "المرج", "بنها", "أشمون"];
     const UNITS = ["م²", "م.ط", "عدد", "شكارة", "م³", "جركن", "لتر", "متر", "يومية", "مقطوعية", "قطعة"];
-    const STORAGE_KEY = "skybuild_eng_boq_v1";
+    const STORAGE_KEY = "skybuild_full_dossier_boq_v1";
 
     function buildDefaultItems(area = 120, factor = 3, flatGypsum = false) {
       const wallsArea = area * factor;
@@ -722,64 +728,98 @@
         return parts.length ? parts.join("، ") : fb;
       }
       if (typeof v === "object") {
-        const parts = Object.values(v)
-          .filter(x => typeof x === "string" || typeof x === "number" || typeof x === "boolean")
-          .map(x => String(x).trim())
-          .filter(Boolean);
+        const parts = Object.entries(v)
+          .filter(([, val]) => typeof val === "string" || typeof val === "number" || typeof val === "boolean")
+          .filter(([, val]) => String(val).trim() !== "" && String(val).trim() !== "false")
+          .map(([k, val]) => typeof val === "boolean" ? k : String(val).trim());
         return parts.length ? parts.join(" — ") : fb;
       }
       return fb;
     }
 
-    function getExactClientName(d, id) {
-      const keys = ["clientName", "fullName", "name", "leadName", "client", "customerName", "userName", "username", "ownerName"];
+    function pickFirst(d, keys, fb = "") {
       for (const k of keys) {
-        const s = safeVal(d[k], "");
-        if (s) return s;
+        if (d && d[k] !== undefined && d[k] !== null) {
+          const s = safeVal(d[k], "");
+          if (s) return s;
+        }
       }
-      for (const v of Object.values(d || {})) {
-        if (v && typeof v === "object" && !Array.isArray(v)) {
-          for (const k of keys) {
-            const s = safeVal(v[k], "");
-            if (s) return s;
+      if (d && typeof d === "object") {
+        for (const v of Object.values(d)) {
+          if (v && typeof v === "object" && !Array.isArray(v)) {
+            for (const k of keys) {
+              if (v[k] !== undefined && v[k] !== null) {
+                const s = safeVal(v[k], "");
+                if (s) return s;
+              }
+            }
           }
         }
       }
-      return `#${String(id || "").slice(-6)}`;
-    }
-
-    function extractZoneFromAddress(d) {
-      const parts = [d.location, d.unitLocation, d.address, d.unitAddress, d.areaName, d.district, d.region, d.zone]
-        .map(v => safeVal(v, ""))
-        .filter(Boolean);
-      const fullAddress = parts.join(" — ").trim();
-      for (const z of ZONES) {
-        if (fullAddress.includes(z)) return { zone: z, fullAddress };
-      }
-      if (fullAddress) return { zone: fullAddress, fullAddress };
-      return { zone: "غير محدد بالعنوان", fullAddress: "-" };
+      return fb;
     }
 
     function mapDoc(doc) {
       const d = doc.data() || {};
-      const addr = extractZoneFromAddress(d);
-      const rawArea = Number(safeVal(d.unitArea ?? d.area, 120));
+
+      const rawName = pickFirst(d, ["clientName", "fullName", "name", "leadName", "client", "customerName"], "");
+      const nameParts = rawName.split(/\s*[—|]\s*/).map(s => s.trim()).filter(Boolean);
+      const phoneMatch = rawName.match(/(?:\+?20|0)?1[0125]\d{8}/);
+      const dateMatch = rawName.match(/\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/);
+
+      const client = nameParts[0] || `#${String(doc.id || "").slice(-6)}`;
+      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp", "phoneNumber"], "") || (phoneMatch ? phoneMatch[0] : "-");
+      const preferredDate = pickFirst(d, ["preferredDate", "visitDate", "date", "appointmentDate"], "") || (dateMatch ? dateMatch[0] : "-");
+      const notes = pickFirst(d, ["notes", "generalNotes", "leadNotes", "remarks"], "-");
+
+      const contractSystem = pickFirst(d, ["contract", "contractScope", "contractSystem", "scope", "serviceType"], "-");
+      const accountingSystem = pickFirst(d, ["pricingModel", "accountingSystem", "pricingType", "paymentSystem"], "-");
+
+      const design3DWant = pickFirst(d, ["want3D", "has3D", "design3DEnabled", "include3D"], "-");
+      const design3DMethod = pickFirst(d, ["design3DMethod", "method3D", "how3D"], "-");
+      const design3DStyle = pickFirst(d, ["design3DStyle", "style3D", "interiorStyle", "style"], "-");
+
+      const location = pickFirst(d, ["location", "unitLocation", "address", "unitAddress", "areaName", "district"], "-");
+      const floor = pickFirst(d, ["floor", "unitFloor", "floorNumber"], "-");
+      const utilities = pickFirst(d, ["utilities", "unitUtilities", "services", "meters"], "-");
+      const elevator = pickFirst(d, ["elevator", "hasElevator", "lift"], "-");
+      const rawArea = Number(pickFirst(d, ["unitArea", "area", "totalArea", "space"], "120"));
       const area = rawArea > 0 ? rawArea : 120;
-      const d3Text = safeVal(d.has3D ?? d.design3DStyle ?? d.design3DEnabled, "-");
-      const flatFlag = Boolean(d.hasFlatGypsum || d.flatGypsum || String(d.notes || "").includes("فلات"));
+      const handoverStatus = pickFirst(d, ["handoverStatus", "deliveryStatus", "currentStatus", "condition"], "-");
+      const roomsAndRecep = pickFirst(d, ["roomsAndReception", "roomsReception", "rooms", "layout"], "-");
+      const bathrooms = pickFirst(d, ["bathrooms", "baths", "bathCount"], "-");
+
+      let zone = "غير محدد";
+      for (const z of ZONES) {
+        if (location.includes(z) || rawName.includes(z)) {
+          zone = z;
+          break;
+        }
+      }
+
+      const combinedText = `${design3DWant} ${design3DStyle} ${notes} ${contractSystem}`;
+      const flatFlag = Boolean(d.hasFlatGypsum || d.flatGypsum || combinedText.includes("فلات"));
 
       return {
         id: doc.id,
-        client: getExactClientName(d, doc.id),
-        phone: safeVal(d.phone ?? d.leadPhone ?? d.mobile ?? d.whatsapp, "-"),
-        zone: addr.zone,
-        location: addr.fullAddress,
-        floor: safeVal(d.floor ?? d.unitFloor, "-"),
+        client,
+        phone,
+        preferredDate,
+        notes,
+        contractSystem,
+        accountingSystem,
+        design3DWant,
+        design3DMethod,
+        design3DStyle,
+        zone,
+        location,
+        floor,
+        utilities,
+        elevator,
         area,
-        contract: safeVal(d.contract ?? d.contractScope, "-"),
-        has3D: d3Text,
-        date: safeVal(d.preferredDate ?? d.date, "-"),
-        notes: safeVal(d.notes, "-"),
+        handoverStatus,
+        roomsAndRecep,
+        bathrooms,
         flatFlag,
         status: ["new", "visit", "quoted"].includes(d.status) ? d.status : "new",
         quoteTotal: Number(d.quoteTotal || 0)
@@ -814,7 +854,6 @@
       });
     }
 
-    // إعادة حساب الكميات القياسية تلقائياً من مساحة العميل مع الحفاظ على أسعار السوق المخصصة
     function recalcFromClient() {
       const area = Number(state.unitArea || 0);
       const factor = Number(state.plasterFactor || 3);
@@ -889,7 +928,7 @@
 
     function renderZones() {
       const extra = Array.from(new Set(
-        state.requests.map(r => r.zone).filter(z => z && !ZONES.includes(z) && z !== "غير محدد بالعنوان")
+        state.requests.map(r => r.zone).filter(z => z && !ZONES.includes(z) && z !== "غير محدد")
       ));
       const list = [...ZONES, ...extra];
       let html = `<button class="zone-btn ${state.zoneFilter === "all" ? "active" : ""}" onclick="setZone('all')">الكل (${state.requests.length})</button>`;
@@ -897,9 +936,9 @@
         const c = state.requests.filter(r => r.zone === z).length;
         html += `<button class="zone-btn ${state.zoneFilter === z ? "active" : ""}" onclick="setZone('${z.replace(/'/g, "\\'")}')">${z} (${c})</button>`;
       }
-      const unzoned = state.requests.filter(r => r.zone === "غير محدد بالعنوان").length;
+      const unzoned = state.requests.filter(r => r.zone === "غير محدد").length;
       if (unzoned > 0) {
-        html += `<button class="zone-btn ${state.zoneFilter === "غير محدد بالعنوان" ? "active" : ""}" onclick="setZone('غير محدد بالعنوان')">غير محدد (${unzoned})</button>`;
+        html += `<button class="zone-btn ${state.zoneFilter === "غير محدد" ? "active" : ""}" onclick="setZone('غير محدد')">غير محدد (${unzoned})</button>`;
       }
       document.getElementById("zonesBox").innerHTML = html;
     }
@@ -1029,19 +1068,42 @@
     function renderDossier() {
       const r = state.requests.find(x => x.id === state.selectedId);
       if (!r) {
-        document.getElementById("dossierContent").innerHTML = `<p style="color:var(--muted);">اختر طلباً من الجدول لعرض بياناته.</p>`;
+        document.getElementById("dossierContent").innerHTML = `<p style="color:var(--muted);">اختر طلباً من الجدول لعرض بياناته الكاملة.</p>`;
         return;
       }
       document.getElementById("dossierContent").innerHTML = `
+        <div class="sec-label">1. بيانات العميل وطلب المعاينة</div>
         <div class="info-grid">
-          <div class="info-box"><small>العميل</small><strong>${r.client}</strong></div>
-          <div class="info-box"><small>الهاتف</small><strong dir="ltr">${r.phone}</strong></div>
+          <div class="info-box"><small>الاسم بالكامل</small><strong>${r.client}</strong></div>
+          <div class="info-box"><small>رقم الموبايل / واتساب</small><strong dir="ltr">${r.phone}</strong></div>
+          <div class="info-box"><small>الموعد المفضل للمعاينة</small><strong>${r.preferredDate}</strong></div>
+          <div class="info-box"><small>ملاحظات عامة</small><strong>${r.notes}</strong></div>
+        </div>
+
+        <div class="sec-label">2. نظام التعاقد والمحاسبة</div>
+        <div class="info-grid">
+          <div class="info-box"><small>نظام التعاقد المطلوب</small><strong>${r.contractSystem}</strong></div>
+          <div class="info-box"><small>نظام المحاسبة للتنفيذ الكامل</small><strong>${r.accountingSystem}</strong></div>
+        </div>
+
+        <div class="sec-label">3. التصميم الداخلي ثلاثي الأبعاد (3D Design)</div>
+        <div class="info-grid">
+          <div class="info-box"><small>إضافة خدمة 3D</small><strong>${r.design3DWant}</strong></div>
+          <div class="info-box"><small>طريقة عمل 3D</small><strong>${r.design3DMethod}</strong></div>
+          <div class="info-box"><small>طراز التصميم (Interior Style)</small><strong>${r.design3DStyle}</strong></div>
+        </div>
+
+        <div class="sec-label">4. بيانات ومواصفات الوحدة</div>
+        <div class="info-grid">
+          <div class="info-box"><small>مكان الوحدة (المدينة / الحي / الكمبوند)</small><strong>${r.location}</strong></div>
           <div class="info-box"><small>المنطقة</small><strong>${r.zone}</strong></div>
-          <div class="info-box"><small>العنوان / الدور</small><strong>${r.location} — ${r.floor}</strong></div>
-          <div class="info-box"><small>المساحة</small><strong>${r.area} م²</strong></div>
-          <div class="info-box"><small>التعاقد / 3D</small><strong>${r.contract} | ${r.has3D}</strong></div>
-          <div class="info-box"><small>الموعد</small><strong>${r.date}</strong></div>
-          <div class="info-box"><small>الملاحظات</small><strong>${r.notes}</strong></div>
+          <div class="info-box"><small>الدور الكام</small><strong>${r.floor}</strong></div>
+          <div class="info-box"><small>العدادات والمرافق للوحدة</small><strong>${r.utilities}</strong></div>
+          <div class="info-box"><small>أسانسير يعمل بالعقار</small><strong>${r.elevator}</strong></div>
+          <div class="info-box"><small>مساحة الوحدة الإجمالية</small><strong>${r.area} م²</strong></div>
+          <div class="info-box"><small>حالة الاستلام الحالية</small><strong>${r.handoverStatus}</strong></div>
+          <div class="info-box"><small>عدد الغرف والريسبشن</small><strong>${r.roomsAndRecep}</strong></div>
+          <div class="info-box"><small>عدد الحمامات</small><strong>${r.bathrooms}</strong></div>
         </div>
       `;
     }
