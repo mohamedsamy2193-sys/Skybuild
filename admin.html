@@ -258,7 +258,7 @@
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
       gap: 12px;
       margin-bottom: 16px;
     }
@@ -277,6 +277,37 @@
     .kpi-val { font-size: 20px; font-weight: 800; color: var(--obsidian); }
     .kpi-val.gold { color: var(--gold-dark); }
     .kpi-val.emerald { color: var(--emerald); }
+
+    .zones-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      align-items: center;
+    }
+
+    .zone-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: #FFFFFF;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .zone-chip:hover { border-color: var(--obsidian); }
+    .zone-chip.active {
+      background: var(--obsidian);
+      color: #FBBF24;
+      border-color: var(--obsidian);
+    }
 
     .status-pill {
       display: inline-block;
@@ -613,7 +644,7 @@
           <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
         </span>
         <span style="color:#6B7280;">•</span>
-        <span>صفحة الإدارة — متابعة الطلبات، ملف العميل الكامل، تحليل الأسعار، وإرسال المقايسة</span>
+        <span>صفحة الإدارة — متابعة الطلبات وتوزيع المناطق وتحليل الأسعار وإرسال المقايسة</span>
         <span style="color:#6B7280;">•</span>
         <span class="sb-marquee-gold">
           <i class="ph ph-phone"></i>
@@ -625,12 +656,12 @@
 
   <div class="container">
 
-    <!-- 1) DASHBOARD -->
+    <!-- 1) DASHBOARD & ZONES -->
     <section class="card card-featured" id="dashboardSection">
       <div class="section-head">
         <div class="section-title-wrap">
           <span class="step-badge"><i class="ph ph-gauge"></i></span>
-          <h2 class="section-title">داشبورد الطلبات الواردة</h2>
+          <h2 class="section-title">داشبورد الطلبات وتوزيع المناطق</h2>
           <span id="firestoreSyncBadge" class="sync-badge sync-local">جاري الاتصال بـ Firestore...</span>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" class="no-print">
@@ -647,7 +678,10 @@
 
       <div class="kpi-grid" id="dashboardKpis"></div>
 
-      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">اضغط على أي صف في الجدول لفتح <strong>لوحة معلومات الطلب الكاملة</strong> والبدء في تحليل الأسعار وإرسال المقايسة.</p>
+      <!-- Zones Filter Bar -->
+      <div class="zones-bar no-print" id="zonesFilterBar"></div>
+
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">اضغط على أي صف في الجدول لفتح <strong>لوحة معلومات الطلب الكاملة</strong>، أو استخدم زر <strong>مسح</strong> لحذف الطلب نهائياً من قاعدة البيانات.</p>
 
       <div style="overflow-x:auto;">
         <table>
@@ -655,6 +689,7 @@
             <tr>
               <th>اسم العميل</th>
               <th>الهاتف</th>
+              <th>المنطقة</th>
               <th>المكان / الدور</th>
               <th>المساحة</th>
               <th>نظام التعاقد</th>
@@ -713,7 +748,7 @@
       <div class="grid-4">
         <div class="field">
           <label>اسم العميل / المشروع النشط</label>
-          <input type="text" id="clientName" oninput="updateGlobal('clientName', this.value)" placeholder="مثال: تشطيب شقة - 6 أكتوبر" />
+          <input type="text" id="clientName" oninput="updateGlobal('clientName', this.value)" placeholder="مثال: تشطيب شقة - التجمع الخامس" />
         </div>
         <div class="field">
           <label>مساحة السقف / الوحدة (م²)</label>
@@ -777,12 +812,24 @@
       measurementId: "G-TL1THMTTC8"
     };
 
-    const STORAGE_KEY = "skybuild_admin_clean_v1";
+    const STORAGE_KEY = "skybuild_admin_zones_v1";
     const UNITS = ["م²", "م.ط", "عدد", "شكارة", "لتر", "متر", "يومية", "مقطوعية", "قطعة", "جركن", "م³"];
+
+    const REGIONS = [
+      "مدينة نصر",
+      "التجمع الخامس",
+      "المعادي",
+      "المقطم",
+      "البساتين",
+      "المرج",
+      "بنها",
+      "أشمون"
+    ];
 
     const DEFAULT_STATE = {
       collectionName: "inspection_requests",
       selectedRequestId: null,
+      selectedZoneFilter: "all",
       clientName: "تشطيب وحدة — SkyBuild",
       unitArea: 140,
       plasterFactor: 3,
@@ -1043,6 +1090,47 @@
       return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
     }
 
+    function isGarbledOrTechnical(str, docId) {
+      if (!str) return true;
+      const s = String(str).trim();
+      if (!s) return true;
+      if (docId && s === docId) return true;
+      if (/^[A-Za-z0-9_-]{18,}$/.test(s)) return true;
+      if (/^(undefined|null|nan|test|sample|عميل تجريبي)$/i.test(s)) return true;
+      return false;
+    }
+
+    function extractClientName(d, docId) {
+      const candidates = [
+        d.clientName,
+        d.fullName,
+        d.name,
+        d.leadName,
+        d.client,
+        d.customerName,
+        d.clientData && (d.clientData.name || d.clientData.fullName || d.clientData.clientName),
+        d.customer && (d.customer.name || d.customer.fullName)
+      ];
+      for (const c of candidates) {
+        if (typeof c === "string" && !isGarbledOrTechnical(c, docId)) {
+          return c.trim();
+        }
+      }
+      return "اسم غير مسجل في الطلب";
+    }
+
+    function detectRegion(d, locationText) {
+      const explicit = d.region || d.zone || d.areaZone || d.district || "";
+      if (explicit && REGIONS.includes(String(explicit).trim())) {
+        return String(explicit).trim();
+      }
+      const hay = `${explicit} ${locationText || ""}`;
+      for (const reg of REGIONS) {
+        if (hay.includes(reg)) return reg;
+      }
+      return "غير محدد";
+    }
+
     function pickFirst(obj, keys, fallback) {
       for (const k of keys) {
         if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== "") {
@@ -1054,9 +1142,10 @@
 
     function normalizeFirestoreDoc(doc) {
       const d = doc.data() || {};
-      const client = pickFirst(d, ["clientName", "leadName", "name", "fullName", "client"], "عميل بدون اسم");
-      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp"], "-");
-      const location = pickFirst(d, ["location", "unitLocation", "address"], "غير محدد");
+      const client = extractClientName(d, doc.id);
+      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp", "phoneNumber"], "-");
+      const location = pickFirst(d, ["location", "unitLocation", "address", "areaName"], "غير محدد");
+      const zone = detectRegion(d, location);
       const floor = pickFirst(d, ["floor", "unitFloor"], "-");
       const area = Number(pickFirst(d, ["unitArea", "area"], 150)) || 150;
 
@@ -1078,6 +1167,7 @@
         client,
         phone,
         location,
+        zone,
         floor,
         area,
         contract,
@@ -1093,6 +1183,48 @@
       };
     }
 
+    function getFilteredRequests() {
+      if (!state.selectedZoneFilter || state.selectedZoneFilter === "all") {
+        return state.requests;
+      }
+      return state.requests.filter(r => r.zone === state.selectedZoneFilter);
+    }
+
+    function setZoneFilter(zone) {
+      state.selectedZoneFilter = zone;
+      saveState();
+      renderZonesBar();
+      renderDashboard();
+    }
+
+    function renderZonesBar() {
+      const bar = document.getElementById("zonesFilterBar");
+      const allCount = state.requests.length;
+      const chips = [
+        `<button class="zone-chip ${state.selectedZoneFilter === "all" ? "active" : ""}" onclick="setZoneFilter('all')">كل المناطق (${allCount})</button>`
+      ];
+
+      REGIONS.forEach(reg => {
+        const count = state.requests.filter(r => r.zone === reg).length;
+        chips.push(`
+          <button class="zone-chip ${state.selectedZoneFilter === reg ? "active" : ""}" onclick="setZoneFilter('${reg}')">
+            ${reg} (${count})
+          </button>
+        `);
+      });
+
+      const unzonedCount = state.requests.filter(r => r.zone === "غير محدد").length;
+      if (unzonedCount > 0) {
+        chips.push(`
+          <button class="zone-chip ${state.selectedZoneFilter === "غير محدد" ? "active" : ""}" onclick="setZoneFilter('غير محدد')">
+            غير محدد (${unzonedCount})
+          </button>
+        `);
+      }
+
+      bar.innerHTML = `<span style="font-size:12px;font-weight:800;color:var(--muted);">المناطق:</span>` + chips.join("");
+    }
+
     function getSelectedRequest() {
       if (!state.requests.length) return null;
       return state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
@@ -1102,7 +1234,7 @@
       const r = state.requests.find(x => x.id === id);
       if (!r) return;
       state.selectedRequestId = r.id;
-      state.clientName = `${r.client} — ${r.location}`;
+      state.clientName = `${r.client} — ${r.zone !== "غير محدد" ? r.zone : r.location}`;
       state.unitArea = +r.area || state.unitArea;
       saveState();
       syncGlobalInputs();
@@ -1145,7 +1277,8 @@
         <div class="dossier-grid">
           <div class="dossier-box"><span>اسم العميل</span><strong>${r.client}</strong></div>
           <div class="dossier-box"><span>رقم الموبايل / واتساب</span><strong dir="ltr">${r.phone}</strong></div>
-          <div class="dossier-box"><span>المكان</span><strong>${r.location}</strong></div>
+          <div class="dossier-box"><span>المنطقة</span><strong>${r.zone}</strong></div>
+          <div class="dossier-box"><span>المكان التفصيلي</span><strong>${r.location}</strong></div>
           <div class="dossier-box"><span>الدور</span><strong>${r.floor}</strong></div>
           <div class="dossier-box"><span>مساحة الوحدة</span><strong>${r.area} م²</strong></div>
           <div class="dossier-box"><span>الأسانسير</span><strong>${r.elevator}</strong></div>
@@ -1209,6 +1342,7 @@
             ...quotePayload,
             clientName: r.client,
             phone: r.phone,
+            zone: r.zone,
             itemsBreakdown: state.items.map(item => ({
               num: item.num,
               name: item.name,
@@ -1232,6 +1366,7 @@
       const lines = [
         `مرحباً ${clientName}،`,
         `إليك ملخص المقايسة المبدئية من SkyBuild for Design & Contracting:`,
+        r && r.zone !== "غير محدد" ? `• المنطقة: ${r.zone}` : "",
         `• مساحة الوحدة: ${state.unitArea} م²`,
         `• إجمالي الخامات: ${fmt(totals.mat)} ج.م`,
         `• إجمالي المصنعيات: ${fmt(totals.labor)} ج.م`,
@@ -1277,8 +1412,11 @@
             state.requests = snapshot.docs.map(normalizeFirestoreDoc);
             if (!state.selectedRequestId && state.requests.length) {
               state.selectedRequestId = state.requests[0].id;
+            } else if (state.selectedRequestId && !state.requests.some(r => r.id === state.selectedRequestId)) {
+              state.selectedRequestId = state.requests.length ? state.requests[0].id : null;
             }
             saveState();
+            renderZonesBar();
             renderDashboard();
             renderRequestDossier();
 
@@ -1328,24 +1466,31 @@
       const statusLabel = s => s === "new" ? "جديد" : s === "visit" ? "معاينة" : "تم التسعير";
       const statusClass = s => s === "new" ? "st-new" : s === "visit" ? "st-visit" : "st-quoted";
       const selected = getSelectedRequest();
+      const visibleReqs = getFilteredRequests();
 
-      if (!state.requests.length) {
+      if (!visibleReqs.length) {
         document.getElementById("requestsTableBody").innerHTML = `
           <tr>
-            <td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">
-              لا توجد طلبات مسجلة في مجموعة <strong>${state.collectionName}</strong> حتى الآن.
+            <td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">
+              لا توجد طلبات مطابقة للفلتر الحالي في مجموعة <strong>${state.collectionName}</strong>.
             </td>
           </tr>
         `;
         return;
       }
 
-      document.getElementById("requestsTableBody").innerHTML = state.requests.map(req => {
+      document.getElementById("requestsTableBody").innerHTML = visibleReqs.map(req => {
         const isSelected = selected && selected.id === req.id;
         return `
           <tr class="request-row ${isSelected ? "selected-row" : ""}" onclick="openRequestWorkspace('${req.id}', true)">
             <td style="font-weight:800;color:var(--obsidian);">${req.client}</td>
             <td dir="ltr" style="text-align:right;font-weight:700;">${req.phone}</td>
+            <td onclick="event.stopPropagation()">
+              <select onchange="updateRequestZone('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
+                <option value="غير محدد" ${req.zone === "غير محدد" ? "selected" : ""}>غير محدد</option>
+                ${REGIONS.map(reg => `<option value="${reg}" ${req.zone === reg ? "selected" : ""}>${reg}</option>`).join("")}
+              </select>
+            </td>
             <td>${req.location} — ${req.floor}</td>
             <td class="num-col">${req.area} م²</td>
             <td>${req.contract}</td>
@@ -1360,10 +1505,34 @@
             </td>
             <td class="no-print" style="white-space:nowrap;" onclick="event.stopPropagation()">
               <button class="btn btn-dark btn-sm" onclick="openRequestWorkspace('${req.id}', true)">فتح الطلب</button>
+              <button class="btn btn-danger btn-sm" title="مسح الطلب" onclick="deleteRequest('${req.id}')">
+                <i class="ph ph-trash"></i>
+                <span>مسح</span>
+              </button>
             </td>
           </tr>
         `;
       }).join("");
+    }
+
+    async function updateRequestZone(id, zone) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      r.zone = zone;
+      saveState();
+      renderZonesBar();
+      renderDashboard();
+      if (getSelectedRequest() && getSelectedRequest().id === id) {
+        renderRequestDossier();
+      }
+
+      if (db) {
+        try {
+          await db.collection(state.collectionName).doc(id).set({ zone, region: zone }, { merge: true });
+        } catch (err) {
+          console.error("Error updating zone:", err);
+        }
+      }
     }
 
     async function updateRequestStatus(id, status) {
@@ -1383,14 +1552,41 @@
       }
     }
 
+    async function deleteRequest(id) {
+      const r = state.requests.find(x => x.id === id);
+      const label = r ? r.client : "هذا الطلب";
+      if (!confirm(`هل أنت متأكد من مسح طلب (${label}) نهائياً؟`)) return;
+
+      state.requests = state.requests.filter(x => x.id !== id);
+      if (state.selectedRequestId === id) {
+        state.selectedRequestId = state.requests.length ? state.requests[0].id : null;
+      }
+      saveState();
+      renderZonesBar();
+      renderDashboard();
+      renderRequestDossier();
+
+      if (db) {
+        try {
+          await db.collection(state.collectionName).doc(id).delete();
+        } catch (err) {
+          console.error("Error deleting request:", err);
+          alert("تعذر حذف الطلب من Firestore: " + err.message);
+        }
+      }
+    }
+
     async function addSampleRequest() {
       if (!db) return;
+      const zonesCycle = ["التجمع الخامس", "مدينة نصر", "المعادي", "المقطم", "البساتين", "المرج", "بنها", "أشمون"];
       const idx = state.requests.length + 1;
+      const sampleZone = zonesCycle[(idx - 1) % zonesCycle.length];
       try {
         await db.collection(state.collectionName).add({
-          clientName: `عميل تجريبي #${idx}`,
+          clientName: `أ. كريم حسن`,
           phone: "01060728015",
-          location: "القاهرة / 6 أكتوبر",
+          zone: sampleZone,
+          location: `${sampleZone} — مشروع سكني`,
           floor: "الدور الثاني",
           unitArea: 150,
           contractScope: "full",
@@ -1981,7 +2177,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "skybuild-admin-quote.json";
+      a.download = "skybuild-admin-zones.json";
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -2004,6 +2200,7 @@
     }
 
     function renderAll() {
+      renderZonesBar();
       renderDashboard();
       renderRequestDossier();
       renderNav();
