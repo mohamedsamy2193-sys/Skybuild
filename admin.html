@@ -364,8 +364,8 @@
               <th style="width:36px;"></th>
               <th>العميل</th>
               <th>الموبايل / واتساب</th>
-              <th>المنطقة</th>
-              <th>العنوان / المساحة</th>
+              <th>المنطقة / العنوان</th>
+              <th>المساحة</th>
               <th>الحالة</th>
               <th>إجراء</th>
             </tr>
@@ -375,7 +375,7 @@
       </div>
     </section>
 
-    <!-- لوحة بيانات الطلب الكاملة (خطوات 1 إلى 4) -->
+    <!-- لوحة بيانات الطلب الكاملة -->
     <section class="card" id="dossierCard">
       <div class="card-title">
         <span>لوحة بيانات الطلب المختار</span>
@@ -441,7 +441,7 @@
 
     const ZONES = ["مدينة نصر", "التجمع الخامس", "المعادي", "المقطم", "البساتين", "المرج", "بنها", "أشمون"];
     const UNITS = ["م²", "م.ط", "عدد", "شكارة", "م³", "جركن", "لتر", "متر", "يومية", "مقطوعية", "قطعة"];
-    const STORAGE_KEY = "skybuild_full_dossier_boq_v1";
+    const STORAGE_KEY = "skybuild_full_dossier_boq_v2";
 
     function buildDefaultItems(area = 120, factor = 3, flatGypsum = false) {
       const wallsArea = area * factor;
@@ -737,67 +737,67 @@
       return fb;
     }
 
-    function pickFirst(d, keys, fb = "") {
+    function pickDeep(obj, keys, fb = "") {
+      if (!obj || typeof obj !== "object") return fb;
+
       for (const k of keys) {
-        if (d && d[k] !== undefined && d[k] !== null) {
-          const s = safeVal(d[k], "");
+        if (obj[k] !== undefined && obj[k] !== null) {
+          const s = safeVal(obj[k], "");
           if (s) return s;
         }
       }
-      if (d && typeof d === "object") {
-        for (const v of Object.values(d)) {
-          if (v && typeof v === "object" && !Array.isArray(v)) {
-            for (const k of keys) {
-              if (v[k] !== undefined && v[k] !== null) {
-                const s = safeVal(v[k], "");
-                if (s) return s;
-              }
-            }
-          }
+
+      for (const v of Object.values(obj)) {
+        if (v && typeof v === "object") {
+          const found = pickDeep(v, keys, "");
+          if (found) return found;
         }
       }
+
       return fb;
     }
 
     function mapDoc(doc) {
       const d = doc.data() || {};
 
-      const rawName = pickFirst(d, ["clientName", "fullName", "name", "leadName", "client", "customerName"], "");
-      const nameParts = rawName.split(/\s*[—|]\s*/).map(s => s.trim()).filter(Boolean);
-      const phoneMatch = rawName.match(/(?:\+?20|0)?1[0125]\d{8}/);
-      const dateMatch = rawName.match(/\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/);
+      const client = pickDeep(d.client || d, ["name", "clientName", "fullName", "leadName", "client", "customerName"], "") || `#${String(doc.id || "").slice(-6)}`;
+      const phone = pickDeep(d.client || d, ["phone", "leadPhone", "mobile", "whatsapp"], "-");
+      const preferredDate = pickDeep(d.client || d, ["preferredDate", "visitDate", "date"], "-");
+      const clientNotes = pickDeep(d.client || {}, ["notes"], "");
+      const scopeNotes = pickDeep(d.selectedScope || {}, ["notes"], "");
+      const notes = [clientNotes, scopeNotes, safeVal(d.notes, "")].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(" — ") || "-";
 
-      const client = nameParts[0] || `#${String(doc.id || "").slice(-6)}`;
-      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp", "phoneNumber"], "") || (phoneMatch ? phoneMatch[0] : "-");
-      const preferredDate = pickFirst(d, ["preferredDate", "visitDate", "date", "appointmentDate"], "") || (dateMatch ? dateMatch[0] : "-");
-      const notes = pickFirst(d, ["notes", "generalNotes", "leadNotes", "remarks"], "-");
+      const contractSystem = pickDeep(d.contract || d, ["label", "contract", "contractScope", "scope"], "-");
+      const accountingSystem = pickDeep(d.contract || d, ["pricingModel", "accountingSystem"], "-");
 
-      const contractSystem = pickFirst(d, ["contract", "contractScope", "contractSystem", "scope", "serviceType"], "-");
-      const accountingSystem = pickFirst(d, ["pricingModel", "accountingSystem", "pricingType", "paymentSystem"], "-");
+      const design3DWant = d.design3D && typeof d.design3D === "object"
+        ? (d.design3D.enabled ? "نعم (مفعل)" : "لا")
+        : pickDeep(d, ["want3D", "has3D"], "-");
+      const design3DMethod = pickDeep(d.design3D || d, ["mode", "design3DMethod"], "-");
+      const design3DStyle = pickDeep(d.design3D || d, ["style", "summary", "design3DStyle"], "-");
 
-      const design3DWant = pickFirst(d, ["want3D", "has3D", "design3DEnabled", "include3D"], "-");
-      const design3DMethod = pickFirst(d, ["design3DMethod", "method3D", "how3D"], "-");
-      const design3DStyle = pickFirst(d, ["design3DStyle", "style3D", "interiorStyle", "style"], "-");
-
-      const location = pickFirst(d, ["location", "unitLocation", "address", "unitAddress", "areaName", "district"], "-");
-      const floor = pickFirst(d, ["floor", "unitFloor", "floorNumber"], "-");
-      const utilities = pickFirst(d, ["utilities", "unitUtilities", "services", "meters"], "-");
-      const elevator = pickFirst(d, ["elevator", "hasElevator", "lift"], "-");
-      const rawArea = Number(pickFirst(d, ["unitArea", "area", "totalArea", "space"], "120"));
-      const area = rawArea > 0 ? rawArea : 120;
-      const handoverStatus = pickFirst(d, ["handoverStatus", "deliveryStatus", "currentStatus", "condition"], "-");
-      const roomsAndRecep = pickFirst(d, ["roomsAndReception", "roomsReception", "rooms", "layout"], "-");
-      const bathrooms = pickFirst(d, ["bathrooms", "baths", "bathCount"], "-");
-
+      const location = pickDeep(d, ["location", "unitLocation", "address", "unitAddress", "areaName", "zone"], "-");
       let zone = "غير محدد";
       for (const z of ZONES) {
-        if (location.includes(z) || rawName.includes(z)) {
+        if (location.includes(z) || client.includes(z) || notes.includes(z)) {
           zone = z;
           break;
         }
       }
+      if (zone === "غير محدد" && location !== "-") zone = location;
 
-      const combinedText = `${design3DWant} ${design3DStyle} ${notes} ${contractSystem}`;
+      const rawAreaStr = pickDeep(d, ["unitArea", "area", "totalArea"], "");
+      const parsedArea = parseFloat(String(rawAreaStr).replace(/[^\d.]/g, ""));
+      const area = !Number.isNaN(parsedArea) && parsedArea > 0 ? parsedArea : 120;
+
+      const floor = pickDeep(d, ["floor", "unitFloor"], "-");
+      const utilities = pickDeep(d, ["utilities", "unitUtilities"], "-");
+      const elevator = pickDeep(d, ["elevator", "hasElevator"], "-");
+      const handoverStatus = pickDeep(d, ["handoverStatus", "deliveryStatus"], "-");
+      const roomsAndRecep = pickDeep(d, ["roomsAndReception", "roomsReception", "rooms"], "-");
+      const bathrooms = pickDeep(d, ["bathrooms", "baths"], "-");
+
+      const combinedText = `${design3DMethod} ${design3DStyle} ${notes} ${contractSystem}`;
       const flatFlag = Boolean(d.hasFlatGypsum || d.flatGypsum || combinedText.includes("فلات"));
 
       return {
@@ -1028,8 +1028,8 @@
           </td>
           <td><strong>${r.client}</strong></td>
           <td dir="ltr" style="text-align:right;">${r.phone}</td>
-          <td><span class="zone-tag">${r.zone}</span></td>
-          <td>${r.location} — ${r.area} م²</td>
+          <td><span class="zone-tag">${r.location !== "-" ? r.location : r.zone}</span></td>
+          <td>${r.area} م²</td>
           <td onclick="event.stopPropagation()">
             <select onchange="updateStatus('${r.id}', this.value)" style="padding:4px 6px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;">
               <option value="new" ${r.status === "new" ? "selected" : ""}>جديد</option>
