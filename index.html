@@ -1,1345 +1,2025 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyBuild for Design & Contracting | طلب معاينة ومقايسة تشطيب</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyBuild for Design & Contracting | لوحة الإدارة وتحليل الأسعار وإرسال المقايسة</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Google Fonts: Cairo, Tajawal & Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Firebase Compat SDK (Firestore) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --bg: #F3F4F6;
+      --surface: #FFFFFF;
+      --surface-soft: #F9FAFB;
+      --surface-warm: #FFFBEB;
+      --border: #E5E7EB;
+      --border-strong: #D1D5DB;
+      --text: #111827;
+      --muted: #6B7280;
+      --obsidian: #090D16;
+      --slate-dark: #111827;
+      --gold: #D97706;
+      --gold-dark: #B45309;
+      --emerald: #059669;
+      --rose: #DC2626;
+      --radius: 16px;
+      --shadow: 0 4px 18px rgba(9, 13, 22, 0.05);
+    }
 
-    <!-- Firebase Compat SDK (Firestore & Analytics) -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Cairo', 'Tajawal', 'sans-serif'],
-                        brand: ['Plus Jakarta Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        obsidian: {
-                            800: '#1F2937',
-                            900: '#111827',
-                            950: '#090D16',
-                        },
-                        silver: {
-                            50: '#F9FAFB',
-                            100: '#F3F4F6',
-                            200: '#E5E7EB',
-                            300: '#D1D5DB',
-                            400: '#9CA3AF',
-                        },
-                        gold: {
-                            500: '#D97706',
-                            600: '#B45309',
-                            700: '#92400E',
-                        }
-                    },
-                    keyframes: {
-                        marqueeRTL: {
-                            '0%': { transform: 'translateX(-100%)' },
-                            '100%': { transform: 'translateX(100%)' }
-                        }
-                    },
-                    animation: {
-                        'marquee-rtl': 'marqueeRTL 22s linear infinite'
-                    }
-                }
-            }
-        }
-    </script>
+    body {
+      font-family: "Cairo", "Tajawal", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding-bottom: 100px;
+    }
 
-    <style>
-        body {
-            background-color: #F3F4F6;
-            color: #111827;
-            font-family: 'Cairo', sans-serif;
-        }
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 8px;
-            background: #E5E7EB;
-            border-radius: 999px;
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: #111827;
-            border: 3px solid #D97706;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .marquee-track:hover {
-            animation-play-state: paused;
-        }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #F3F4F6; }
-        ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
-    </style>
+    button, select, input, textarea { font-family: inherit; }
+
+    .sb-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 2px 10px rgba(9, 13, 22, 0.04);
+    }
+
+    .sb-header-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .sb-logo-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      direction: ltr;
+    }
+
+    .sb-logo-svg {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+
+    .sb-logo-link:hover .sb-logo-svg { transform: scale(1.04); }
+
+    .sb-brand-text {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    .sb-brand-row {
+      display: flex;
+      align-items: baseline;
+      line-height: 1;
+    }
+
+    .sb-sky {
+      font-style: italic;
+      font-weight: 800;
+      font-size: 26px;
+      color: var(--obsidian);
+      letter-spacing: -0.02em;
+    }
+
+    .sb-build {
+      font-weight: 700;
+      font-size: 26px;
+      color: var(--obsidian);
+      letter-spacing: -0.02em;
+      padding-bottom: 4px;
+      border-bottom: 3px solid var(--obsidian);
+    }
+
+    .sb-sub {
+      font-weight: 600;
+      font-size: 11px;
+      color: #4B5563;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .sb-marquee {
+      background: var(--obsidian);
+      color: #FFFFFF;
+      border-top: 1px solid #1F2937;
+      overflow: hidden;
+      padding: 7px 0;
+    }
+
+    .sb-marquee-track {
+      display: inline-flex;
+      align-items: center;
+      gap: 28px;
+      white-space: nowrap;
+      font-size: 12.5px;
+      font-weight: 700;
+      animation: sbMarqueeRTL 22s linear infinite;
+    }
+
+    .sb-marquee-track:hover { animation-play-state: paused; }
+
+    .sb-marquee-gold {
+      color: #FBBF24;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @keyframes sbMarqueeRTL {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn-dark { background: var(--obsidian); color: #FFFFFF; }
+    .btn-dark:hover { background: #1F2937; }
+    .btn-gold { background: var(--gold); color: #FFFFFF; }
+    .btn-gold:hover { background: var(--gold-dark); }
+    .btn-light { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-light:hover { background: var(--surface-soft); border-color: var(--border-strong); }
+    .btn-phone { background: #F3F4F6; color: var(--obsidian); border: 1px solid var(--border-strong); }
+    .btn-phone:hover { background: #E5E7EB; }
+    .btn-whatsapp { background: var(--emerald); color: #FFFFFF; }
+    .btn-whatsapp:hover { background: #047857; }
+    .btn-danger { background: #FEE2E2; color: var(--rose); }
+    .btn-danger:hover { background: #FECACA; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 9px; }
+
+    .container {
+      max-width: 1380px;
+      margin: 22px auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .card-featured { border: 2px solid var(--slate-dark); }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .step-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--obsidian);
+      color: #FBBF24;
+      font-size: 12px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--obsidian);
+    }
+
+    .sync-badge {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-live { background: #D1FAE5; color: #065F46; }
+    .sync-local { background: #FEF3C7; color: #92400E; }
+    .sync-error { background: #FEE2E2; color: #991B1B; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .kpi-val { font-size: 20px; font-weight: 800; color: var(--obsidian); }
+    .kpi-val.gold { color: var(--gold-dark); }
+    .kpi-val.emerald { color: var(--emerald); }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 800;
+    }
+    .st-new { background: #FEF3C7; color: #92400E; }
+    .st-visit { background: #E0E7FF; color: #1E40AF; }
+    .st-quoted { background: #D1FAE5; color: #065F46; }
+
+    .request-row {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .request-row:hover {
+      background: #FFFBEB;
+    }
+
+    .request-row.selected-row {
+      background: #FEF3C7;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    .field input, .field select, .field textarea {
+      padding: 9px 11px;
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      font-size: 13.5px;
+      background: var(--surface-soft);
+      color: var(--text);
+      transition: 0.15s ease;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      background: #FFFFFF;
+      border-color: var(--obsidian);
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+    }
+
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .dossier-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 13px;
+    }
+
+    .dossier-box span {
+      display: block;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .dossier-box strong {
+      font-size: 13.5px;
+      color: var(--obsidian);
+    }
+
+    .quote-actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-warm);
+      border: 1px solid #FDE68A;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 12px;
+    }
+
+    .items-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+    }
+
+    .nav-pill {
+      white-space: nowrap;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .nav-pill:hover { border-color: var(--obsidian); }
+
+    .nav-pill.active {
+      background: var(--obsidian);
+      color: #FFFFFF;
+      border-color: var(--obsidian);
+    }
+
+    .item-num {
+      background: var(--surface-warm);
+      color: var(--gold-dark);
+      border: 1px solid #FDE68A;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 5px 11px;
+      border-radius: 9px;
+    }
+
+    .item-total-box {
+      background: var(--obsidian);
+      color: #FFFFFF;
+      padding: 8px 14px;
+      border-radius: 11px;
+      font-weight: 800;
+      font-size: 13.5px;
+    }
+
+    .item-total-box strong { color: #FBBF24; }
+
+    .sub-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .sub-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--obsidian);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #F1F5F9;
+      text-align: right;
+    }
+
+    th {
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    td input, td select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 12.5px;
+      background: #FFFFFF;
+    }
+
+    .num-col { font-weight: 800; color: var(--obsidian); white-space: nowrap; }
+
+    .note-box {
+      background: var(--surface-warm);
+      border: 1px solid #FDE68A;
+      color: #78350F;
+      padding: 10px 14px;
+      border-radius: 11px;
+      font-size: 12.5px;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    .warn-box {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #991B1B;
+      padding: 10px 14px;
+      border-radius: 11px;
+      font-size: 12.5px;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+
+    .sticky-summary {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--obsidian);
+      color: #FFFFFF;
+      padding: 13px 24px;
+      border-top: 2px solid var(--gold);
+      box-shadow: 0 -6px 24px rgba(9, 13, 22, 0.2);
+      z-index: 50;
+    }
+
+    .sticky-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .summary-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 13.5px;
+    }
+
+    .summary-stats strong { color: #FBBF24; font-size: 15px; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.6);
+      display: none;
+      place-items: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      max-width: 860px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F3F4F6; }
+    ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
+
+    @media print {
+      .sb-header, .sticky-summary, .no-print, .items-nav { display: none !important; }
+      body { background: #FFFFFF; padding-bottom: 0; }
+      .card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-obsidian-900 selection:text-white">
+<body>
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2"></div>
-
-    <!-- ===================================================================== -->
-    <!-- SKYBUILD BRANDED HEADER + MOVING SLOGAN STRIP UNDER LOGO              -->
-    <!-- ===================================================================== -->
-    <header class="bg-white border-b border-silver-200 sticky top-0 z-40 shadow-xs">
-        <div class="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-            <!-- Brand Logo -->
-            <a href="#" class="flex items-center gap-3.5 group" dir="ltr">
-                <svg class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="62" cy="60" r="50" fill="#F1F5F9"/>
-                    <path d="M 65 10 C 33 10 10 34 10 62 C 10 90 33 111 63 111 C 74 111 83 107 90 101 C 80 106 69 108 58 106 C 34 102 18 82 20 58 C 22 33 41 14 65 10 Z" fill="#0F172A"/>
-                    <path d="M 68 104 C 46 108 26 93 23 71 C 21 54 30 37 45 29 C 33 39 27 54 29 69 C 32 88 49 102 68 104 Z" fill="#0F172A"/>
-                    <text x="64" y="73" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="38" letter-spacing="-1.5">SB</text>
-                </svg>
-                <div class="flex flex-col text-left">
-                    <div class="flex items-baseline leading-none">
-                        <span class="font-brand italic font-extrabold text-2xl sm:text-3xl text-obsidian-950 tracking-tight">Sky</span>
-                        <span class="font-brand font-bold text-2xl sm:text-3xl text-obsidian-950 tracking-tight relative pb-1">
-                            Build
-                            <span class="absolute bottom-0 left-0 right-0 h-[3px] bg-obsidian-950 rounded-full"></span>
-                        </span>
-                    </div>
-                    <span class="font-brand font-semibold text-[10px] sm:text-xs text-slate-600 tracking-wider uppercase mt-1">
-                        for Design &amp; Contracting
-                    </span>
-                </div>
-            </a>
-
-            <!-- Quick Contact Buttons (Phone & WhatsApp) -->
-            <div class="flex items-center gap-2">
-                <a href="tel:01060728015" class="flex items-center gap-1.5 bg-silver-100 hover:bg-silver-200 text-obsidian-950 border border-silver-300 px-3 py-2 rounded-xl text-xs font-extrabold transition">
-                    <i class="ph ph-phone-call text-base text-gold-600"></i>
-                    <span dir="ltr">01060728015</span>
-                </a>
-                <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-extrabold transition shadow-xs">
-                    <i class="ph ph-whatsapp-logo text-base"></i>
-                    <span>واتساب</span>
-                </a>
-            </div>
+  <header class="sb-header">
+    <div class="sb-header-inner">
+      <a href="#" class="sb-logo-link">
+        <svg class="sb-logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="62" cy="60" r="50" fill="#F1F5F9" />
+          <path d="M 65 10 C 33 10 10 34 10 62 C 10 90 33 111 63 111 C 74 111 83 107 90 101 C 80 106 69 108 58 106 C 34 102 18 82 20 58 C 22 33 41 14 65 10 Z" fill="#0F172A" />
+          <path d="M 68 104 C 46 108 26 93 23 71 C 21 54 30 37 45 29 C 33 39 27 54 29 69 C 32 88 49 102 68 104 Z" fill="#0F172A" />
+          <text x="64" y="73" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="38" letter-spacing="-1.5">SB</text>
+        </svg>
+        <div class="sb-brand-text">
+          <div class="sb-brand-row">
+            <span class="sb-sky">Sky</span>
+            <span class="sb-build">Build</span>
+          </div>
+          <span class="sb-sub">for Design &amp; Contracting</span>
         </div>
+      </a>
 
-        <!-- Moving Strip Under Logo -->
-        <div class="bg-obsidian-950 text-white border-t border-slate-800 overflow-hidden py-2">
-            <div class="marquee-track whitespace-nowrap animate-marquee-rtl inline-flex items-center gap-8 text-xs sm:text-sm font-bold">
-                <span class="inline-flex items-center gap-2 text-amber-400">
-                    <i class="ph ph-buildings text-base"></i>
-                    <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
-                </span>
-                <span class="text-slate-500">•</span>
-                <span class="inline-flex items-center gap-2 text-slate-200">
-                    <i class="ph ph-phone text-base text-amber-400"></i>
-                    <span>للتواصل والاستفسار: <strong dir="ltr">01060728015</strong></span>
-                </span>
-                <span class="text-slate-500">•</span>
-                <span class="inline-flex items-center gap-2 text-amber-400">
-                    <i class="ph ph-compass-tool text-base"></i>
-                    <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
-                </span>
-            </div>
-        </div>
-    </header>
+      <div class="header-actions no-print">
+        <button class="btn btn-light" onclick="openReportModal()">
+          <i class="ph ph-table" style="color:#D97706;"></i>
+          <span>ملخص المقايسة</span>
+        </button>
+        <button class="btn btn-light" onclick="exportJSON()">
+          <i class="ph ph-download-simple" style="color:#090D16;"></i>
+          <span>تصدير JSON</span>
+        </button>
+        <button class="btn btn-light" onclick="window.print()">
+          <i class="ph ph-printer"></i>
+          <span>طباعة</span>
+        </button>
+        <button class="btn btn-danger" onclick="resetAllData()">
+          <i class="ph ph-arrow-counter-clockwise"></i>
+          <span>إعادة ضبط</span>
+        </button>
+        <a href="tel:01060728015" class="btn btn-phone">
+          <i class="ph ph-phone-call" style="color:#D97706;"></i>
+          <span dir="ltr">01060728015</span>
+        </a>
+        <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
+          <i class="ph ph-whatsapp-logo"></i>
+          <span>واتساب</span>
+        </a>
+      </div>
+    </div>
 
-    <!-- ===================================================================== -->
-    <!-- HERO SECTION                                                          -->
-    <!-- ===================================================================== -->
-    <section class="bg-gradient-to-bl from-obsidian-950 via-obsidian-900 to-slate-800 text-white py-8 sm:py-10 px-4 border-b border-slate-800 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
-        <div class="max-w-[1280px] mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-2.5 max-w-2xl">
-                <div class="inline-flex items-center gap-2 bg-white/10 border border-white/15 px-3 py-1 rounded-full text-xs font-semibold text-amber-300">
-                    <i class="ph ph-sparkle text-sm"></i>
-                    <span>نصمم ونبني تجربة متكاملة تناسبك</span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight">
-                    حدد تفاصيل وحدتك وبنود التشطيب المطلوبة لطلب <span class="text-amber-400">معاينة هندسية</span>
-                </h1>
-                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    سجّل بياناتك واختر نظام التعاقد المناسب لك وحدد البنود التي تحتاجها بدقة، وسيتم إرسال طلبك مباشرة للمهندس المختص لتحديد موعد المعاينة وإعداد المقايسة الهندسية التفصيلية.
-                </p>
-            </div>
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 text-xs space-y-2 shrink-0">
-                <div class="flex items-center gap-2 text-amber-400 font-bold"><i class="ph ph-check-circle text-base"></i> شفافية كاملة في نظام Cost Plus</div>
-                <div class="flex items-center gap-2 text-slate-200"><i class="ph ph-check-circle text-amber-400 text-base"></i> إشراف هندسي دقيق واستلام كل بند</div>
-                <div class="flex items-center gap-2 text-slate-200"><i class="ph ph-check-circle text-amber-400 text-base"></i> خصومات خاصة على التصميم 3D مع التنفيذ</div>
-            </div>
+    <div class="sb-marquee">
+      <div class="sb-marquee-track">
+        <span class="sb-marquee-gold">
+          <i class="ph ph-buildings"></i>
+          <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
+        </span>
+        <span style="color:#6B7280;">•</span>
+        <span>داشبورد الإدارة — متابعة الطلبات، ملف العميل الكامل، تحليل الأسعار، وإرسال المقايسة</span>
+        <span style="color:#6B7280;">•</span>
+        <span class="sb-marquee-gold">
+          <i class="ph ph-phone"></i>
+          <span>للتواصل والاستفسار: <strong dir="ltr">01060728015</strong></span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 1) DASHBOARD -->
+    <section class="card card-featured" id="dashboardSection">
+      <div class="section-head">
+        <div class="section-title-wrap">
+          <span class="step-badge"><i class="ph ph-gauge"></i></span>
+          <h2 class="section-title">داشبورد الطلبات الواردة من صفحة التسجيل</h2>
+          <span id="firestoreSyncBadge" class="sync-badge sync-local">جاري الاتصال بـ Firestore...</span>
         </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" class="no-print">
+          <select id="collectionSelector" onchange="switchCollection(this.value)" style="padding:6px 10px;border-radius:9px;border:1px solid var(--border-strong);font-size:12px;font-weight:700;">
+            <option value="inspection_requests">مجموعة: inspection_requests</option>
+            <option value="requests">مجموعة: requests</option>
+            <option value="leads">مجموعة: leads</option>
+          </select>
+          <button class="btn btn-gold btn-sm" onclick="addSampleRequest()">+ إضافة طلب تجريبي</button>
+        </div>
+      </div>
+
+      <div id="firestoreAlert" class="warn-box" style="display:none;margin-bottom:14px;"></div>
+
+      <div class="kpi-grid" id="dashboardKpis"></div>
+
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">اضغط على أي صف أو على <strong>فتح الطلب</strong> للانتقال إلى لوحة معلومات الطلب الكاملة وتحليل الأسعار.</p>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>اسم العميل</th>
+              <th>الهاتف</th>
+              <th>المكان / الدور</th>
+              <th>المساحة</th>
+              <th>نظام التعاقد</th>
+              <th>3D</th>
+              <th>الحالة</th>
+              <th class="no-print">إجراء</th>
+            </tr>
+          </thead>
+          <tbody id="requestsTableBody"></tbody>
+        </table>
+      </div>
     </section>
 
-    <!-- ===================================================================== -->
-    <!-- MAIN WORKSPACE                                                        -->
-    <!-- ===================================================================== -->
-    <main class="flex-1 max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-8">
-        <form id="inspection-form" onsubmit="submitInspectionRequest(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
-            <!-- RIGHT COLUMN (7 Cols) -->
-            <div class="lg:col-span-7 space-y-6">
-
-                <!-- ========================================================= -->
-                <!-- SECTION 1: CLIENT DATA & INSPECTION REQUEST               -->
-                <!-- ========================================================= -->
-                <div class="bg-white rounded-2xl border-2 border-obsidian-900 p-5 sm:p-6 shadow-xs space-y-4">
-                    <div class="flex items-center justify-between border-b border-silver-100 pb-3">
-                        <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-lg bg-obsidian-950 text-amber-400 text-xs flex items-center justify-center font-extrabold">1</span>
-                            <span>بيانات العميل وطلب المعاينة</span>
-                        </h2>
-                        <span class="text-xs font-bold text-gold-600 bg-amber-50 px-2.5 py-1 rounded-lg">الخطوة الأولى</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">الاسم بالكامل <span class="text-rose-600">*</span></label>
-                            <input type="text" id="lead-name" required oninput="updateLiveSummary()" placeholder="مثال: أ. محمد محمود" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">رقم الموبايل / واتساب <span class="text-rose-600">*</span></label>
-                            <input type="tel" id="lead-phone" required oninput="updateLiveSummary()" placeholder="010xxxxxxxx" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">الموعد المفضل للمعاينة</label>
-                            <input type="date" id="lead-date" oninput="updateLiveSummary()" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">ملاحظات عامة (اختياري)</label>
-                            <input type="text" id="lead-notes" oninput="updateLiveSummary()" placeholder="مواعيد التواصل المناسبة أو أي طلب خاص..." class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================================= -->
-                <!-- SECTION 2: CONTRACTING SYSTEM                             -->
-                <!-- ========================================================= -->
-                <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-4">
-                    <div class="border-b border-silver-100 pb-3">
-                        <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">2</span>
-                            <span>نظام التعاقد المطلوب</span>
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">حدد هل تحتاج تنفيذ متكامل للوحدة أم إشراف هندسي فقط</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="contract-scope" value="full" checked onchange="handleContractScopeChange()" class="peer sr-only">
-                            <div class="p-4 rounded-xl border-2 border-silver-200 peer-checked:border-obsidian-950 peer-checked:bg-obsidian-950 peer-checked:text-white transition space-y-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-extrabold text-sm">تشطيب كامل (إشراف وتنفيذ)</span>
-                                    <i class="ph ph-check-circle text-lg text-amber-400"></i>
-                                </div>
-                                <p class="text-[11px] opacity-80">توريد الخامات، إدارة الصنايعية، والتنفيذ الكامل تحت إشرافنا</p>
-                            </div>
-                        </label>
-
-                        <label class="cursor-pointer">
-                            <input type="radio" name="contract-scope" value="supervision" onchange="handleContractScopeChange()" class="peer sr-only">
-                            <div class="p-4 rounded-xl border-2 border-silver-200 peer-checked:border-obsidian-950 peer-checked:bg-obsidian-950 peer-checked:text-white transition space-y-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-extrabold text-sm">إشراف هندسي فقط</span>
-                                    <i class="ph ph-hard-hat text-lg text-amber-400"></i>
-                                </div>
-                                <p class="text-[11px] opacity-80">متابعة الجودة الفنية واستلام البنود الهندسية في الموقع</p>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Full Finishing Pricing Models -->
-                    <div id="full-finishing-options" class="bg-silver-50 border border-silver-200 rounded-xl p-4 space-y-2.5">
-                        <label class="block text-xs font-extrabold text-obsidian-900">اختر نظام المحاسبة للتنفيذ الكامل:</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="pricing-model" value="Cost Plus" checked onchange="updateLiveSummary()" class="peer sr-only">
-                                <div class="p-3 bg-white rounded-xl border-2 border-silver-200 peer-checked:border-gold-600 peer-checked:bg-amber-50/50 transition">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">نظام Cost Plus</span>
-                                        <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">الأكثر شفافية</span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-600 mt-1">محاسبة بالتكلفة الفعلية للخامات والمصنعيات بفواتير معتمدة + نسبة إشراف وتنفيذ متفق عليها.</p>
-                                </div>
-                            </label>
-
-                            <label class="cursor-pointer">
-                                <input type="radio" name="pricing-model" value="Fixed Cost" onchange="updateLiveSummary()" class="peer sr-only">
-                                <div class="p-3 bg-white rounded-xl border-2 border-silver-200 peer-checked:border-gold-600 peer-checked:bg-amber-50/50 transition">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">نظام Fixed Cost</span>
-                                        <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">سعر مقطوع</span>
-                                    </div>
-                                    <p class="text-[11px] text-slate-600 mt-1">تحديد قيمة إجمالية ثابتة للمقايسة بناءً على التوصيف النهائي والكميات المعتمدة.</p>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Supervision Only Notice -->
-                    <div id="supervision-notice" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
-                        <i class="ph ph-info text-2xl text-gold-600 shrink-0 mt-0.5"></i>
-                        <div class="space-y-1">
-                            <h4 class="text-xs sm:text-sm font-extrabold text-amber-950">تنبيه هام بخصوص نظام الإشراف الهندسي فقط:</h4>
-                            <p class="text-xs text-amber-900 leading-relaxed">
-                                الإشراف الهندسي في هذا النظام يكون <strong>بعدد زيارات محددة ومتفق عليها مسبقاً عند استلام كل بند</strong> للتأكد من مطابقته للأصول الهندسية والمواصفات الفنية.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================================= -->
-                <!-- SECTION 3: OPTIONAL 3D DESIGN WITH STYLE PREVIEWS          -->
-                <!-- ========================================================= -->
-                <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-silver-100 pb-3">
-                        <div>
-                            <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">3</span>
-                                <span>التصميم الداخلي ثلاثي الأبعاد (3D Design)</span>
-                            </h2>
-                            <p class="text-xs text-slate-500 mt-1">أوبشن اختياري — تخيّل وحدتك بالكامل قبل التنفيذ</p>
-                        </div>
-                        <span class="text-[11px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
-                            خصومات خاصة عند التنفيذ مع SkyBuild
-                        </span>
-                    </div>
-
-                    <!-- Toggle 3D Design -->
-                    <label class="flex items-center justify-between p-4 rounded-xl border-2 border-silver-200 bg-silver-50 cursor-pointer hover:border-obsidian-900 transition">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" id="design-3d-enabled" onchange="handle3DToggle()" class="w-5 h-5 rounded accent-obsidian-950 cursor-pointer">
-                            <div>
-                                <span class="font-extrabold text-sm text-obsidian-950 block">أرغب في إضافة خدمة التصميم ثلاثي الأبعاد (3D)</span>
-                                <span class="text-xs text-slate-600">توزيع الأثاث، الإضاءة، الألوان، واللقطات الواقعية قبل البدء</span>
-                            </div>
-                        </div>
-                        <i class="ph ph-cube text-2xl text-gold-600"></i>
-                    </label>
-
-                    <!-- Expandable 3D Options -->
-                    <div id="design-3d-panel" class="hidden space-y-5 pt-2">
-                        <!-- 3D Mode Selection -->
-                        <div class="space-y-2">
-                            <label class="block text-xs font-extrabold text-obsidian-900">حدد باقة التصميم الـ 3D المطلوبة:</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="design-3d-mode" value="تصميم 3D بجانب التنفيذ (شامل الخصم الخاص)" checked onchange="updateLiveSummary()" class="peer sr-only">
-                                    <div class="p-3.5 rounded-xl border-2 border-silver-200 bg-white peer-checked:border-gold-600 peer-checked:bg-amber-50/60 transition space-y-1">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">تصميم 3D مع التنفيذ</span>
-                                            <span class="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full">خصم وأسعار خاصة</span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-600">تتمتع بخصومات وأسعار خاصة جداً على التصميم الـ 3D عند تنفيذ التشطيب مع SkyBuild.</p>
-                                    </div>
-                                </label>
-
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="design-3d-mode" value="تصميم 3D فقط (لوحات تنفيذية ولقطات واقعية)" onchange="updateLiveSummary()" class="peer sr-only">
-                                    <div class="p-3.5 rounded-xl border-2 border-silver-200 bg-white peer-checked:border-gold-600 peer-checked:bg-amber-50/60 transition space-y-1">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">تصميم 3D فقط</span>
-                                            <span class="text-[10px] font-bold bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">باقة مستقلة</span>
-                                        </div>
-                                        <p class="text-[11px] text-slate-600">استلام ملفات التصميم واللقطات الواقعية واللوحات التنفيذية بالكامل.</p>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- 3D Interior Style Selection with Visual Cards -->
-                        <div class="space-y-2.5">
-                            <label class="block text-xs font-extrabold text-obsidian-900">اختر طراز التصميم المفضل (Interior Style):</label>
-                            <div id="design-styles-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                <!-- Style cards injected via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================================= -->
-                <!-- SECTION 4: UNIT DETAILS                                   -->
-                <!-- ========================================================= -->
-                <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-5">
-                    <div class="border-b border-silver-100 pb-3">
-                        <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                            <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">4</span>
-                            <span>بيانات ومواصفات الوحدة</span>
-                        </h2>
-                    </div>
-
-                    <!-- Location & Floor -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">مكان الوحدة (المدينة / الحي / اسم الكمبوند) <span class="text-rose-600">*</span></label>
-                            <input type="text" id="unit-location" required oninput="updateLiveSummary()" placeholder="مثال: 6 أكتوبر - الحي المتميز / التجمع الخامس..." class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">الدور الكام <span class="text-rose-600">*</span></label>
-                            <input type="text" id="unit-floor" required oninput="updateLiveSummary()" placeholder="مثال: الدور الثالث / أرضي" class="w-full bg-silver-50 border border-silver-300 rounded-xl px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                        </div>
-                    </div>
-
-                    <!-- Elevator & Utilities -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-silver-50 border border-silver-200 rounded-xl p-4">
-                        <div>
-                            <label class="block text-xs font-extrabold text-obsidian-900 mb-2">هل يوجد أسانسير يعمل بالعقار؟</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="unit-elevator" value="نعم، يوجد أسانسير" checked onchange="updateLiveSummary()" class="peer sr-only">
-                                    <div class="text-center py-2 px-2 rounded-lg border border-silver-300 bg-white text-xs font-bold peer-checked:bg-obsidian-900 peer-checked:text-white peer-checked:border-obsidian-900 transition">
-                                        نعم، يوجد
-                                    </div>
-                                </label>
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="unit-elevator" value="لا يوجد أسانسير" onchange="updateLiveSummary()" class="peer sr-only">
-                                    <div class="text-center py-2 px-2 rounded-lg border border-silver-300 bg-white text-xs font-bold peer-checked:bg-obsidian-900 peer-checked:text-white peer-checked:border-obsidian-900 transition">
-                                        لا يوجد
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-extrabold text-obsidian-900 mb-2">هل الخدمات واصلة للوحدة؟</label>
-                            <div class="flex flex-wrap gap-2">
-                                <label class="cursor-pointer flex items-center gap-1.5 bg-white border border-silver-300 px-2.5 py-1.5 rounded-lg text-xs font-bold">
-                                    <input type="checkbox" class="utility-chk accent-obsidian-900" value="كهرباء" checked onchange="handleUtilityToggle(this)">
-                                    <span>كهرباء</span>
-                                </label>
-                                <label class="cursor-pointer flex items-center gap-1.5 bg-white border border-silver-300 px-2.5 py-1.5 rounded-lg text-xs font-bold">
-                                    <input type="checkbox" class="utility-chk accent-obsidian-900" value="مياه" checked onchange="handleUtilityToggle(this)">
-                                    <span>مياه</span>
-                                </label>
-                                <label class="cursor-pointer flex items-center gap-1.5 bg-white border border-silver-300 px-2.5 py-1.5 rounded-lg text-xs font-bold">
-                                    <input type="checkbox" class="utility-chk accent-obsidian-900" value="غاز طبيعي" onchange="handleUtilityToggle(this)">
-                                    <span>غاز</span>
-                                </label>
-                                <label class="cursor-pointer flex items-center gap-1.5 bg-white border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-700">
-                                    <input type="checkbox" id="utility-none" class="accent-rose-600" value="لا توجد خدمات واصلة بعد" onchange="handleNoUtilities(this)">
-                                    <span>لا توجد خدمات</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Area Slider -->
-                    <div class="bg-silver-50 border border-silver-200 rounded-xl p-4 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <label class="text-sm font-bold text-obsidian-900">مساحة الوحدة الإجمالية (م²)</label>
-                            <div class="flex items-center gap-1.5">
-                                <input type="number" id="unit-area-input" value="150" min="30" max="1500" oninput="syncAreaFromInput(this.value)" class="w-24 text-center bg-white border-2 border-obsidian-900 rounded-xl py-1 text-base font-extrabold text-obsidian-950">
-                                <span class="text-xs font-bold text-slate-600">م²</span>
-                            </div>
-                        </div>
-                        <input type="range" id="unit-area-slider" min="50" max="500" step="5" value="150" oninput="syncAreaFromSlider(this.value)" class="w-full">
-                    </div>
-
-                    <!-- Condition, Rooms & Bathrooms -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1.5">حالة الاستلام الحالية</label>
-                            <select id="unit-condition" onchange="updateLiveSummary()" class="w-full bg-silver-50 border border-silver-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-obsidian-900 focus:outline-none focus:border-obsidian-900">
-                                <option value="طوب أحمر">طوب أحمر</option>
-                                <option value="نصف تشطيب (محارة وحلوق)">نصف تشطيب (محارة وحلوق)</option>
-                                <option value="تجديد شقة قائمة (تكسير وإحلال)">تجديد شقة قائمة</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1.5">عدد الغرف والريسبشن</label>
-                            <select id="unit-rooms" onchange="updateLiveSummary()" class="w-full bg-silver-50 border border-silver-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-obsidian-900 focus:outline-none focus:border-obsidian-900">
-                                <option value="غرفتين + ريسبشن">غرفتين + ريسبشن</option>
-                                <option value="3 غرف + ريسبشن" selected>3 غرف + ريسبشن</option>
-                                <option value="4 غرف + ريسبشن">4 غرف + ريسبشن</option>
-                                <option value="5 غرف أو أكثر / فيلا">5 غرف أو أكثر / فيلا</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1.5">عدد الحمامات</label>
-                            <select id="unit-bathrooms" onchange="updateLiveSummary()" class="w-full bg-silver-50 border border-silver-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm font-bold text-obsidian-900 focus:outline-none focus:border-obsidian-900">
-                                <option value="1 حمام">1 حمام</option>
-                                <option value="2 حمام" selected>2 حمام</option>
-                                <option value="3 حمامات">3 حمامات</option>
-                                <option value="4 حمامات أو أكثر">4 حمامات أو أكثر</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ========================================================= -->
-                <!-- SECTION 5: 16 INTERACTIVE FINISHING SCOPE ITEMS           -->
-                <!-- ========================================================= -->
-                <div class="bg-white rounded-2xl border border-silver-200 p-5 sm:p-6 shadow-xs space-y-4">
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-silver-100 pb-3">
-                        <div>
-                            <h2 class="text-base sm:text-lg font-extrabold text-obsidian-950 flex items-center gap-2">
-                                <span class="w-7 h-7 rounded-lg bg-obsidian-900 text-white text-xs flex items-center justify-center">5</span>
-                                <span>تحديد بنود التشطيب والتوصيف المطلوب</span>
-                            </h2>
-                            <p class="text-xs text-slate-500 mt-1">اختر البنود المطلوبة وحدد مواصفات كل بند بدقة</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="toggleAllItems(true)" class="text-xs font-bold text-obsidian-900 bg-silver-100 hover:bg-silver-200 px-3 py-1.5 rounded-lg transition">تحديد الكل</button>
-                            <button type="button" onclick="toggleAllItems(false)" class="text-xs font-bold text-slate-600 bg-silver-100 hover:bg-silver-200 px-3 py-1.5 rounded-lg transition">إلغاء الكل</button>
-                        </div>
-                    </div>
-
-                    <div id="scope-items-container" class="space-y-3">
-                        <!-- Rendered dynamically via JS -->
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- LEFT COLUMN (5 Cols): Sticky Live Summary & Submit Button -->
-            <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-5">
-                <div class="bg-obsidian-950 text-white rounded-2xl p-6 shadow-lg border border-slate-800 space-y-5">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <div>
-                            <span class="text-xs text-amber-400 font-bold">ملخص طلب المعاينة والتوصيف</span>
-                            <h3 class="text-base sm:text-lg font-extrabold mt-0.5">SkyBuild Engineering Brief</h3>
-                        </div>
-                        <span id="summary-items-count" class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-extrabold px-3 py-1 rounded-full">
-                            0 بنود مختارة
-                        </span>
-                    </div>
-
-                    <!-- Live Unit & Contract Overview -->
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2.5 text-xs">
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400 shrink-0">نظام التعاقد:</span>
-                            <span id="sum-contract" class="font-bold text-amber-400 text-left">تشطيب كامل (Cost Plus)</span>
-                        </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400 shrink-0">التصميم 3D:</span>
-                            <span id="sum-3d" class="font-bold text-emerald-400 text-left">غير مطلوب</span>
-                        </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400 shrink-0">مكان الوحدة والدور:</span>
-                            <span id="sum-location" class="font-bold text-white text-left">لم يُحدد بعد</span>
-                        </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400 shrink-0">المساحة والحالة:</span>
-                            <span id="sum-area-cond" class="font-bold text-white text-left">150 م² — طوب أحمر</span>
-                        </div>
-                        <div class="flex justify-between gap-2">
-                            <span class="text-slate-400 shrink-0">الأسانسير والخدمات:</span>
-                            <span id="sum-utils" class="font-bold text-slate-200 text-left">يوجد أسانسير | كهرباء، مياه</span>
-                        </div>
-                    </div>
-
-                    <!-- Selected Items Preview List -->
-                    <div class="space-y-2">
-                        <span class="text-xs font-bold text-slate-300 block">البنود والتفاصيل المختارة:</span>
-                        <div id="sum-selected-list" class="max-h-[260px] overflow-y-auto space-y-2 pr-1">
-                            <!-- Dynamic preview -->
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="pt-2 space-y-2.5 border-t border-slate-800">
-                        <button type="submit" id="btn-submit-request" class="w-full bg-amber-500 hover:bg-amber-400 text-obsidian-950 font-extrabold text-sm py-3.5 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
-                            <i class="ph ph-paper-plane-tilt text-xl"></i>
-                            <span>إرسال طلب المعاينة والتوصيف</span>
-                        </button>
-                        <p class="text-[11px] text-slate-400 text-center leading-relaxed">
-                            سيتم حفظ طلبك سحابياً في نظام <strong>SkyBuild</strong> وفتح محادثة واتساب مباشرة لتأكيد موعد المعاينة.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-        </form>
-    </main>
-
-    <!-- ===================================================================== -->
-    <!-- FOOTER WITH DIRECT CONTACT & FACEBOOK PAGE LINK                       -->
-    <!-- ===================================================================== -->
-    <footer class="bg-obsidian-950 text-white border-t border-slate-800 mt-12">
-        <div class="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="text-center md:text-right space-y-1">
-                <div class="font-brand font-extrabold text-xl tracking-tight">
-                    <span class="italic text-amber-400">Sky</span>Build <span class="text-xs font-normal text-slate-400">for Design &amp; Contracting</span>
-                </div>
-                <p class="text-xs text-slate-300 font-semibold">نصمم ونبني تجربة متكاملة تناسبك</p>
-            </div>
-
-            <!-- Contact & Social Buttons -->
-            <div class="flex flex-wrap items-center justify-center gap-3">
-                <a href="tel:01060728015" class="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/15 px-4 py-2.5 rounded-xl text-xs font-bold transition">
-                    <i class="ph ph-phone-call text-lg text-amber-400"></i>
-                    <span dir="ltr">01060728015</span>
-                </a>
-                <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
-                    <i class="ph ph-whatsapp-logo text-lg"></i>
-                    <span>تواصل واتساب</span>
-                </a>
-                <a id="footer-fb-link" href="https://www.facebook.com/share/19LHe2zZbL/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition">
-                    <i class="ph ph-facebook-logo text-lg"></i>
-                    <span>صفحتنا على فيسبوك</span>
-                </a>
-            </div>
+    <!-- 2) SELECTED REQUEST FULL DOSSIER & QUOTE SENDER -->
+    <section class="card" id="requestDossierSection">
+      <div class="section-head">
+        <div class="section-title-wrap">
+          <span class="step-badge"><i class="ph ph-file-text"></i></span>
+          <h2 class="section-title">لوحة معلومات الطلب الكاملة وإرسال المقايسة</h2>
         </div>
-        <div class="border-t border-slate-900 py-3 text-center text-[11px] text-slate-500">
-            © 2026 SkyBuild for Design &amp; Contracting. جميع الحقوق محفوظة.
+        <div style="display:flex;gap:8px;align-items:center;" class="no-print">
+          <span id="selectedQuoteBadge" class="status-pill st-new">لم تُرسل مقايسة بعد</span>
+          <a href="#pricingSection" class="btn btn-dark btn-sm">الانتقال لتحليل الأسعار ↓</a>
         </div>
-    </footer>
+      </div>
 
-    <!-- ===================================================================== -->
-    <!-- JAVASCRIPT LOGIC & FIREBASE CLOUD SYNC                                -->
-    <!-- ===================================================================== -->
-    <script>
-        // ===================================================================
-        // 1. CONTACT, SOCIAL & FIREBASE CONFIGURATION
-        // ===================================================================
-        const WHATSAPP_NUMBER = "201060728015";
-        const FACEBOOK_PAGE_URL = "https://www.facebook.com/share/19LHe2zZbL/?mibextid=wwXIfr";
+      <div id="requestDossierBody"></div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBs5O6-3V67a-LqRF9yWr1JWJnPBSrGFhg",
-            authDomain: "skybuild-a63fb.firebaseapp.com",
-            projectId: "skybuild-a63fb",
-            storageBucket: "skybuild-a63fb.firebasestorage.app",
-            messagingSenderId: "311610298789",
-            appId: "1:311610298789:web:442581f4e18f9aba11184c",
-            measurementId: "G-TL1THMTTC8"
-        };
+      <div class="quote-actions-bar no-print">
+        <div style="font-size:12.5px;color:#78350F;font-weight:700;">
+          بعد مراجعة البنود الـ 16 بالأسفل، يمكنك حفظ المقايسة وربطها بالطلب أو إرسال ملخصها للعميل مباشرة.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-gold btn-sm" onclick="saveAndSendQuoteToFirestore()">
+            <i class="ph ph-paper-plane-tilt"></i>
+            <span>حفظ وإرسال المقايسة للطلب</span>
+          </button>
+          <button class="btn btn-whatsapp btn-sm" onclick="sendQuoteViaWhatsApp()">
+            <i class="ph ph-whatsapp-logo"></i>
+            <span>إرسال المقايسة واتساب للعميل</span>
+          </button>
+        </div>
+      </div>
+    </section>
 
-        let db = null;
+    <!-- 3) UNIT PARAMETERS & OVERHEAD -->
+    <section class="card" id="pricingSection">
+      <div class="section-head">
+        <div class="section-title-wrap">
+          <span class="step-badge"><i class="ph ph-sliders-horizontal"></i></span>
+          <h2 class="section-title">بيانات الوحدة والمصاريف الإضافية الثابتة على كل البنود</h2>
+        </div>
+        <span style="font-size:12px;color:var(--emerald);font-weight:800;">✓ يتم الحفظ تلقائياً في المتصفح</span>
+      </div>
+
+      <div class="grid-4">
+        <div class="field">
+          <label>اسم العميل / المشروع النشط</label>
+          <input type="text" id="clientName" oninput="updateGlobal('clientName', this.value)" placeholder="مثال: تشطيب شقة - 6 أكتوبر" />
+        </div>
+        <div class="field">
+          <label>مساحة السقف / الوحدة (م²)</label>
+          <input type="number" min="0" step="0.5" id="unitArea" oninput="updateGlobal('unitArea', +this.value || 0)" />
+        </div>
+        <div class="field">
+          <label>معامل الحوائط للمحارة (افتراضي ×3)</label>
+          <input type="number" min="0" step="0.1" id="plasterFactor" oninput="updateGlobal('plasterFactor', +this.value || 0)" />
+        </div>
+        <div class="field">
+          <label>مصاريف إضافية ثابتة لكل بند (هالك/نقل/تشوينات)</label>
+          <input type="number" min="0" step="50" id="commonOverhead" oninput="updateGlobal('commonOverhead', +this.value || 0)" />
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:14px;">
+        <label>ملاحظات المهندس وشروط المقايسة المرسلة للعميل</label>
+        <textarea id="engineerQuoteNotes" rows="2" oninput="updateGlobal('engineerQuoteNotes', this.value)" placeholder="مثال: الأسعار استرشادية وفق المساحات المبدئية وتُعتمد نهائياً بعد المعاينة الفعلية بالموقع..."></textarea>
+      </div>
+    </section>
+
+    <!-- 4) 16 PRICING ITEMS -->
+    <div class="items-nav no-print" id="itemsNav"></div>
+    <main id="itemsContainer"></main>
+  </div>
+
+  <div class="sticky-summary">
+    <div class="sticky-inner">
+      <div class="summary-stats">
+        <div>إجمالي الخامات: <strong id="sumMaterials">0</strong> ج.م</div>
+        <div>إجمالي المصنعيات: <strong id="sumLabor">0</strong> ج.م</div>
+        <div>إجمالي المصاريف الإضافية: <strong id="sumOverhead">0</strong> ج.م</div>
+        <div>إجمالي المقايسة: <strong id="sumGrand">0</strong> ج.م</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-light btn-sm" onclick="openReportModal()">جدول المقايسة</button>
+        <button class="btn btn-gold btn-sm" onclick="saveAndSendQuoteToFirestore()">إرسال المقايسة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div class="modal-backdrop" id="reportModal" onclick="if(event.target===this)closeReportModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-weight:800;font-size:17px;">ملخص المقايسة التفصيلي (16 بنداً) — SkyBuild</h3>
+        <button class="btn btn-light btn-sm" onclick="closeReportModal()">إغلاق ✕</button>
+      </div>
+      <div id="reportContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBs5O6-3V67a-LqRF9yWr1JWJnPBSrGFhg",
+      authDomain: "skybuild-a63fb.firebaseapp.com",
+      projectId: "skybuild-a63fb",
+      storageBucket: "skybuild-a63fb.firebasestorage.app",
+      messagingSenderId: "311610298789",
+      appId: "1:311610298789:web:442581f4e18f9aba11184c",
+      measurementId: "G-TL1THMTTC8"
+    };
+
+    const STORAGE_KEY = "skybuild_admin_suite_v3";
+    const UNITS = ["م²", "م.ط", "عدد", "شكارة", "لتر", "متر", "يومية", "مقطوعية", "قطعة", "جركن", "م³"];
+
+    const DEFAULT_STATE = {
+      collectionName: "inspection_requests",
+      selectedRequestId: null,
+      clientName: "تشطيب وحدة — SkyBuild",
+      unitArea: 140,
+      plasterFactor: 3,
+      commonOverhead: 1500,
+      engineerQuoteNotes: "الأسعار مبدئية بناءً على البيانات المسجلة وتُراجع وتُعتمد نهائياً بعد المعاينة الهندسية.",
+      activeTab: "all",
+      requests: [],
+      items: [
+        {
+          id: "masonry",
+          num: "01",
+          name: "أعمال المباني (هدم وإزالة مخلفات + بناء)",
+          type: "masonry",
+          demolitionCost: 4500,
+          buildCost: 14000,
+          materials: [
+            { name: "طوب أسمنتي / أحمر", unit: "عدد", qty: 2000, price: 2.2 },
+            { name: "أسمنت بورتلاندي", unit: "شكارة", qty: 35, price: 165 },
+            { name: "رمل حرش", unit: "م³", qty: 10, price: 220 }
+          ]
+        },
+        {
+          id: "plumbing_rough",
+          num: "02",
+          name: "تأسيس السباكة",
+          type: "lump_plus_mat",
+          laborCost: 8500,
+          laborLabel: "مصنعية تأسيس السباكة (مقطوعية)",
+          materials: [
+            { name: "مواسير تغذية وبولي بروبلين ولوازمها", unit: "مقطوعية", qty: 1, price: 9500 },
+            { name: "مواسير صرف ومشتملاتها", unit: "مقطوعية", qty: 1, price: 7800 }
+          ]
+        },
+        {
+          id: "elec_rough",
+          num: "03",
+          name: "تأسيس الكهرباء",
+          type: "lump_plus_mat",
+          laborCost: 9500,
+          laborLabel: "مصنعية تأسيس الكهرباء (مقطوعية)",
+          materials: [
+            { name: "أسلاك وخراطيم ولوحات تأسيس", unit: "مقطوعية", qty: 1, price: 14500 }
+          ]
+        },
+        {
+          id: "hvac_rough",
+          num: "04",
+          name: "تأسيس التكييفات (توريد وتركيب بالمتر الطولي)",
+          type: "linear_supply_install",
+          length: 25,
+          ratePerMeter: 1100,
+          materials: []
+        },
+        {
+          id: "windows",
+          num: "05",
+          name: "أعمال الشبابيك (توريد وتركيب بالمتر المسطح)",
+          type: "windows",
+          system: "alumetal",
+          alumetalProfiles: [
+            { name: "PS صغير", area: 4, rate: 2600 },
+            { name: "PS كبير", area: 5, rate: 3100 },
+            { name: "تانجو", area: 3, rate: 3600 },
+            { name: "جامبو", area: 2, rate: 4200 }
+          ],
+          upvcProfiles: [
+            { name: "قطاع UPVC قياسي", area: 6, rate: 3800 }
+          ],
+          woodArea: 0,
+          woodRate: 3400,
+          materials: []
+        },
+        {
+          id: "plastering",
+          num: "06",
+          name: "المحارة والمصيص",
+          type: "plastering",
+          plasterRate: 65,
+          hasFlatGypsum: false,
+          includeMassis: true,
+          massisLabor: 2200,
+          materials: [
+            { name: "أسمنت محارة", unit: "شكارة", qty: 60, price: 165 },
+            { name: "رمل محارة", unit: "م³", qty: 18, price: 220 },
+            { name: "جبس مصيص", unit: "شكارة", qty: 15, price: 95 },
+            { name: "أسمنت أبيض مصيص", unit: "شكارة", qty: 8, price: 240 }
+          ]
+        },
+        {
+          id: "gypsum",
+          num: "07",
+          name: "الجبسمبورد (توريد وتركيب بالمتر المسطح)",
+          type: "gypsum",
+          system: "ركب",
+          area: 45,
+          ratePerSqm: 420,
+          materials: []
+        },
+        {
+          id: "doors",
+          num: "08",
+          name: "الأبواب (بالعدد)",
+          type: "doors",
+          entries: [
+            { category: "خارجي", kind: "مصفح", count: 1, unitPrice: 14500 },
+            { category: "داخلي", kind: "عمولة", count: 5, unitPrice: 5200 }
+          ],
+          materials: []
+        },
+        {
+          id: "flooring",
+          num: "09",
+          name: "الأرضيات والسيراميك",
+          type: "flooring",
+          area: 120,
+          laborRate: 95,
+          materials: [
+            { name: "سيراميك / بورسلين", unit: "م²", qty: 126, price: 340 },
+            { name: "مادة لصق", unit: "شكارة", qty: 24, price: 145 },
+            { name: "مشابك وكلبسات تسوية", unit: "قطعة", qty: 300, price: 4 }
+          ]
+        },
+        {
+          id: "painting",
+          num: "10",
+          name: "أعمال الدهانات",
+          type: "painting",
+          paintArea: 320,
+          laborPerSqm: 55,
+          cornerDays: 4,
+          cornerDailyWage: 450,
+          materials: [
+            { name: "سيلر مائي", unit: "جركن", qty: 6, price: 420 },
+            { name: "سيلر حراري (عند وجود جبسمبورد)", unit: "جركن", qty: 3, price: 650 },
+            { name: "معجون دايتون", unit: "شكارة", qty: 10, price: 230 },
+            { name: "معجون شروخ", unit: "قطعة", qty: 5, price: 140 },
+            { name: "بلاستيك 3030", unit: "جركن", qty: 5, price: 520 },
+            { name: "بلاستيك 7070", unit: "جركن", qty: 4, price: 740 },
+            { name: "ألوان سكيب", unit: "قطعة", qty: 12, price: 65 },
+            { name: "لزق تيب", unit: "قطعة", qty: 10, price: 35 },
+            { name: "ورنيش مائي", unit: "لتر", qty: 5, price: 240 },
+            { name: "دهانات التشطيب (جوتن / GLC تقريبي)", unit: "جركن", qty: 6, price: 1350 },
+            { name: "صنفرة", unit: "متر", qty: 40, price: 25 },
+            { name: "معجون ممتاز", unit: "شكارة", qty: 8, price: 290 }
+          ]
+        },
+        {
+          id: "decor",
+          num: "11",
+          name: "أعمال الديكورات",
+          type: "decor",
+          decorItems: [
+            { name: "بانوهات / فيوتك حوائط", matQty: 1, matPrice: 4500, laborQty: 1, laborPrice: 2500 },
+            { name: "تكسيات خشبية / بديل خشب", matQty: 1, matPrice: 6000, laborQty: 1, laborPrice: 2000 }
+          ],
+          materials: []
+        },
+        {
+          id: "marble",
+          num: "12",
+          name: "أعمال الرخام (مطبخ م² / عتب م.ط)",
+          type: "marble",
+          kitchenArea: 8,
+          kitchenRate: 2400,
+          thresholdLength: 14,
+          thresholdRate: 650,
+          materials: []
+        },
+        {
+          id: "plumbing_finishing",
+          num: "13",
+          name: "تشطيبات السباكة",
+          type: "lump_plus_mat",
+          laborCost: 5500,
+          laborLabel: "مصنعية تشطيب السباكة (مقطوعية)",
+          materials: [
+            { name: "قاعدة", unit: "عدد", qty: 2, price: 4800 },
+            { name: "حوض حمام", unit: "عدد", qty: 2, price: 2200 },
+            { name: "حوض مطبخ", unit: "عدد", qty: 1, price: 3100 },
+            { name: "خلاط حوض حمام", unit: "عدد", qty: 2, price: 1850 },
+            { name: "خلاط حوض مطبخ", unit: "عدد", qty: 1, price: 2100 },
+            { name: "خلاط شاور", unit: "عدد", qty: 2, price: 2400 },
+            { name: "خلاط شطاف", unit: "عدد", qty: 2, price: 650 },
+            { name: "حنفيات غسالة", unit: "عدد", qty: 2, price: 280 },
+            { name: "محابس", unit: "عدد", qty: 8, price: 220 },
+            { name: "وش نيكل", unit: "عدد", qty: 10, price: 65 },
+            { name: "شطاف خارجي", unit: "عدد", qty: 2, price: 450 },
+            { name: "وصلات وإضافات أخرى", unit: "مقطوعية", qty: 1, price: 1800 }
+          ]
+        },
+        {
+          id: "elec_finishing",
+          num: "14",
+          name: "تشطيبات الكهرباء",
+          type: "lump_plus_mat",
+          laborCost: 6000,
+          laborLabel: "مصنعية تشطيب الكهرباء (مقطوعية)",
+          materials: [
+            { name: "برايز ومفاتيح", unit: "عدد", qty: 35, price: 95 },
+            { name: "شاسيهات", unit: "عدد", qty: 25, price: 55 },
+            { name: "أوشاش", unit: "عدد", qty: 25, price: 45 },
+            { name: "ليد بروفايل", unit: "م.ط", qty: 20, price: 260 },
+            { name: "ليد عادي", unit: "متر", qty: 30, price: 85 },
+            { name: "كشافات", unit: "عدد", qty: 4, price: 450 },
+            { name: "أسبوتات", unit: "عدد", qty: 24, price: 120 },
+            { name: "أباليك", unit: "عدد", qty: 4, price: 650 },
+            { name: "دلايات", unit: "عدد", qty: 3, price: 550 },
+            { name: "نجف", unit: "عدد", qty: 2, price: 2800 },
+            { name: "مفاتيح أوتوماتيك", unit: "عدد", qty: 12, price: 180 },
+            { name: "برايز مجوفة", unit: "عدد", qty: 4, price: 140 },
+            { name: "برايز ثلاثية", unit: "عدد", qty: 6, price: 130 }
+          ]
+        },
+        {
+          id: "waterproofing",
+          num: "15",
+          name: "أعمال العزل المائي والحراري",
+          type: "lump_plus_mat",
+          laborCost: 2500,
+          laborLabel: "مصنعية العزل (مقطوعية)",
+          materials: [
+            { name: "مادة عزل مائي / حراري", unit: "م²", qty: 35, price: 140 }
+          ]
+        },
+        {
+          id: "carpentry_misc",
+          num: "16",
+          name: "أعمال النجارة والمطبخ والدريسنج",
+          type: "lump_plus_mat",
+          laborCost: 4000,
+          laborLabel: "مصنعية تركيب وإكسسوارات (مقطوعية)",
+          materials: [
+            { name: "وحدات وإكسسوارات نجارة", unit: "مقطوعية", qty: 1, price: 12000 }
+          ]
+        }
+      ]
+    };
+
+    let state = loadState();
+    let db = null;
+    let unsubscribeListener = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(DEFAULT_STATE);
+        return { ...structuredClone(DEFAULT_STATE), ...JSON.parse(raw) };
+      } catch {
+        return structuredClone(DEFAULT_STATE);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function fmt(n) {
+      return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
+    function pickFirst(obj, keys, fallback) {
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== "") {
+          return obj[k];
+        }
+      }
+      return fallback;
+    }
+
+    function normalizeFirestoreDoc(doc) {
+      const d = doc.data() || {};
+      const client = pickFirst(d, ["clientName", "leadName", "name", "fullName", "client"], "عميل بدون اسم");
+      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp"], "-");
+      const location = pickFirst(d, ["location", "unitLocation", "address"], "غير محدد");
+      const floor = pickFirst(d, ["floor", "unitFloor"], "-");
+      const area = Number(pickFirst(d, ["unitArea", "area"], 150)) || 150;
+
+      const rawScope = pickFirst(d, ["contractScope", "contract", "scope"], "full");
+      const contractScope = (rawScope === "supervision" || String(rawScope).includes("إشراف"))
+        ? "إشراف هندسي فقط"
+        : "تشطيب كامل";
+      const pricingModel = pickFirst(d, ["pricingModel", "model"], "");
+      const contract = pricingModel && !contractScope.includes(pricingModel)
+        ? `${contractScope} (${pricingModel})`
+        : contractScope;
+
+      const enabled3D = d.design3DEnabled === true || d.has3D === true || String(d.has3D || "").includes("نعم");
+      const style3D = pickFirst(d, ["design3DStyle", "style3D", "design3DMode"], "");
+      const has3D = enabled3D ? (style3D ? `نعم — ${style3D}` : "نعم (3D)") : "لا";
+
+      return {
+        id: doc.id,
+        client,
+        phone,
+        location,
+        floor,
+        area,
+        contract,
+        has3D,
+        preferredDate: pickFirst(d, ["preferredDate", "leadDate", "date"], "غير محدد"),
+        notes: pickFirst(d, ["notes", "leadNotes"], "لا توجد ملاحظات"),
+        elevator: pickFirst(d, ["elevator", "unitElevator"], "غير محدد"),
+        utilities: Array.isArray(d.utilities) ? d.utilities.join("، ") : pickFirst(d, ["utilities"], "غير محدد"),
+        selectedItems: Array.isArray(d.selectedItems) ? d.selectedItems : [],
+        status: ["new", "visit", "quoted"].includes(d.status) ? d.status : "new",
+        quoteSent: d.quoteSent === true || d.status === "quoted",
+        quoteTotal: Number(d.quoteTotal || 0),
+        raw: d
+      };
+    }
+
+    function getSelectedRequest() {
+      if (!state.requests.length) return null;
+      return state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
+    }
+
+    function openRequestWorkspace(id, scrollToDossier = true) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      state.selectedRequestId = r.id;
+      state.clientName = `${r.client} — ${r.location}`;
+      state.unitArea = +r.area || state.unitArea;
+      saveState();
+      syncGlobalInputs();
+      renderDashboard();
+      renderRequestDossier();
+      renderItems();
+      updateStickySummary();
+
+      if (scrollToDossier) {
+        document.getElementById("requestDossierSection").scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    function renderRequestDossier() {
+      const r = getSelectedRequest();
+      const badge = document.getElementById("selectedQuoteBadge");
+
+      if (!r) {
+        badge.className = "status-pill st-new";
+        badge.textContent = "لا يوجد طلب محدد";
+        document.getElementById("requestDossierBody").innerHTML = `
+          <p style="color:var(--muted);font-size:13px;">اختر طلباً من الداشبورد بالأعلى لعرض بياناته الكاملة، أو أضف طلباً تجريبياً وابدأ تحليل الأسعار وإرسال المقايسة.</p>
+        `;
+        return;
+      }
+
+      if (r.quoteSent || r.status === "quoted") {
+        badge.className = "status-pill st-quoted";
+        badge.textContent = r.quoteTotal ? `تم إرسال المقايسة (${fmt(r.quoteTotal)} ج.م)` : "تم التسعير";
+      } else {
+        badge.className = "status-pill st-new";
+        badge.textContent = "قيد الإعداد / لم تُرسل مقايسة بعد";
+      }
+
+      const itemsList = r.selectedItems.length
+        ? r.selectedItems.map(x => `<span class="status-pill st-visit" style="margin:2px;">${x}</span>`).join(" ")
+        : `<span style="color:var(--muted);font-size:12.5px;">لم تُحدد بنود فرعية (يشمل المقايسة الكاملة للبنود الـ 16)</span>`;
+
+      document.getElementById("requestDossierBody").innerHTML = `
+        <div class="dossier-grid">
+          <div class="dossier-box"><span>اسم العميل</span><strong>${r.client}</strong></div>
+          <div class="dossier-box"><span>رقم الموبايل / واتساب</span><strong dir="ltr">${r.phone}</strong></div>
+          <div class="dossier-box"><span>المكان</span><strong>${r.location}</strong></div>
+          <div class="dossier-box"><span>الدور</span><strong>${r.floor}</strong></div>
+          <div class="dossier-box"><span>مساحة الوحدة</span><strong>${r.area} م²</strong></div>
+          <div class="dossier-box"><span>الأسانسير</span><strong>${r.elevator}</strong></div>
+          <div class="dossier-box"><span>الخدمات الواصلة</span><strong>${r.utilities}</strong></div>
+          <div class="dossier-box"><span>نظام التعاقد</span><strong>${r.contract}</strong></div>
+          <div class="dossier-box"><span>التصميم 3D</span><strong>${r.has3D}</strong></div>
+          <div class="dossier-box"><span>الموعد المفضل للمعاينة</span><strong>${r.preferredDate}</strong></div>
+        </div>
+        <div class="dossier-box" style="margin-bottom:10px;">
+          <span>ملاحظات العميل</span>
+          <strong>${r.notes}</strong>
+        </div>
+        <div class="dossier-box">
+          <span>البنود المختارة من العميل</span>
+          <div style="margin-top:6px;">${itemsList}</div>
+        </div>
+      `;
+    }
+
+    function calcProjectTotals() {
+      let mat = 0, labor = 0, overhead = 0, grand = 0;
+      state.items.forEach(item => {
+        const b = calcItemBreakdown(item);
+        mat += b.matTotal;
+        labor += b.laborTotal;
+        overhead += b.overhead;
+        grand += b.grand;
+      });
+      return { mat, labor, overhead, grand };
+    }
+
+    async function saveAndSendQuoteToFirestore() {
+      const r = getSelectedRequest();
+      const totals = calcProjectTotals();
+
+      const quotePayload = {
+        quoteSent: true,
+        status: "quoted",
+        quoteTotal: totals.grand,
+        quoteMaterialsTotal: totals.mat,
+        quoteLaborTotal: totals.labor,
+        quoteOverheadTotal: totals.overhead,
+        quoteUnitArea: state.unitArea,
+        quoteNotes: state.engineerQuoteNotes,
+        quoteUpdatedAt: new Date().toISOString()
+      };
+
+      if (r) {
+        r.status = "quoted";
+        r.quoteSent = true;
+        r.quoteTotal = totals.grand;
+        saveState();
+        renderDashboard();
+        renderRequestDossier();
+      }
+
+      if (db && r) {
         try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            db = firebase.firestore();
-            if (typeof firebase.analytics === 'function') {
-                firebase.analytics();
-            }
+          await db.collection(state.collectionName).doc(r.id).set(quotePayload, { merge: true });
+          await db.collection(state.collectionName).doc(r.id).collection("quotes").add({
+            ...quotePayload,
+            clientName: r.client,
+            phone: r.phone,
+            itemsBreakdown: state.items.map(item => ({
+              num: item.num,
+              name: item.name,
+              ...calcItemBreakdown(item)
+            }))
+          });
+          alert(`تم حفظ وإرسال المقايسة للعميل (${r.client}) بإجمالي ${fmt(totals.grand)} ج.م.`);
         } catch (err) {
-            console.error("Firebase init error:", err);
+          console.error("Error saving quote:", err);
+          alert("تم تحديث المقايسة محلياً، وحدث خطأ أثناء الحفظ في Firestore: " + err.message);
+        }
+      } else {
+        alert(`تم إعداد المقايسة بإجمالي ${fmt(totals.grand)} ج.م.`);
+      }
+    }
+
+    function sendQuoteViaWhatsApp() {
+      const r = getSelectedRequest();
+      const totals = calcProjectTotals();
+      const clientName = r ? r.client : state.clientName;
+      const lines = [
+        `مرحباً ${clientName}،`,
+        `إليك ملخص المقايسة المبدئية من SkyBuild for Design & Contracting:`,
+        `• مساحة الوحدة: ${state.unitArea} م²`,
+        `• إجمالي الخامات: ${fmt(totals.mat)} ج.م`,
+        `• إجمالي المصنعيات: ${fmt(totals.labor)} ج.م`,
+        `• المصاريف الإضافية: ${fmt(totals.overhead)} ج.م`,
+        `• الإجمالي الكلي للمقايسة: ${fmt(totals.grand)} ج.م`,
+        state.engineerQuoteNotes ? `ملاحظات: ${state.engineerQuoteNotes}` : ""
+      ].filter(Boolean).join("\n");
+
+      const cleanPhone = r && r.phone && r.phone !== "-"
+        ? String(r.phone).replace(/\D/g, "").replace(/^0/, "20")
+        : "201060728015";
+      const targetPhone = cleanPhone.startsWith("20") ? cleanPhone : `20${cleanPhone}`;
+      window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(lines)}`, "_blank", "noopener,noreferrer");
+    }
+
+    function switchCollection(colName) {
+      state.collectionName = colName;
+      saveState();
+      startFirestoreListener();
+    }
+
+    function startFirestoreListener() {
+      const badge = document.getElementById("firestoreSyncBadge");
+      const alertBox = document.getElementById("firestoreAlert");
+      alertBox.style.display = "none";
+
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+
+        if (unsubscribeListener) {
+          unsubscribeListener();
+          unsubscribeListener = null;
         }
 
-        // ===================================================================
-        // 2. 3D DESIGN STYLES ARRAY WITH SKYBUILD GITHUB PAGES IMAGES
-        // ===================================================================
-        const DESIGN_STYLES = [
-            {
-                id: 'modern',
-                name: 'مودرن (Modern)',
-                desc: 'خطوط بسيطة، ألوان هادئة، وإضاءات مخفية عصرية',
-                icon: 'ph-sliders-horizontal',
-                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/modern.jpg'
-            },
-            {
-                id: 'newclassic',
-                name: 'نيو كلاسيك (New Classic)',
-                desc: 'دمج الفخامة الكلاسيكية والبانوهات مع البساطة الحديثة',
-                icon: 'ph-columns',
-                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/neo classic.jpg'
-            },
-            {
-                id: 'classic',
-                name: 'كلاسيك (Classic)',
-                desc: 'زخارف غنية، تفاصيل فاخرة، وأخشاب كلاسيكية راقية',
-                icon: 'ph-crown',
-                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/classic.jpg'
-            },
-            {
-                id: 'newmodern',
-                name: 'نيو مودرن (New Modern)',
-                desc: 'لمسات جريئة تجمع بين الدفء الخشبي والتصميم المعاصر',
-                icon: 'ph-sparkle',
-                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/neo modern.jpg'
-            },
-            {
-                id: 'bohemian',
-                name: 'بوهيمي (Bohemian)',
-                desc: 'خامات طبيعية، ألوان دافئة، ونباتات وإحساس مريح',
-                icon: 'ph-flower-lotus',
-                img: 'https://mohamedsamy2193-sys.github.io/Skybuild/images/bohemian.jpg'
+        badge.className = "sync-badge sync-local";
+        badge.innerHTML = `<i class="ph ph-spinner"></i> جاري تحميل البيانات من (${state.collectionName})...`;
+
+        unsubscribeListener = db.collection(state.collectionName).onSnapshot(
+          snapshot => {
+            state.requests = snapshot.docs.map(normalizeFirestoreDoc);
+            if (!state.selectedRequestId && state.requests.length) {
+              state.selectedRequestId = state.requests[0].id;
             }
-        ];
+            saveState();
+            renderDashboard();
+            renderRequestDossier();
 
-        // ===================================================================
-        // 3. DATA SCHEMA FOR ALL 16 INTERACTIVE FINISHING ITEMS
-        // ===================================================================
-        const SCOPE_ITEMS = [
-            {
-                id: 'masonry',
-                title: 'أعمال المباني والتعديلات المعمارية',
-                icon: 'ph-wall',
-                defaultChecked: false,
-                fields: [
-                    { type: 'text', key: 'notes', label: 'تفاصيل التعديلات المعمارية (فتح/قفل حوائط، تعديل تقسيم...)', placeholder: 'مثال: فتح مطبخ أمريكان وتعديل حمام الضيوف' }
-                ]
-            },
-            {
-                id: 'plumbing_rough',
-                title: 'أعمال تأسيس السباكة',
-                icon: 'ph-pipe',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'system',
-                        label: 'حدد نظام تأسيس السباكة المطلوب:',
-                        options: ['تأسيس دفن', 'تأسيس خارجي', 'تأسيس القاعدة دفن فقط والباقي خارجي'],
-                        default: 'تأسيس دفن'
-                    }
-                ]
-            },
-            {
-                id: 'elec_rough',
-                title: 'أعمال تأسيس الكهرباء',
-                icon: 'ph-lightning',
-                defaultChecked: true,
-                fields: [
-                    { type: 'text', key: 'notes', label: 'ملاحظات التأسيس (سمارت هوم، كاميرات، داتا، لوحة رئيسية...)', placeholder: 'مثال: تأسيس كابلات نت وشاشات في كل الغرف' }
-                ]
-            },
-            {
-                id: 'hvac_rough',
-                title: 'أعمال تأسيس التكييفات (فريون وصرف)',
-                icon: 'ph-wind',
-                defaultChecked: true,
-                fields: [
-                    { type: 'text', key: 'locations', label: 'حدد أماكن التكييفات بالضبط:', placeholder: 'مثال: قطعتين في الريسبشن + غرفة النوم الرئيسية + غرفتين أطفال' }
-                ]
-            },
-            {
-                id: 'windows',
-                title: 'أعمال الشبابيك والواجهات',
-                icon: 'ph-app-window',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'material',
-                        label: 'نوع قطاع الشبابيك:',
-                        options: ['خشب', 'ألوميتال', 'UPVC'],
-                        default: 'UPVC'
-                    },
-                    { type: 'number', key: 'count', label: 'عدد الشبابيك / البلكونات التقريبي:', placeholder: 'مثال: 6', default: '5' }
-                ]
-            },
-            {
-                id: 'plastering',
-                title: 'أعمال بياض محارة ومصيص',
-                icon: 'ph-paint-roller',
-                defaultChecked: true,
-                fields: [
-                    { type: 'text', key: 'notes', label: 'ملاحظات المحارة والمصيص:', placeholder: 'مثال: بؤج وأوتار كاملة للشقة + مصيص أسقف' }
-                ]
-            },
-            {
-                id: 'gypsum',
-                title: 'أعمال الجبسمبورد والأسقف المعلقة',
-                icon: 'ph-squares-four',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'style',
-                        label: 'نوع تصميم الجبسمبورد:',
-                        options: ['فلات', 'بيت نور', 'الاتنين معاً'],
-                        default: 'الاتنين معاً'
-                    },
-                    { type: 'text', key: 'locations', label: 'حدد أماكن تنفيذ الجبسمبورد:', placeholder: 'مثال: الريسبشن والطرقات بيت نور + الغرف فلات' }
-                ]
-            },
-            {
-                id: 'doors',
-                title: 'أعمال الأبواب (خارجي وداخلي)',
-                icon: 'ph-door',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'exterior_door',
-                        label: 'نوع الباب الخارجي للشقة:',
-                        options: ['خشب', 'مصفح'],
-                        default: 'مصفح'
-                    },
-                    {
-                        type: 'radio',
-                        key: 'interior_doors',
-                        label: 'نوع الأبواب الداخلية:',
-                        options: ['جاهزة', 'عمولة'],
-                        default: 'عمولة'
-                    }
-                ]
-            },
-            {
-                id: 'painting',
-                title: 'أعمال الدهانات والتأسيس',
-                icon: 'ph-paint-brush-broad',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'brand_system',
-                        label: 'نظام خامات التأسيس والتشطيب:',
-                        options: ['تأسيس GLC وتشطيب Jotun', 'تأسيس GLC وتشطيب GLC'],
-                        default: 'تأسيس GLC وتشطيب Jotun'
-                    }
-                ]
-            },
-            {
-                id: 'decor',
-                title: 'أعمال الديكورات الجدارية',
-                icon: 'ph-frame-corners',
-                defaultChecked: false,
-                fields: [
-                    {
-                        type: 'checkboxes',
-                        key: 'items',
-                        label: 'اختر عناصر الديكور المطلوبة:',
-                        options: ['بانوهات', 'كرانيش', 'معبرة مطبخ', 'أخرى'],
-                        default: ['بانوهات']
-                    },
-                    { type: 'text', key: 'other_text', label: 'في حال اختيار (أخرى) أو إضافة تفاصيل ديكور:', placeholder: 'مثال: بديل رخام وبديل خشب في الريسبشن' }
-                ]
-            },
-            {
-                id: 'floor_ceramic',
-                title: 'أعمال سيراميك أو بورسلين الأرضيات',
-                icon: 'ph-grid-four',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'size',
-                        label: 'مقاس سيراميك / بورسلين الأرضيات:',
-                        options: ['60*60', '60*120', 'مقاسات أكبر'],
-                        default: '60*120'
-                    }
-                ]
-            },
-            {
-                id: 'wall_ceramic',
-                title: 'أعمال سيراميك الحوائط (حمامات ومطبخ)',
-                icon: 'ph-rows',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'size',
-                        label: 'مقاس سيراميك الحوائط:',
-                        options: ['30*60', '30*75', '60*120', 'مقاسات أكبر'],
-                        default: '30*75'
-                    }
-                ]
-            },
-            {
-                id: 'kitchen_marble',
-                title: 'أعمال رخام المطبخ (الكونتر والوزر)',
-                icon: 'ph-cooking-pot',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'marble_type',
-                        label: 'اختر نوع رخام / جرانيت المطبخ:',
-                        options: ['أسود جلاكسي', 'أسود أسواني', 'كرارا', 'بريشيا', 'حلايب', 'نيو حلايب', 'جندولا', 'أخرى'],
-                        default: 'أسود جلاكسي'
-                    },
-                    { type: 'text', key: 'other_marble', label: 'توضيح في حال اختيار (أخرى):', placeholder: 'اكتب اسم الرخام أو الكوارتز المطلوب...' }
-                ]
-            },
-            {
-                id: 'floor_marble',
-                title: 'أعمال رخام الأرضيات والعتب',
-                icon: 'ph-steps',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'checkboxes',
-                        key: 'items',
-                        label: 'حدد بنود رخام الأرضيات المطلوبة:',
-                        options: ['عتب الغرف والحمام والمطبخ', 'أرضية شاور الحمام'],
-                        default: ['عتب الغرف والحمام والمطبخ', 'أرضية شاور الحمام']
-                    }
-                ]
-            },
-            {
-                id: 'plumbing_finish',
-                title: 'أعمال تشطيب السباكة والأطقم الصحية',
-                icon: 'ph-shower',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'radio',
-                        key: 'brand',
-                        label: 'ماركة الأطقم الصحية المفضلة:',
-                        options: ['Duravit', 'Sanipure', 'Ideal Standard', 'أخرى'],
-                        default: 'Ideal Standard'
-                    },
-                    { type: 'text', key: 'other_brand', label: 'توضيح في حال اختيار (أخرى):', placeholder: 'مثال: كليوباترا / روكا / جروهي...' }
-                ]
-            },
-            {
-                id: 'elec_finish',
-                title: 'أعمال تشطيب الكهرباء والإضاءة',
-                icon: 'ph-lightbulb',
-                defaultChecked: true,
-                fields: [
-                    {
-                        type: 'checkboxes',
-                        key: 'lighting',
-                        label: 'وحدات الإضاءة المطلوبة:',
-                        options: ['ليد بيت نور', 'ليد بروفايل', 'ماجنتك ليد', 'اسبوتات', 'دلايات', 'نجف', 'أباليك'],
-                        default: ['ليد بيت نور', 'اسبوتات']
-                    },
-                    {
-                        type: 'radio',
-                        key: 'switches_brand',
-                        label: 'نوع تشطيب علب والمفاتيح الكهربائية:',
-                        options: ['فينوس', 'شنايدر', 'بيانو', 'سانشي', 'ساس'],
-                        default: 'شنايدر'
-                    }
-                ]
-            }
-        ];
+            badge.className = "sync-badge sync-live";
+            badge.innerHTML = `<i class="ph ph-broadcast"></i> متصل بـ Firestore (${state.collectionName}) — ${state.requests.length} طلب`;
+          },
+          err => {
+            console.error("Firestore error:", err);
+            badge.className = "sync-badge sync-error";
+            badge.innerHTML = `<i class="ph ph-warning-circle"></i> خطأ في الاتصال بـ Firestore`;
+            alertBox.style.display = "block";
+            alertBox.innerHTML = `تعذر قراءة البيانات من مجموعة <strong>${state.collectionName}</strong> (${err.message}). تأكد من تفعيل <strong>Firestore Database</strong> وضبط قواعد الأمان (Rules).`;
+          }
+        );
+      } catch (e) {
+        console.error("Firebase init error:", e);
+        badge.className = "sync-badge sync-error";
+        badge.innerHTML = `<i class="ph ph-warning-circle"></i> فشل تهيئة Firebase`;
+      }
+    }
 
-        // ===================================================================
-        // 4. UI RENDERING & INTERACTIVE HANDLERS
-        // ===================================================================
-        function renderDesignStyles() {
-            const grid = document.getElementById('design-styles-grid');
-            grid.innerHTML = DESIGN_STYLES.map((style, idx) => {
-                const encodedImg = encodeURI(style.img);
-                const hasImg = Boolean(style.img && style.img.trim());
-                const mediaBlock = hasImg
-                    ? `<img src="${encodedImg}" alt="${style.name}" loading="lazy" onerror="this.parentElement.innerHTML = getStyleFallbackHTML('${style.icon}', '${style.name.split(' (')[0]}')" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">`
-                    : getStyleFallbackHTML(style.icon, style.name.split(' (')[0]);
+    function renderDashboard() {
+      const totalReqs = state.requests.length;
+      const newReqs = state.requests.filter(r => r.status === "new").length;
+      const visitReqs = state.requests.filter(r => r.status === "visit").length;
+      const quotedReqs = state.requests.filter(r => r.status === "quoted").length;
 
-                return `
-                    <label class="cursor-pointer group">
-                        <input type="radio" name="design-3d-style" value="${style.name}" ${idx === 0 ? 'checked' : ''} onchange="updateLiveSummary()" class="peer sr-only">
-                        <div class="h-full rounded-xl border-2 border-silver-200 bg-white overflow-hidden peer-checked:border-gold-600 peer-checked:ring-2 peer-checked:ring-amber-400/40 transition shadow-2xs flex flex-col">
-                            <div class="relative h-24 w-full overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 shrink-0">
-                                ${mediaBlock}
-                            </div>
-                            <div class="p-2.5 space-y-0.5 flex-1">
-                                <div class="font-extrabold text-xs text-obsidian-950">${style.name}</div>
-                                <p class="text-[10px] text-slate-500 leading-snug">${style.desc}</p>
-                            </div>
-                        </div>
-                    </label>
-                `;
-            }).join('');
+      document.getElementById("dashboardKpis").innerHTML = `
+        <div class="kpi-box">
+          <span class="kpi-label">إجمالي الطلبات الواردة</span>
+          <span class="kpi-val">${totalReqs}</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">طلبات جديدة</span>
+          <span class="kpi-val gold">${newReqs}</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">معاينة / زيارة مجدولة</span>
+          <span class="kpi-val">${visitReqs}</span>
+        </div>
+        <div class="kpi-box">
+          <span class="kpi-label">تم إرسال المقايسة</span>
+          <span class="kpi-val emerald">${quotedReqs}</span>
+        </div>
+      `;
+
+      const statusLabel = s => s === "new" ? "جديد" : s === "visit" ? "معاينة" : "تم التسعير";
+      const statusClass = s => s === "new" ? "st-new" : s === "visit" ? "st-visit" : "st-quoted";
+      const selected = getSelectedRequest();
+
+      if (!state.requests.length) {
+        document.getElementById("requestsTableBody").innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">
+              لا توجد طلبات مسجلة في مجموعة <strong>${state.collectionName}</strong> حتى الآن.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      document.getElementById("requestsTableBody").innerHTML = state.requests.map(req => {
+        const isSelected = selected && selected.id === req.id;
+        return `
+          <tr class="request-row ${isSelected ? "selected-row" : ""}" onclick="openRequestWorkspace('${req.id}', true)">
+            <td style="font-weight:800;color:var(--obsidian);">${req.client}</td>
+            <td dir="ltr" style="text-align:right;font-weight:700;">${req.phone}</td>
+            <td>${req.location} — ${req.floor}</td>
+            <td class="num-col">${req.area} م²</td>
+            <td>${req.contract}</td>
+            <td>${req.has3D}</td>
+            <td onclick="event.stopPropagation()">
+              <select onchange="updateRequestStatus('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
+                <option value="new" ${req.status === "new" ? "selected" : ""}>جديد</option>
+                <option value="visit" ${req.status === "visit" ? "selected" : ""}>معاينة</option>
+                <option value="quoted" ${req.status === "quoted" ? "selected" : ""}>تم التسعير</option>
+              </select>
+              <span class="status-pill ${statusClass(req.status)}" style="margin-right:6px;">${statusLabel(req.status)}</span>
+            </td>
+            <td class="no-print" style="white-space:nowrap;" onclick="event.stopPropagation()">
+              <button class="btn btn-dark btn-sm" onclick="openRequestWorkspace('${req.id}', true)">فتح الطلب</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function updateRequestStatus(id, status) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      r.status = status;
+      saveState();
+      renderDashboard();
+      renderRequestDossier();
+
+      if (db) {
+        try {
+          await db.collection(state.collectionName).doc(id).set({ status }, { merge: true });
+        } catch (err) {
+          console.error("Error updating status:", err);
         }
+      }
+    }
 
-        function getStyleFallbackHTML(icon, shortName) {
-            return `
-                <div class="w-full h-full flex flex-col items-center justify-center gap-1 text-amber-400 px-2 text-center">
-                    <i class="ph ${icon} text-2xl"></i>
-                    <span class="text-[10px] font-bold text-slate-200">${shortName}</span>
-                </div>
-            `;
-        }
-
-        function handle3DToggle() {
-            const enabled = document.getElementById('design-3d-enabled').checked;
-            const panel = document.getElementById('design-3d-panel');
-            if (enabled) {
-                panel.classList.remove('hidden');
-            } else {
-                panel.classList.add('hidden');
-            }
-            updateLiveSummary();
-        }
-
-        function renderScopeItems() {
-            const container = document.getElementById('scope-items-container');
-            container.innerHTML = '';
-
-            SCOPE_ITEMS.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = `rounded-xl border transition-all duration-200 ${item.defaultChecked ? 'border-obsidian-900 bg-white shadow-xs' : 'border-silver-200 bg-silver-50/60'}`;
-                card.id = `card-${item.id}`;
-
-                let fieldsHTML = '';
-                item.fields.forEach(field => {
-                    if (field.type === 'radio') {
-                        fieldsHTML += `
-                            <div class="space-y-1.5">
-                                <label class="block text-xs font-bold text-slate-700">${field.label}</label>
-                                <div class="flex flex-wrap gap-2">
-                                    ${field.options.map(opt => `
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="field-${item.id}-${field.key}" value="${opt}" ${opt === field.default ? 'checked' : ''} onchange="updateLiveSummary()" class="peer sr-only">
-                                            <span class="inline-block px-3 py-1.5 rounded-lg text-xs font-bold border border-silver-300 bg-silver-50 text-slate-700 peer-checked:bg-obsidian-900 peer-checked:text-white peer-checked:border-obsidian-900 transition">
-                                                ${opt}
-                                            </span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    } else if (field.type === 'checkboxes') {
-                        fieldsHTML += `
-                            <div class="space-y-1.5">
-                                <label class="block text-xs font-bold text-slate-700">${field.label}</label>
-                                <div class="flex flex-wrap gap-2">
-                                    ${field.options.map(opt => `
-                                        <label class="cursor-pointer">
-                                            <input type="checkbox" name="field-${item.id}-${field.key}" value="${opt}" ${(field.default || []).includes(opt) ? 'checked' : ''} onchange="updateLiveSummary()" class="peer sr-only">
-                                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-silver-300 bg-silver-50 text-slate-700 peer-checked:bg-amber-500/15 peer-checked:text-obsidian-950 peer-checked:border-gold-600 transition">
-                                                <i class="ph ph-check text-gold-600"></i> ${opt}
-                                            </span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    } else if (field.type === 'number') {
-                        fieldsHTML += `
-                            <div class="space-y-1">
-                                <label class="block text-xs font-bold text-slate-700">${field.label}</label>
-                                <input type="number" id="field-${item.id}-${field.key}" value="${field.default || ''}" min="1" placeholder="${field.placeholder || ''}" oninput="updateLiveSummary()" class="w-32 bg-silver-50 border border-silver-300 rounded-lg px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                            </div>
-                        `;
-                    } else {
-                        fieldsHTML += `
-                            <div class="space-y-1">
-                                <label class="block text-xs font-bold text-slate-700">${field.label}</label>
-                                <input type="text" id="field-${item.id}-${field.key}" placeholder="${field.placeholder || ''}" oninput="updateLiveSummary()" class="w-full bg-silver-50 border border-silver-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-obsidian-900 focus:bg-white">
-                            </div>
-                        `;
-                    }
-                });
-
-                card.innerHTML = `
-                    <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3 cursor-pointer select-none" onclick="toggleItemCheckbox('${item.id}')">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" id="chk-${item.id}" ${item.defaultChecked ? 'checked' : ''} onclick="event.stopPropagation(); handleItemToggle('${item.id}')" class="w-5 h-5 rounded accent-obsidian-950 cursor-pointer">
-                            <div class="w-8 h-8 rounded-lg bg-silver-100 text-obsidian-900 flex items-center justify-center shrink-0">
-                                <i class="ph ${item.icon} text-lg"></i>
-                            </div>
-                            <span class="font-extrabold text-xs sm:text-sm text-obsidian-950">${index + 1}. ${item.title}</span>
-                        </div>
-                        <span id="badge-${item.id}" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${item.defaultChecked ? 'bg-obsidian-900 text-amber-400' : 'bg-silver-200 text-slate-500'}">
-                            ${item.defaultChecked ? 'مشمول' : 'غير محدد'}
-                        </span>
-                    </div>
-                    <div id="body-${item.id}" class="${item.defaultChecked ? 'block' : 'hidden'} px-4 pb-4 pt-2 border-t border-silver-100 space-y-3 bg-white rounded-b-xl">
-                        ${fieldsHTML}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function toggleItemCheckbox(id) {
-            const chk = document.getElementById(`chk-${id}`);
-            chk.checked = !chk.checked;
-            handleItemToggle(id);
-        }
-
-        function handleItemToggle(id) {
-            const chk = document.getElementById(`chk-${id}`);
-            const card = document.getElementById(`card-${id}`);
-            const body = document.getElementById(`body-${id}`);
-            const badge = document.getElementById(`badge-${id}`);
-
-            if (chk.checked) {
-                card.className = 'rounded-xl border border-obsidian-900 bg-white shadow-xs transition-all duration-200';
-                body.classList.remove('hidden');
-                badge.textContent = 'مشمول';
-                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-obsidian-900 text-amber-400';
-            } else {
-                card.className = 'rounded-xl border border-silver-200 bg-silver-50/60 transition-all duration-200';
-                body.classList.add('hidden');
-                badge.textContent = 'غير محدد';
-                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-silver-200 text-slate-500';
-            }
-            updateLiveSummary();
-        }
-
-        function toggleAllItems(state) {
-            SCOPE_ITEMS.forEach(item => {
-                const chk = document.getElementById(`chk-${item.id}`);
-                if (chk && chk.checked !== state) {
-                    chk.checked = state;
-                    handleItemToggle(item.id);
-                }
-            });
-        }
-
-        function handleContractScopeChange() {
-            const scope = document.querySelector('input[name="contract-scope"]:checked').value;
-            const fullBox = document.getElementById('full-finishing-options');
-            const supNotice = document.getElementById('supervision-notice');
-
-            if (scope === 'full') {
-                fullBox.classList.remove('hidden');
-                supNotice.classList.add('hidden');
-            } else {
-                fullBox.classList.add('hidden');
-                supNotice.classList.remove('hidden');
-            }
-            updateLiveSummary();
-        }
-
-        function handleNoUtilities(noneChk) {
-            const utilChks = document.querySelectorAll('.utility-chk');
-            if (noneChk.checked) {
-                utilChks.forEach(c => { c.checked = false; c.disabled = true; });
-            } else {
-                utilChks.forEach(c => { c.disabled = false; });
-            }
-            updateLiveSummary();
-        }
-
-        function handleUtilityToggle(chk) {
-            if (chk.checked) {
-                document.getElementById('utility-none').checked = false;
-            }
-            updateLiveSummary();
-        }
-
-        function syncAreaFromSlider(val) {
-            document.getElementById('unit-area-input').value = val;
-            updateLiveSummary();
-        }
-
-        function syncAreaFromInput(val) {
-            const clamped = Math.min(Math.max(parseInt(val) || 50, 50), 500);
-            document.getElementById('unit-area-slider').value = clamped;
-            updateLiveSummary();
-        }
-
-        // ===================================================================
-        // 5. COLLECT STRUCTURED DATA & UPDATE LIVE SUMMARY
-        // ===================================================================
-        function collectFormData() {
-            const scopeVal = document.querySelector('input[name="contract-scope"]:checked').value;
-            const pricingModel = document.querySelector('input[name="pricing-model"]:checked')?.value || 'Cost Plus';
-            const contractLabel = scopeVal === 'full'
-                ? `تشطيب كامل (إشراف وتنفيذ) — نظام ${pricingModel}`
-                : 'إشراف هندسي فقط (زيارات محددة عند استلام كل بند)';
-
-            const design3DEnabled = document.getElementById('design-3d-enabled').checked;
-            const design3DMode = document.querySelector('input[name="design-3d-mode"]:checked')?.value || '';
-            const design3DStyle = document.querySelector('input[name="design-3d-style"]:checked')?.value || '';
-
-            const elevator = document.querySelector('input[name="unit-elevator"]:checked')?.value || '';
-            const noneUtil = document.getElementById('utility-none').checked;
-            let utilitiesList = [];
-            if (noneUtil) {
-                utilitiesList = ['لا توجد خدمات واصلة بعد'];
-            } else {
-                document.querySelectorAll('.utility-chk:checked').forEach(c => utilitiesList.push(c.value));
-                if (utilitiesList.length === 0) utilitiesList = ['غير محدد'];
-            }
-
-            const selectedScope = [];
-            SCOPE_ITEMS.forEach(item => {
-                const isChecked = document.getElementById(`chk-${item.id}`)?.checked;
-                if (!isChecked) return;
-
-                const details = {};
-                const detailsTextParts = [];
-
-                item.fields.forEach(field => {
-                    if (field.type === 'radio') {
-                        const val = document.querySelector(`input[name="field-${item.id}-${field.key}"]:checked`)?.value || '';
-                        details[field.key] = val;
-                        if (val) detailsTextParts.push(val);
-                    } else if (field.type === 'checkboxes') {
-                        const vals = [];
-                        document.querySelectorAll(`input[name="field-${item.id}-${field.key}"]:checked`).forEach(c => vals.push(c.value));
-                        details[field.key] = vals;
-                        if (vals.length) detailsTextParts.push(vals.join('، '));
-                    } else {
-                        const val = document.getElementById(`field-${item.id}-${field.key}`)?.value.trim() || '';
-                        details[field.key] = val;
-                        if (val) detailsTextParts.push(field.type === 'number' ? `العدد: ${val}` : val);
-                    }
-                });
-
-                selectedScope.push({
-                    id: item.id,
-                    title: item.title,
-                    details: details,
-                    summaryText: detailsTextParts.join(' | ') || 'مطلوب تنفيذه'
-                });
-            });
-
-            return {
-                client: {
-                    name: document.getElementById('lead-name').value.trim(),
-                    phone: document.getElementById('lead-phone').value.trim(),
-                    preferredDate: document.getElementById('lead-date').value || 'غير محدد',
-                    notes: document.getElementById('lead-notes').value.trim()
-                },
-                contract: {
-                    scope: scopeVal,
-                    pricingModel: scopeVal === 'full' ? pricingModel : 'إشراف فقط',
-                    label: contractLabel
-                },
-                design3D: {
-                    enabled: design3DEnabled,
-                    mode: design3DEnabled ? design3DMode : 'غير مطلوب',
-                    style: design3DEnabled ? design3DStyle : '',
-                    summary: design3DEnabled ? `${design3DMode} — طراز ${design3DStyle}` : 'غير مطلوب'
-                },
-                unit: {
-                    location: document.getElementById('unit-location').value.trim(),
-                    floor: document.getElementById('unit-floor').value.trim(),
-                    elevator: elevator,
-                    utilities: utilitiesList,
-                    area: parseFloat(document.getElementById('unit-area-input').value) || 0,
-                    condition: document.getElementById('unit-condition').value,
-                    rooms: document.getElementById('unit-rooms').value,
-                    bathrooms: document.getElementById('unit-bathrooms').value
-                },
-                selectedScope: selectedScope
-            };
-        }
-
-        function updateLiveSummary() {
-            const data = collectFormData();
-
-            document.getElementById('summary-items-count').textContent = `${data.selectedScope.length} بنود مختارة`;
-            document.getElementById('sum-contract').textContent = data.contract.label;
-            document.getElementById('sum-3d').textContent = data.design3D.summary;
-
-            const locText = [data.unit.location, data.unit.floor].filter(Boolean).join(' — ');
-            document.getElementById('sum-location').textContent = locText || 'لم يُحدد بعد';
-            document.getElementById('sum-area-cond').textContent = `${data.unit.area} م² — ${data.unit.condition}`;
-            document.getElementById('sum-utils').textContent = `${data.unit.elevator} | ${data.unit.utilities.join('، ')}`;
-
-            const listEl = document.getElementById('sum-selected-list');
-            if (data.selectedScope.length === 0) {
-                listEl.innerHTML = `<div class="text-xs text-slate-400 bg-white/5 p-3 rounded-xl text-center">لم يتم اختيار أي بند بعد</div>`;
-                return;
-            }
-
-            listEl.innerHTML = data.selectedScope.map(item => `
-                <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs space-y-0.5">
-                    <div class="font-bold text-amber-300 flex items-center gap-1.5">
-                        <i class="ph ph-check-circle"></i>
-                        <span>${item.title}</span>
-                    </div>
-                    <div class="text-[11px] text-slate-300 pr-5">${item.summaryText}</div>
-                </div>
-            `).join('');
-        }
-
-        // ===================================================================
-        // 6. CLOUD SUBMISSION (FIREBASE FIRESTORE) + WHATSAPP REDIRECT
-        // ===================================================================
-        async function submitInspectionRequest(e) {
-            e.preventDefault();
-            const data = collectFormData();
-
-            if (data.selectedScope.length === 0 && !data.design3D.enabled) {
-                showToast('يرجى اختيار بند واحد على الأقل من بنود التشطيب أو تفعيل التصميم الـ 3D', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('btn-submit-request');
-            const originalHTML = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `<i class="ph ph-spinner animate-spin text-xl"></i><span>جاري حفظ الطلب سحابياً...</span>`;
-
-            try {
-                if (db) {
-                    await db.collection('inspection_requests').add({
-                        ...data,
-                        status: 'new',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        createdAtISO: new Date().toISOString()
-                    });
-                }
-
-                showToast('تم تسجيل طلب المعاينة في نظام SkyBuild بنجاح!', 'success');
-
-                const scopeLines = data.selectedScope.length > 0
-                    ? data.selectedScope.map((s, i) => `${i + 1}. *${s.title}*: ${s.summaryText}`).join('\n')
-                    : '• طلب تصميم 3D فقط بدون بنود تنفيذ حالياً';
-
-                const message = [
-                    `*طلب معاينة هندسية جديد — SkyBuild*`,
-                    `━━━━━━━━━━━━━━━━━━━━`,
-                    `*1. بيانات العميل:*`,
-                    `• الاسم: ${data.client.name}`,
-                    `• الهاتف: ${data.client.phone}`,
-                    `• الموعد المفضل: ${data.client.preferredDate}`,
-                    data.client.notes ? `• ملاحظات: ${data.client.notes}` : null,
-                    ``,
-                    `*2. نظام التعاقد:*`,
-                    `• ${data.contract.label}`,
-                    ``,
-                    `*3. التصميم ثلاثي الأبعاد (3D):*`,
-                    `• ${data.design3D.summary}`,
-                    ``,
-                    `*4. بيانات الوحدة:*`,
-                    `• المكان: ${data.unit.location}`,
-                    `• الدور: ${data.unit.floor}`,
-                    `• الأسانسير: ${data.unit.elevator}`,
-                    `• الخدمات الواصلة: ${data.unit.utilities.join('، ')}`,
-                    `• المساحة: ${data.unit.area} م² | الحالة: ${data.unit.condition}`,
-                    `• التقسيم: ${data.unit.rooms} — ${data.unit.bathrooms}`,
-                    ``,
-                    `*5. البنود المطلوبة (${data.selectedScope.length} بند):*`,
-                    scopeLines
-                ].filter(line => line !== null).join('\n');
-
-                const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-                setTimeout(() => {
-                    window.open(waUrl, '_blank');
-                }, 600);
-
-            } catch (error) {
-                console.error("Firestore save error:", error);
-                showToast('حدث خطأ أثناء الحفظ السحابي، تأكد من إعدادات Firestore Rules', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-            }
-        }
-
-        function showToast(msg, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bg = type === 'error' ? 'bg-rose-700' : 'bg-obsidian-900 border border-amber-500/40';
-            toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all duration-300`;
-            toast.innerHTML = `<i class="ph ${type === 'error' ? 'ph-warning-circle text-amber-300' : 'ph-check-circle text-emerald-400'} text-lg"></i><span>${msg}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // Initialize Page
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('footer-fb-link').href = FACEBOOK_PAGE_URL;
-            renderDesignStyles();
-            renderScopeItems();
-            updateLiveSummary();
+    async function addSampleRequest() {
+      if (!db) return;
+      const idx = state.requests.length + 1;
+      try {
+        await db.collection(state.collectionName).add({
+          clientName: `عميل تجريبي #${idx}`,
+          phone: "01060728015",
+          location: "القاهرة / 6 أكتوبر",
+          floor: "الدور الثاني",
+          unitArea: 150,
+          contractScope: "full",
+          pricingModel: "Cost Plus",
+          design3DEnabled: true,
+          design3DStyle: "Modern",
+          status: "new",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-    </script>
+      } catch (err) {
+        alert("تعذر إضافة الطلب التجريبي: " + err.message);
+      }
+    }
+
+    function calcItemBreakdown(item) {
+      let matTotal = (item.materials || []).reduce((acc, m) => acc + ((+m.qty || 0) * (+m.price || 0)), 0);
+      let laborTotal = 0;
+
+      if (item.type === "masonry") {
+        laborTotal = (+item.demolitionCost || 0) + (+item.buildCost || 0);
+      } else if (item.type === "lump_plus_mat") {
+        laborTotal = +item.laborCost || 0;
+      } else if (item.type === "linear_supply_install") {
+        const total = (+item.length || 0) * (+item.ratePerMeter || 0);
+        matTotal += total * 0.65;
+        laborTotal += total * 0.35;
+      } else if (item.type === "windows") {
+        let winCost = 0;
+        if (item.system === "alumetal") {
+          winCost = (item.alumetalProfiles || []).reduce((s, p) => s + ((+p.area || 0) * (+p.rate || 0)), 0);
+        } else if (item.system === "upvc") {
+          winCost = (item.upvcProfiles || []).reduce((s, p) => s + ((+p.area || 0) * (+p.rate || 0)), 0);
+        } else {
+          winCost = (+item.woodArea || 0) * (+item.woodRate || 0);
+        }
+        matTotal += winCost * 0.75;
+        laborTotal += winCost * 0.25;
+      } else if (item.type === "plastering") {
+        const wallsArea = (+state.unitArea || 0) * (+state.plasterFactor || 0);
+        laborTotal += wallsArea * (+item.plasterRate || 0);
+        if (!item.hasFlatGypsum && item.includeMassis) {
+          laborTotal += +item.massisLabor || 0;
+        }
+      } else if (item.type === "gypsum") {
+        const gypCost = (+item.area || 0) * (+item.ratePerSqm || 0);
+        matTotal += gypCost * 0.6;
+        laborTotal += gypCost * 0.4;
+      } else if (item.type === "doors") {
+        laborTotal += (item.entries || []).reduce((s, d) => s + ((+d.count || 0) * (+d.unitPrice || 0)), 0);
+      } else if (item.type === "flooring") {
+        laborTotal += (+item.area || 0) * (+item.laborRate || 0);
+      } else if (item.type === "painting") {
+        laborTotal += (+item.paintArea || 0) * (+item.laborPerSqm || 0);
+        laborTotal += (+item.cornerDays || 0) * (+item.cornerDailyWage || 0);
+      } else if (item.type === "decor") {
+        (item.decorItems || []).forEach(d => {
+          matTotal += (+d.matQty || 0) * (+d.matPrice || 0);
+          laborTotal += (+d.laborQty || 0) * (+d.laborPrice || 0);
+        });
+      } else if (item.type === "marble") {
+        const mCost = ((+item.kitchenArea || 0) * (+item.kitchenRate || 0)) + ((+item.thresholdLength || 0) * (+item.thresholdRate || 0));
+        matTotal += mCost * 0.7;
+        laborTotal += mCost * 0.3;
+      }
+
+      const overhead = +state.commonOverhead || 0;
+      const grand = matTotal + laborTotal + overhead;
+      return { matTotal, laborTotal, overhead, grand };
+    }
+
+    function updateGlobal(key, val) {
+      state[key] = val;
+      saveState();
+      renderAll();
+    }
+
+    function setActiveTab(tab) {
+      state.activeTab = tab;
+      saveState();
+      renderNav();
+      renderItems();
+    }
+
+    function renderNav() {
+      const nav = document.getElementById("itemsNav");
+      let html = `<button class="nav-pill ${state.activeTab === "all" ? "active" : ""}" onclick="setActiveTab('all')">كل البنود (16)</button>`;
+      state.items.forEach(item => {
+        html += `<button class="nav-pill ${state.activeTab === item.id ? "active" : ""}" onclick="setActiveTab('${item.id}')">${item.num} - ${item.name.split("(")[0].trim()}</button>`;
+      });
+      nav.innerHTML = html;
+    }
+
+    function renderMaterialsTable(item) {
+      const rows = (item.materials || []).map((m, idx) => {
+        const lineTotal = (+m.qty || 0) * (+m.price || 0);
+        const unitOpts = UNITS.includes(m.unit) ? UNITS : [m.unit, ...UNITS];
+        return `
+          <tr>
+            <td><input type="text" value="${m.name}" oninput="updateMat('${item.id}', ${idx}, 'name', this.value)" /></td>
+            <td>
+              <select onchange="updateMat('${item.id}', ${idx}, 'unit', this.value)">
+                ${unitOpts.map(u => `<option value="${u}" ${m.unit === u ? "selected" : ""}>${u}</option>`).join("")}
+              </select>
+            </td>
+            <td><input type="number" min="0" step="0.5" value="${m.qty}" oninput="updateMat('${item.id}', ${idx}, 'qty', +this.value || 0)" /></td>
+            <td><input type="number" min="0" step="5" value="${m.price}" oninput="updateMat('${item.id}', ${idx}, 'price', +this.value || 0)" /></td>
+            <td class="num-col">${fmt(lineTotal)} ج.م</td>
+            <td><button class="btn btn-danger btn-sm" onclick="removeMat('${item.id}', ${idx})">✕</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      return `
+        <div class="sub-section">
+          <div class="sub-title">
+            <span>الخامات (الكمية حسب الوحدة × سعر الوحدة)</span>
+            <button class="btn btn-light btn-sm" onclick="addMat('${item.id}')">+ إضافة خامة</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:34%">اسم الخامة</th>
+                <th style="width:15%">الوحدة</th>
+                <th style="width:14%">الكمية</th>
+                <th style="width:15%">سعر الوحدة</th>
+                <th style="width:15%">الإجمالي</th>
+                <th style="width:7%">حذف</th>
+              </tr>
+            </thead>
+            <tbody>${rows || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">لا توجد خامات مضافة لهذا البند</td></tr>`}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderSpecificLogic(item) {
+      if (item.type === "masonry") {
+        return `
+          <div class="grid-4">
+            <div class="field">
+              <label>هدم وإزالة مخلفات (مقطوعية)</label>
+              <input type="number" min="0" value="${item.demolitionCost}" oninput="updateItemField('${item.id}', 'demolitionCost', +this.value || 0)" />
+            </div>
+            <div class="field">
+              <label>مصنعية البناء (مقطوعية)</label>
+              <input type="number" min="0" value="${item.buildCost}" oninput="updateItemField('${item.id}', 'buildCost', +this.value || 0)" />
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "lump_plus_mat") {
+        return `
+          <div class="grid-4">
+            <div class="field">
+              <label>${item.laborLabel || "المصنعية (مقطوعية)"}</label>
+              <input type="number" min="0" value="${item.laborCost}" oninput="updateItemField('${item.id}', 'laborCost', +this.value || 0)" />
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "linear_supply_install") {
+        return `
+          <div class="grid-4">
+            <div class="field">
+              <label>الطول (متر طولي)</label>
+              <input type="number" min="0" step="0.5" value="${item.length}" oninput="updateItemField('${item.id}', 'length', +this.value || 0)" />
+            </div>
+            <div class="field">
+              <label>سعر توريد وتركيب المتر الطولي</label>
+              <input type="number" min="0" value="${item.ratePerMeter}" oninput="updateItemField('${item.id}', 'ratePerMeter', +this.value || 0)" />
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "windows") {
+        let sysHtml = "";
+        if (item.system === "alumetal") {
+          sysHtml = `
+            <div class="sub-title" style="margin-top:12px;">
+              <span>قطاعات الألوميتال (الكمية م² × سعر المتر)</span>
+              <button class="btn btn-light btn-sm" onclick="addWinProfile('alumetalProfiles')">+ إضافة قطاع</button>
+            </div>
+            <table>
+              <thead><tr><th>القطاع</th><th>المساحة (م²)</th><th>سعر الم²</th><th>الإجمالي</th><th></th></tr></thead>
+              <tbody>
+                ${item.alumetalProfiles.map((p, i) => `
+                  <tr>
+                    <td><input type="text" value="${p.name}" oninput="updateWinProfile('alumetalProfiles', ${i}, 'name', this.value)" /></td>
+                    <td><input type="number" min="0" step="0.5" value="${p.area}" oninput="updateWinProfile('alumetalProfiles', ${i}, 'area', +this.value || 0)" /></td>
+                    <td><input type="number" min="0" value="${p.rate}" oninput="updateWinProfile('alumetalProfiles', ${i}, 'rate', +this.value || 0)" /></td>
+                    <td class="num-col">${fmt((+p.area || 0) * (+p.rate || 0))} ج.م</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeWinProfile('alumetalProfiles', ${i})">✕</button></td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `;
+        } else if (item.system === "upvc") {
+          sysHtml = `
+            <div class="sub-title" style="margin-top:12px;">
+              <span>قطاعات UPVC (قابلة للإضافة والتعديل)</span>
+              <button class="btn btn-light btn-sm" onclick="addWinProfile('upvcProfiles')">+ إضافة قطاع UPVC</button>
+            </div>
+            <table>
+              <thead><tr><th>القطاع</th><th>المساحة (م²)</th><th>سعر الم²</th><th>الإجمالي</th><th></th></tr></thead>
+              <tbody>
+                ${item.upvcProfiles.map((p, i) => `
+                  <tr>
+                    <td><input type="text" value="${p.name}" oninput="updateWinProfile('upvcProfiles', ${i}, 'name', this.value)" /></td>
+                    <td><input type="number" min="0" step="0.5" value="${p.area}" oninput="updateWinProfile('upvcProfiles', ${i}, 'area', +this.value || 0)" /></td>
+                    <td><input type="number" min="0" value="${p.rate}" oninput="updateWinProfile('upvcProfiles', ${i}, 'rate', +this.value || 0)" /></td>
+                    <td class="num-col">${fmt((+p.area || 0) * (+p.rate || 0))} ج.م</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeWinProfile('upvcProfiles', ${i})">✕</button></td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `;
+        } else {
+          sysHtml = `
+            <div class="grid-4" style="margin-top:12px;">
+              <div class="field"><label>مساحة الشبابيك الخشبية (م²)</label><input type="number" min="0" value="${item.woodArea}" oninput="updateItemField('windows', 'woodArea', +this.value || 0)" /></div>
+              <div class="field"><label>سعر المتر المسطح</label><input type="number" min="0" value="${item.woodRate}" oninput="updateItemField('windows', 'woodRate', +this.value || 0)" /></div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="grid-4">
+            <div class="field">
+              <label>اختيار نظام الشبابيك</label>
+              <select onchange="updateItemField('windows', 'system', this.value)">
+                <option value="alumetal" ${item.system === "alumetal" ? "selected" : ""}>ألوميتال (PS صغير / PS كبير / تانجو / جامبو)</option>
+                <option value="upvc" ${item.system === "upvc" ? "selected" : ""}>UPVC</option>
+                <option value="wood" ${item.system === "wood" ? "selected" : ""}>خشب</option>
+              </select>
+            </div>
+          </div>
+          ${sysHtml}
+        `;
+      }
+
+      if (item.type === "plastering") {
+        const wallsArea = (+state.unitArea || 0) * (+state.plasterFactor || 0);
+        return `
+          <div class="grid-4">
+            <div class="field">
+              <label>مساحة الحوائط المحسوبة (${state.unitArea} × ${state.plasterFactor})</label>
+              <input type="text" disabled value="${fmt(wallsArea)} م²" />
+            </div>
+            <div class="field">
+              <label>سعر مصنعية المحارة (للمتر المسطح)</label>
+              <input type="number" min="0" value="${item.plasterRate}" oninput="updateItemField('plastering', 'plasterRate', +this.value || 0)" />
+            </div>
+            <div class="field">
+              <label>هل السقف جبسمبورد فلات؟</label>
+              <select onchange="updateItemField('plastering', 'hasFlatGypsum', this.value === 'true')">
+                <option value="false" ${!item.hasFlatGypsum ? "selected" : ""}>لا (يُرشح المصيص)</option>
+                <option value="true" ${item.hasFlatGypsum ? "selected" : ""}>نعم (لا يُنصح بالمصيص غالباً)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>إدراج بند المصيص</label>
+              <select onchange="updateItemField('plastering', 'includeMassis', this.value === 'true')">
+                <option value="true" ${item.includeMassis ? "selected" : ""}>نعم</option>
+                <option value="false" ${!item.includeMassis ? "selected" : ""}>لا</option>
+              </select>
+            </div>
+          </div>
+          ${item.includeMassis ? `
+            <div class="grid-4" style="margin-top:12px;">
+              <div class="field">
+                <label>مصنعية المصيص (مقطوعية)</label>
+                <input type="number" min="0" value="${item.massisLabor}" oninput="updateItemField('plastering', 'massisLabor', +this.value || 0)" />
+              </div>
+            </div>
+          ` : ""}
+          ${item.hasFlatGypsum ? `<div class="warn-box">تنبيه: العميل مختار جبسمبورد فلات؛ يمكنك إبقاء المصيص مفعلاً يدوياً أو إيقافه.</div>` : ""}
+        `;
+      }
+
+      if (item.type === "gypsum") {
+        return `
+          <div class="grid-4">
+            <div class="field">
+              <label>نظام التنفيذ</label>
+              <select onchange="updateItemField('gypsum', 'system', this.value)">
+                <option value="ركب" ${item.system === "ركب" ? "selected" : ""}>نظام الركب</option>
+                <option value="أتياش" ${item.system === "أتياش" ? "selected" : ""}>نظام الأتياش</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>المساحة (م²)</label>
+              <input type="number" min="0" step="0.5" value="${item.area}" oninput="updateItemField('gypsum', 'area', +this.value || 0)" />
+            </div>
+            <div class="field">
+              <label>سعر توريد وتركيب الم²</label>
+              <input type="number" min="0" value="${item.ratePerSqm}" oninput="updateItemField('gypsum', 'ratePerSqm', +this.value || 0)" />
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "doors") {
+        return `
+          <div class="sub-title">
+            <span>الأبواب الخارجية والداخلية (بالعدد)</span>
+            <button class="btn btn-light btn-sm" onclick="addDoorEntry()">+ إضافة باب</button>
+          </div>
+          <table>
+            <thead><tr><th>الموقع</th><th>النوع (مصفح / عمولة)</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th><th></th></tr></thead>
+            <tbody>
+              ${item.entries.map((d, i) => `
+                <tr>
+                  <td>
+                    <select onchange="updateDoorEntry(${i}, 'category', this.value)">
+                      <option value="خارجي" ${d.category === "خارجي" ? "selected" : ""}>خارجي</option>
+                      <option value="داخلي" ${d.category === "داخلي" ? "selected" : ""}>داخلي</option>
+                    </select>
+                  </td>
+                  <td><input type="text" value="${d.kind}" oninput="updateDoorEntry(${i}, 'kind', this.value)" /></td>
+                  <td><input type="number" min="0" value="${d.count}" oninput="updateDoorEntry(${i}, 'count', +this.value || 0)" /></td>
+                  <td><input type="number" min="0" value="${d.unitPrice}" oninput="updateDoorEntry(${i}, 'unitPrice', +this.value || 0)" /></td>
+                  <td class="num-col">${fmt((+d.count || 0) * (+d.unitPrice || 0))} ج.م</td>
+                  <td><button class="btn btn-danger btn-sm" onclick="removeDoorEntry(${i})">✕</button></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      if (item.type === "flooring") {
+        return `
+          <div class="grid-4">
+            <div class="field"><label>مساحة التركيب (م²)</label><input type="number" min="0" step="0.5" value="${item.area}" oninput="updateItemField('flooring', 'area', +this.value || 0)" /></div>
+            <div class="field"><label>مصنعية التركيب للمتر المسطح</label><input type="number" min="0" value="${item.laborRate}" oninput="updateItemField('flooring', 'laborRate', +this.value || 0)" /></div>
+          </div>
+        `;
+      }
+
+      if (item.type === "painting") {
+        return `
+          <div class="grid-4">
+            <div class="field"><label>مسطح الدهانات (م²)</label><input type="number" min="0" value="${item.paintArea}" oninput="updateItemField('painting', 'paintArea', +this.value || 0)" /></div>
+            <div class="field"><label>مصنعية الدهانات للمتر المسطح</label><input type="number" min="0" value="${item.laborPerSqm}" oninput="updateItemField('painting', 'laborPerSqm', +this.value || 0)" /></div>
+            <div class="field"><label>أيام تركيب الزوايا (باليومية)</label><input type="number" min="0" value="${item.cornerDays}" oninput="updateItemField('painting', 'cornerDays', +this.value || 0)" /></div>
+            <div class="field"><label>يومية تركيب الزوايا</label><input type="number" min="0" value="${item.cornerDailyWage}" oninput="updateItemField('painting', 'cornerDailyWage', +this.value || 0)" /></div>
+          </div>
+          <div class="note-box">تشطيب الدهانات (جوتن / GLC / درجة اللون) يُحتسب بسعر تقريبي قابل للتعديل ضمن جدول الخامات بالأسفل.</div>
+        `;
+      }
+
+      if (item.type === "decor") {
+        return `
+          <div class="sub-title">
+            <span>تحليل عناصر الديكور (خامة ومصنعية لكل عنصر)</span>
+            <button class="btn btn-light btn-sm" onclick="addDecorEntry()">+ إضافة عنصر ديكور</button>
+          </div>
+          <table>
+            <thead><tr><th>بند الديكور</th><th>كمية خامة</th><th>سعر خامة</th><th>كمية مصنعية</th><th>سعر مصنعية</th><th>الإجمالي</th><th></th></tr></thead>
+            <tbody>
+              ${item.decorItems.map((d, i) => {
+                const rowSum = ((+d.matQty || 0) * (+d.matPrice || 0)) + ((+d.laborQty || 0) * (+d.laborPrice || 0));
+                return `
+                  <tr>
+                    <td><input type="text" value="${d.name}" oninput="updateDecorEntry(${i}, 'name', this.value)" /></td>
+                    <td><input type="number" min="0" step="0.5" value="${d.matQty}" oninput="updateDecorEntry(${i}, 'matQty', +this.value || 0)" /></td>
+                    <td><input type="number" min="0" value="${d.matPrice}" oninput="updateDecorEntry(${i}, 'matPrice', +this.value || 0)" /></td>
+                    <td><input type="number" min="0" step="0.5" value="${d.laborQty}" oninput="updateDecorEntry(${i}, 'laborQty', +this.value || 0)" /></td>
+                    <td><input type="number" min="0" value="${d.laborPrice}" oninput="updateDecorEntry(${i}, 'laborPrice', +this.value || 0)" /></td>
+                    <td class="num-col">${fmt(rowSum)} ج.م</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeDecorEntry(${i})">✕</button></td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      if (item.type === "marble") {
+        return `
+          <div class="grid-4">
+            <div class="field"><label>رخام المطبخ (م²)</label><input type="number" min="0" step="0.5" value="${item.kitchenArea}" oninput="updateItemField('marble', 'kitchenArea', +this.value || 0)" /></div>
+            <div class="field"><label>سعر توريد وتركيب رخام المطبخ (م²)</label><input type="number" min="0" value="${item.kitchenRate}" oninput="updateItemField('marble', 'kitchenRate', +this.value || 0)" /></div>
+            <div class="field"><label>عتب الرخام (متر طولي)</label><input type="number" min="0" step="0.5" value="${item.thresholdLength}" oninput="updateItemField('marble', 'thresholdLength', +this.value || 0)" /></div>
+            <div class="field"><label>سعر توريد وتركيب العتب (م.ط)</label><input type="number" min="0" value="${item.thresholdRate}" oninput="updateItemField('marble', 'thresholdRate', +this.value || 0)" /></div>
+          </div>
+        `;
+      }
+
+      return "";
+    }
+
+    function renderItems() {
+      const container = document.getElementById("itemsContainer");
+      const visibleItems = state.activeTab === "all"
+        ? state.items
+        : state.items.filter(i => i.id === state.activeTab);
+
+      container.innerHTML = visibleItems.map(item => {
+        const b = calcItemBreakdown(item);
+        return `
+          <section class="card" id="card-${item.id}">
+            <div class="section-head">
+              <div class="section-title-wrap">
+                <span class="item-num">بند ${item.num}</span>
+                <h2 class="section-title">${item.name}</h2>
+              </div>
+              <div class="item-total-box">إجمالي البند: <strong>${fmt(b.grand)}</strong> ج.م</div>
+            </div>
+
+            ${renderSpecificLogic(item)}
+            ${renderMaterialsTable(item)}
+
+            <div class="sub-section" style="display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;font-size:13px;">
+              <div>خامات البند: <strong>${fmt(b.matTotal)} ج.م</strong></div>
+              <div>مصنعيات البند: <strong>${fmt(b.laborTotal)} ج.م</strong></div>
+              <div>مصاريف إضافية ثابتة: <strong>${fmt(b.overhead)} ج.م</strong></div>
+              <div style="color:var(--gold-dark);font-weight:800;">صافي البند: <strong>${fmt(b.grand)}</strong> ج.م</div>
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function updateStickySummary() {
+      const totals = calcProjectTotals();
+      document.getElementById("sumMaterials").textContent = fmt(totals.mat);
+      document.getElementById("sumLabor").textContent = fmt(totals.labor);
+      document.getElementById("sumOverhead").textContent = fmt(totals.overhead);
+      document.getElementById("sumGrand").textContent = fmt(totals.grand);
+    }
+
+    function updateItemField(itemId, key, val) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item) return;
+      item[key] = val;
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function addMat(itemId) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item) return;
+      item.materials.push({ name: "خامة جديدة", unit: "عدد", qty: 1, price: 0 });
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function updateMat(itemId, idx, key, val) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item || !item.materials[idx]) return;
+      item.materials[idx][key] = val;
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function removeMat(itemId, idx) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item) return;
+      item.materials.splice(idx, 1);
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function addWinProfile(listKey) {
+      const winItem = state.items.find(i => i.id === "windows");
+      winItem[listKey].push({ name: "قطاع جديد", area: 1, rate: 3000 });
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function updateWinProfile(listKey, idx, key, val) {
+      const winItem = state.items.find(i => i.id === "windows");
+      winItem[listKey][idx][key] = val;
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function removeWinProfile(listKey, idx) {
+      const winItem = state.items.find(i => i.id === "windows");
+      winItem[listKey].splice(idx, 1);
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function addDoorEntry() {
+      const dItem = state.items.find(i => i.id === "doors");
+      dItem.entries.push({ category: "داخلي", kind: "عمولة", count: 1, unitPrice: 4500 });
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function updateDoorEntry(idx, key, val) {
+      const dItem = state.items.find(i => i.id === "doors");
+      dItem.entries[idx][key] = val;
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function removeDoorEntry(idx) {
+      const dItem = state.items.find(i => i.id === "doors");
+      dItem.entries.splice(idx, 1);
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function addDecorEntry() {
+      const decItem = state.items.find(i => i.id === "decor");
+      decItem.decorItems.push({ name: "عنصر ديكور جديد", matQty: 1, matPrice: 1500, laborQty: 1, laborPrice: 800 });
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function updateDecorEntry(idx, key, val) {
+      const decItem = state.items.find(i => i.id === "decor");
+      decItem.decorItems[idx][key] = val;
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function removeDecorEntry(idx) {
+      const decItem = state.items.find(i => i.id === "decor");
+      decItem.decorItems.splice(idx, 1);
+      saveState();
+      renderItems();
+      updateStickySummary();
+    }
+
+    function openReportModal() {
+      let totalAll = 0;
+      const rows = state.items.map(item => {
+        const b = calcItemBreakdown(item);
+        totalAll += b.grand;
+        return `
+          <tr>
+            <td>${item.num}</td>
+            <td>${item.name}</td>
+            <td>${fmt(b.matTotal)}</td>
+            <td>${fmt(b.laborTotal)}</td>
+            <td>${fmt(b.overhead)}</td>
+            <td class="num-col">${fmt(b.grand)} ج.م</td>
+          </tr>
+        `;
+      }).join("");
+
+      document.getElementById("reportContent").innerHTML = `
+        <p style="margin-bottom:12px;color:var(--muted)">المشروع: <strong>${state.clientName || "غير محدد"}</strong> | مساحة الوحدة: <strong>${state.unitArea} م²</strong></p>
+        <table>
+          <thead>
+            <tr><th>#</th><th>البند</th><th>الخامات</th><th>المصنعيات</th><th>إضافية</th><th>الإجمالي</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr>
+              <th colspan="5">الإجمالي الكلي</th>
+              <th class="num-col">${fmt(totalAll)} ج.م</th>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+      document.getElementById("reportModal").classList.add("open");
+    }
+
+    function closeReportModal() {
+      document.getElementById("reportModal").classList.remove("open");
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "skybuild-quote-analysis.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetAllData() {
+      if (!confirm("هل أنت متأكد من إعادة ضبط جميع البيانات والأسعار إلى القيم الافتراضية؟")) return;
+      state = structuredClone(DEFAULT_STATE);
+      saveState();
+      syncGlobalInputs();
+      renderAll();
+    }
+
+    function syncGlobalInputs() {
+      document.getElementById("collectionSelector").value = state.collectionName || "inspection_requests";
+      document.getElementById("clientName").value = state.clientName;
+      document.getElementById("unitArea").value = state.unitArea;
+      document.getElementById("plasterFactor").value = state.plasterFactor;
+      document.getElementById("commonOverhead").value = state.commonOverhead;
+      document.getElementById("engineerQuoteNotes").value = state.engineerQuoteNotes || "";
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderRequestDossier();
+      renderNav();
+      renderItems();
+      updateStickySummary();
+    }
+
+    syncGlobalInputs();
+    renderAll();
+    startFirestoreListener();
+  </script>
 </body>
 </html>
