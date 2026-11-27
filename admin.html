@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBuild for Design & Contracting | لوحة المهندس وتحليل التكاليف</title>
+  <title>SkyBuild for Design & Contracting | صفحة الإدارة وتحليل المقايسات</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -41,12 +41,10 @@
       background-color: var(--bg);
       color: var(--text);
       line-height: 1.65;
-      padding-bottom: 96px;
+      padding-bottom: 100px;
     }
 
-    button, select, input {
-      font-family: inherit;
-    }
+    button, select, input, textarea { font-family: inherit; }
 
     .sb-header {
       background: var(--surface);
@@ -83,9 +81,7 @@
       transition: transform 0.25s ease;
     }
 
-    .sb-logo-link:hover .sb-logo-svg {
-      transform: scale(1.04);
-    }
+    .sb-logo-link:hover .sb-logo-svg { transform: scale(1.04); }
 
     .sb-brand-text {
       display: flex;
@@ -144,9 +140,7 @@
       animation: sbMarqueeRTL 22s linear infinite;
     }
 
-    .sb-marquee-track:hover {
-      animation-play-state: paused;
-    }
+    .sb-marquee-track:hover { animation-play-state: paused; }
 
     .sb-marquee-gold {
       color: #FBBF24;
@@ -210,9 +204,7 @@
       margin-bottom: 20px;
     }
 
-    .card-featured {
-      border: 2px solid var(--slate-dark);
-    }
+    .card-featured { border: 2px solid var(--slate-dark); }
 
     .section-head {
       display: flex;
@@ -260,15 +252,9 @@
       gap: 6px;
     }
 
-    .sync-live {
-      background: #D1FAE5;
-      color: #065F46;
-    }
-
-    .sync-local {
-      background: #FEF3C7;
-      color: #92400E;
-    }
+    .sync-live { background: #D1FAE5; color: #065F46; }
+    .sync-local { background: #FEF3C7; color: #92400E; }
+    .sync-error { background: #FEE2E2; color: #991B1B; }
 
     .kpi-grid {
       display: grid;
@@ -303,6 +289,14 @@
     .st-visit { background: #E0E7FF; color: #1E40AF; }
     .st-quoted { background: #D1FAE5; color: #065F46; }
 
+    .request-row {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .request-row:hover { background: #FFFBEB; }
+    .request-row.selected-row { background: #FEF3C7; }
+
     .grid-4 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -321,7 +315,7 @@
       color: #374151;
     }
 
-    .field input, .field select {
+    .field input, .field select, .field textarea {
       padding: 9px 11px;
       border: 1px solid var(--border-strong);
       border-radius: 10px;
@@ -331,11 +325,50 @@
       transition: 0.15s ease;
     }
 
-    .field input:focus, .field select:focus {
+    .field input:focus, .field select:focus, .field textarea:focus {
       outline: none;
       background: #FFFFFF;
       border-color: var(--obsidian);
       box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+    }
+
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .dossier-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 13px;
+    }
+
+    .dossier-box span {
+      display: block;
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .dossier-box strong {
+      font-size: 13.5px;
+      color: var(--obsidian);
+    }
+
+    .quote-actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-warm);
+      border: 1px solid #FDE68A;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 12px;
     }
 
     .items-nav {
@@ -548,7 +581,7 @@
       <div class="header-actions no-print">
         <button class="btn btn-light" onclick="openReportModal()">
           <i class="ph ph-table" style="color:#D97706;"></i>
-          <span>ملخص التقرير</span>
+          <span>ملخص المقايسة</span>
         </button>
         <button class="btn btn-light" onclick="exportJSON()">
           <i class="ph ph-download-simple" style="color:#090D16;"></i>
@@ -580,7 +613,7 @@
           <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
         </span>
         <span style="color:#6B7280;">•</span>
-        <span>لوحة المهندس — استقبال طلبات المعاينة وتحليل التكاليف التفصيلي (16 بنداً)</span>
+        <span>صفحة الإدارة — متابعة الطلبات، ملف العميل الكامل، تحليل الأسعار، وإرسال المقايسة</span>
         <span style="color:#6B7280;">•</span>
         <span class="sb-marquee-gold">
           <i class="ph ph-phone"></i>
@@ -592,23 +625,35 @@
 
   <div class="container">
 
-    <section class="card card-featured">
+    <!-- 1) DASHBOARD -->
+    <section class="card card-featured" id="dashboardSection">
       <div class="section-head">
         <div class="section-title-wrap">
-          <span class="step-badge"><i class="ph ph-kanban"></i></span>
-          <h2 class="section-title">لوحة المعلومات — طلبات المعاينة والعملاء</h2>
+          <span class="step-badge"><i class="ph ph-gauge"></i></span>
+          <h2 class="section-title">داشبورد الطلبات الواردة</h2>
           <span id="firestoreSyncBadge" class="sync-badge sync-local">جاري الاتصال بـ Firestore...</span>
         </div>
-        <button class="btn btn-gold btn-sm no-print" onclick="addSampleRequest()">+ إضافة طلب معاينة</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" class="no-print">
+          <select id="collectionSelector" onchange="switchCollection(this.value)" style="padding:6px 10px;border-radius:9px;border:1px solid var(--border-strong);font-size:12px;font-weight:700;">
+            <option value="inspection_requests">مجموعة: inspection_requests</option>
+            <option value="requests">مجموعة: requests</option>
+            <option value="leads">مجموعة: leads</option>
+          </select>
+          <button class="btn btn-gold btn-sm" onclick="addSampleRequest()">+ إضافة طلب تجريبي</button>
+        </div>
       </div>
 
+      <div id="firestoreAlert" class="warn-box" style="display:none;margin-bottom:14px;"></div>
+
       <div class="kpi-grid" id="dashboardKpis"></div>
+
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">اضغط على أي صف في الجدول لفتح <strong>لوحة معلومات الطلب الكاملة</strong> والبدء في تحليل الأسعار وإرسال المقايسة.</p>
 
       <div style="overflow-x:auto;">
         <table>
           <thead>
             <tr>
-              <th>العميل</th>
+              <th>اسم العميل</th>
               <th>الهاتف</th>
               <th>المكان / الدور</th>
               <th>المساحة</th>
@@ -623,7 +668,40 @@
       </div>
     </section>
 
-    <section class="card">
+    <!-- 2) SELECTED REQUEST DOSSIER & QUOTE SENDER -->
+    <section class="card" id="requestDossierSection">
+      <div class="section-head">
+        <div class="section-title-wrap">
+          <span class="step-badge"><i class="ph ph-file-text"></i></span>
+          <h2 class="section-title">لوحة معلومات الطلب الكاملة وإرسال المقايسة</h2>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;" class="no-print">
+          <span id="selectedQuoteBadge" class="status-pill st-new">لم تُرسل مقايسة بعد</span>
+          <a href="#pricingSection" class="btn btn-dark btn-sm">الانتقال لتحليل الأسعار ↓</a>
+        </div>
+      </div>
+
+      <div id="requestDossierBody"></div>
+
+      <div class="quote-actions-bar no-print">
+        <div style="font-size:12.5px;color:#78350F;font-weight:700;">
+          بعد مراجعة البنود الـ 16 بالأسفل، يمكنك حفظ المقايسة وربطها بالطلب أو إرسال ملخصها للعميل مباشرة.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-gold btn-sm" onclick="saveAndSendQuoteToFirestore()">
+            <i class="ph ph-paper-plane-tilt"></i>
+            <span>حفظ وإرسال المقايسة للطلب</span>
+          </button>
+          <button class="btn btn-whatsapp btn-sm" onclick="sendQuoteViaWhatsApp()">
+            <i class="ph ph-whatsapp-logo"></i>
+            <span>إرسال المقايسة واتساب للعميل</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3) UNIT PARAMETERS & OVERHEAD -->
+    <section class="card" id="pricingSection">
       <div class="section-head">
         <div class="section-title-wrap">
           <span class="step-badge"><i class="ph ph-sliders-horizontal"></i></span>
@@ -650,8 +728,14 @@
           <input type="number" min="0" step="50" id="commonOverhead" oninput="updateGlobal('commonOverhead', +this.value || 0)" />
         </div>
       </div>
+
+      <div class="field" style="margin-top:14px;">
+        <label>ملاحظات المهندس وشروط المقايسة المرسلة للعميل</label>
+        <textarea id="engineerQuoteNotes" rows="2" oninput="updateGlobal('engineerQuoteNotes', this.value)" placeholder="مثال: الأسعار استرشادية وفق المساحات المبدئية وتُعتمد نهائياً بعد المعاينة الفعلية بالموقع..."></textarea>
+      </div>
     </section>
 
+    <!-- 4) 16 PRICING ITEMS -->
     <div class="items-nav no-print" id="itemsNav"></div>
     <main id="itemsContainer"></main>
   </div>
@@ -662,16 +746,20 @@
         <div>إجمالي الخامات: <strong id="sumMaterials">0</strong> ج.م</div>
         <div>إجمالي المصنعيات: <strong id="sumLabor">0</strong> ج.م</div>
         <div>إجمالي المصاريف الإضافية: <strong id="sumOverhead">0</strong> ج.م</div>
-        <div>الإجمالي الكلي للمشروع: <strong id="sumGrand">0</strong> ج.م</div>
+        <div>إجمالي المقايسة: <strong id="sumGrand">0</strong> ج.م</div>
       </div>
-      <button class="btn btn-gold btn-sm" onclick="openReportModal()">عرض الجدول التجميعي</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-light btn-sm" onclick="openReportModal()">جدول المقايسة</button>
+        <button class="btn btn-gold btn-sm" onclick="saveAndSendQuoteToFirestore()">إرسال المقايسة</button>
+      </div>
     </div>
   </div>
 
+  <!-- Report Modal -->
   <div class="modal-backdrop" id="reportModal" onclick="if(event.target===this)closeReportModal()">
     <div class="modal">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3 style="font-weight:800;font-size:17px;">ملخص تكاليف البنود الـ 16 — SkyBuild</h3>
+        <h3 style="font-weight:800;font-size:17px;">ملخص المقايسة التفصيلي (16 بنداً) — SkyBuild</h3>
         <button class="btn btn-light btn-sm" onclick="closeReportModal()">إغلاق ✕</button>
       </div>
       <div id="reportContent"></div>
@@ -688,16 +776,18 @@
       appId: "1:311610298789:web:442581f4e18f9aba11184c",
       measurementId: "G-TL1THMTTC8"
     };
-    const FIRESTORE_COLLECTION = "inspection_requests";
 
-    const STORAGE_KEY = "skybuild_engineer_suite_v1";
+    const STORAGE_KEY = "skybuild_admin_clean_v1";
     const UNITS = ["م²", "م.ط", "عدد", "شكارة", "لتر", "متر", "يومية", "مقطوعية", "قطعة", "جركن", "م³"];
 
     const DEFAULT_STATE = {
-      clientName: "أ. محمد محمود — تشطيب شقة (6 أكتوبر)",
+      collectionName: "inspection_requests",
+      selectedRequestId: null,
+      clientName: "تشطيب وحدة — SkyBuild",
       unitArea: 140,
       plasterFactor: 3,
       commonOverhead: 1500,
+      engineerQuoteNotes: "الأسعار مبدئية بناءً على البيانات المسجلة وتُراجع وتُعتمد نهائياً بعد المعاينة الهندسية.",
       activeTab: "all",
       requests: [],
       items: [
@@ -933,7 +1023,7 @@
 
     let state = loadState();
     let db = null;
-    let isFirestoreConnected = false;
+    let unsubscribeListener = null;
 
     function loadState() {
       try {
@@ -953,55 +1043,260 @@
       return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
     }
 
+    function pickFirst(obj, keys, fallback) {
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== "") {
+          return obj[k];
+        }
+      }
+      return fallback;
+    }
+
     function normalizeFirestoreDoc(doc) {
       const d = doc.data() || {};
-      const area = +(d.unitArea ?? d.area ?? 150) || 150;
-      const contractScope = d.contractScope === "supervision" ? "إشراف هندسي فقط" : "تشطيب كامل";
-      const pricingModel = d.pricingModel ? ` (${d.pricingModel})` : "";
-      const has3D = d.design3DEnabled
-        ? (d.design3DStyle ? `نعم — ${d.design3DStyle}` : "نعم (3D)")
-        : "لا";
+      const client = pickFirst(d, ["clientName", "leadName", "name", "fullName", "client"], "عميل بدون اسم");
+      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp"], "-");
+      const location = pickFirst(d, ["location", "unitLocation", "address"], "غير محدد");
+      const floor = pickFirst(d, ["floor", "unitFloor"], "-");
+      const area = Number(pickFirst(d, ["unitArea", "area"], 150)) || 150;
+
+      const rawScope = pickFirst(d, ["contractScope", "contract", "scope"], "full");
+      const contractScope = (rawScope === "supervision" || String(rawScope).includes("إشراف"))
+        ? "إشراف هندسي فقط"
+        : "تشطيب كامل";
+      const pricingModel = pickFirst(d, ["pricingModel", "model"], "");
+      const contract = pricingModel && !contractScope.includes(pricingModel)
+        ? `${contractScope} (${pricingModel})`
+        : contractScope;
+
+      const enabled3D = d.design3DEnabled === true || d.has3D === true || String(d.has3D || "").includes("نعم");
+      const style3D = pickFirst(d, ["design3DStyle", "style3D", "design3DMode"], "");
+      const has3D = enabled3D ? (style3D ? `نعم — ${style3D}` : "نعم (3D)") : "لا";
 
       return {
         id: doc.id,
-        client: d.clientName || d.name || "عميل بدون اسم",
-        phone: d.phone || d.leadPhone || "-",
-        location: d.location || d.unitLocation || "غير محدد",
-        floor: d.floor || d.unitFloor || "-",
+        client,
+        phone,
+        location,
+        floor,
         area,
-        contract: `${contractScope}${pricingModel}`,
+        contract,
         has3D,
-        status: ["new", "visit", "quoted"].includes(d.status) ? d.status : "new"
+        preferredDate: pickFirst(d, ["preferredDate", "leadDate", "date"], "غير محدد"),
+        notes: pickFirst(d, ["notes", "leadNotes"], "لا توجد ملاحظات"),
+        elevator: pickFirst(d, ["elevator", "unitElevator"], "غير محدد"),
+        utilities: Array.isArray(d.utilities) ? d.utilities.join("، ") : pickFirst(d, ["utilities"], "غير محدد"),
+        selectedItems: Array.isArray(d.selectedItems) ? d.selectedItems : [],
+        status: ["new", "visit", "quoted"].includes(d.status) ? d.status : "new",
+        quoteSent: d.quoteSent === true || d.status === "quoted",
+        quoteTotal: Number(d.quoteTotal || 0)
       };
     }
 
-    function initFirestoreListener() {
+    function getSelectedRequest() {
+      if (!state.requests.length) return null;
+      return state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
+    }
+
+    function openRequestWorkspace(id, scrollToDossier = true) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      state.selectedRequestId = r.id;
+      state.clientName = `${r.client} — ${r.location}`;
+      state.unitArea = +r.area || state.unitArea;
+      saveState();
+      syncGlobalInputs();
+      renderDashboard();
+      renderRequestDossier();
+      renderItems();
+      updateStickySummary();
+
+      if (scrollToDossier) {
+        document.getElementById("requestDossierSection").scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    function renderRequestDossier() {
+      const r = getSelectedRequest();
+      const badge = document.getElementById("selectedQuoteBadge");
+
+      if (!r) {
+        badge.className = "status-pill st-new";
+        badge.textContent = "لم يُحدد طلب بعد";
+        document.getElementById("requestDossierBody").innerHTML = `
+          <p style="color:var(--muted);font-size:13px;">اضغط على أي طلب من الداشبورد بالأعلى لعرض معلوماته الكاملة، أو أضف طلباً تجريبياً وابدأ تحليل الأسعار وإرسال المقايسة.</p>
+        `;
+        return;
+      }
+
+      if (r.quoteSent || r.status === "quoted") {
+        badge.className = "status-pill st-quoted";
+        badge.textContent = r.quoteTotal ? `تم إرسال المقايسة (${fmt(r.quoteTotal)} ج.م)` : "تم التسعير";
+      } else {
+        badge.className = "status-pill st-new";
+        badge.textContent = "لم تُرسل مقايسة بعد";
+      }
+
+      const itemsList = r.selectedItems.length
+        ? r.selectedItems.map(x => `<span class="status-pill st-visit" style="margin:2px;">${x}</span>`).join(" ")
+        : `<span style="color:var(--muted);font-size:12.5px;">يشمل المقايسة الكاملة للبنود الـ 16</span>`;
+
+      document.getElementById("requestDossierBody").innerHTML = `
+        <div class="dossier-grid">
+          <div class="dossier-box"><span>اسم العميل</span><strong>${r.client}</strong></div>
+          <div class="dossier-box"><span>رقم الموبايل / واتساب</span><strong dir="ltr">${r.phone}</strong></div>
+          <div class="dossier-box"><span>المكان</span><strong>${r.location}</strong></div>
+          <div class="dossier-box"><span>الدور</span><strong>${r.floor}</strong></div>
+          <div class="dossier-box"><span>مساحة الوحدة</span><strong>${r.area} م²</strong></div>
+          <div class="dossier-box"><span>الأسانسير</span><strong>${r.elevator}</strong></div>
+          <div class="dossier-box"><span>الخدمات الواصلة</span><strong>${r.utilities}</strong></div>
+          <div class="dossier-box"><span>نظام التعاقد</span><strong>${r.contract}</strong></div>
+          <div class="dossier-box"><span>التصميم 3D</span><strong>${r.has3D}</strong></div>
+          <div class="dossier-box"><span>الموعد المفضل للمعاينة</span><strong>${r.preferredDate}</strong></div>
+        </div>
+        <div class="dossier-box" style="margin-bottom:10px;">
+          <span>ملاحظات العميل</span>
+          <strong>${r.notes}</strong>
+        </div>
+        <div class="dossier-box">
+          <span>البنود المختارة من العميل</span>
+          <div style="margin-top:6px;">${itemsList}</div>
+        </div>
+      `;
+    }
+
+    function calcProjectTotals() {
+      let mat = 0, labor = 0, overhead = 0, grand = 0;
+      state.items.forEach(item => {
+        const b = calcItemBreakdown(item);
+        mat += b.matTotal;
+        labor += b.laborTotal;
+        overhead += b.overhead;
+        grand += b.grand;
+      });
+      return { mat, labor, overhead, grand };
+    }
+
+    async function saveAndSendQuoteToFirestore() {
+      const r = getSelectedRequest();
+      const totals = calcProjectTotals();
+
+      const quotePayload = {
+        quoteSent: true,
+        status: "quoted",
+        quoteTotal: totals.grand,
+        quoteMaterialsTotal: totals.mat,
+        quoteLaborTotal: totals.labor,
+        quoteOverheadTotal: totals.overhead,
+        quoteUnitArea: state.unitArea,
+        quoteNotes: state.engineerQuoteNotes,
+        quoteUpdatedAt: new Date().toISOString()
+      };
+
+      if (r) {
+        r.status = "quoted";
+        r.quoteSent = true;
+        r.quoteTotal = totals.grand;
+        saveState();
+        renderDashboard();
+        renderRequestDossier();
+      }
+
+      if (db && r) {
+        try {
+          await db.collection(state.collectionName).doc(r.id).set(quotePayload, { merge: true });
+          await db.collection(state.collectionName).doc(r.id).collection("quotes").add({
+            ...quotePayload,
+            clientName: r.client,
+            phone: r.phone,
+            itemsBreakdown: state.items.map(item => ({
+              num: item.num,
+              name: item.name,
+              ...calcItemBreakdown(item)
+            }))
+          });
+          alert(`تم حفظ وإرسال المقايسة للعميل (${r.client}) بإجمالي ${fmt(totals.grand)} ج.م.`);
+        } catch (err) {
+          console.error("Error saving quote:", err);
+          alert("تم تحديث المقايسة محلياً، وحدث خطأ أثناء الحفظ في Firestore: " + err.message);
+        }
+      } else {
+        alert(`تم إعداد المقايسة بإجمالي ${fmt(totals.grand)} ج.م.`);
+      }
+    }
+
+    function sendQuoteViaWhatsApp() {
+      const r = getSelectedRequest();
+      const totals = calcProjectTotals();
+      const clientName = r ? r.client : state.clientName;
+      const lines = [
+        `مرحباً ${clientName}،`,
+        `إليك ملخص المقايسة المبدئية من SkyBuild for Design & Contracting:`,
+        `• مساحة الوحدة: ${state.unitArea} م²`,
+        `• إجمالي الخامات: ${fmt(totals.mat)} ج.م`,
+        `• إجمالي المصنعيات: ${fmt(totals.labor)} ج.م`,
+        `• المصاريف الإضافية: ${fmt(totals.overhead)} ج.م`,
+        `• الإجمالي الكلي للمقايسة: ${fmt(totals.grand)} ج.م`,
+        state.engineerQuoteNotes ? `ملاحظات: ${state.engineerQuoteNotes}` : ""
+      ].filter(Boolean).join("\n");
+
+      const cleanPhone = r && r.phone && r.phone !== "-"
+        ? String(r.phone).replace(/\D/g, "").replace(/^0/, "20")
+        : "201060728015";
+      const targetPhone = cleanPhone.startsWith("20") ? cleanPhone : `20${cleanPhone}`;
+      window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(lines)}`, "_blank", "noopener,noreferrer");
+    }
+
+    function switchCollection(colName) {
+      state.collectionName = colName;
+      saveState();
+      startFirestoreListener();
+    }
+
+    function startFirestoreListener() {
       const badge = document.getElementById("firestoreSyncBadge");
+      const alertBox = document.getElementById("firestoreAlert");
+      alertBox.style.display = "none";
+
       try {
         if (!firebase.apps.length) {
           firebase.initializeApp(firebaseConfig);
         }
         db = firebase.firestore();
-        isFirestoreConnected = true;
 
-        badge.className = "sync-badge sync-live";
-        badge.innerHTML = '<i class="ph ph-broadcast"></i> متصل بـ Firestore (skybuild-a63fb) — استقبال تلقائي';
+        if (unsubscribeListener) {
+          unsubscribeListener();
+          unsubscribeListener = null;
+        }
 
-        db.collection(FIRESTORE_COLLECTION)
-          .onSnapshot(snapshot => {
-            const liveRequests = snapshot.docs.map(normalizeFirestoreDoc);
-            state.requests = liveRequests;
+        badge.className = "sync-badge sync-local";
+        badge.innerHTML = `<i class="ph ph-spinner"></i> جاري الاتصال بـ (${state.collectionName})...`;
+
+        unsubscribeListener = db.collection(state.collectionName).onSnapshot(
+          snapshot => {
+            state.requests = snapshot.docs.map(normalizeFirestoreDoc);
+            if (!state.selectedRequestId && state.requests.length) {
+              state.selectedRequestId = state.requests[0].id;
+            }
             saveState();
             renderDashboard();
-          }, err => {
-            console.error("Firestore listener error:", err);
-            badge.className = "sync-badge sync-local";
-            badge.innerHTML = '<i class="ph ph-warning"></i> تحقق من قواعد Firestore أو الاتصال';
-          });
+            renderRequestDossier();
+
+            badge.className = "sync-badge sync-live";
+            badge.innerHTML = `<i class="ph ph-broadcast"></i> متصل بـ Firestore (${state.collectionName}) — ${state.requests.length} طلب`;
+          },
+          err => {
+            console.error("Firestore error:", err);
+            badge.className = "sync-badge sync-error";
+            badge.innerHTML = `<i class="ph ph-warning-circle"></i> خطأ في الاتصال بـ Firestore`;
+            alertBox.style.display = "block";
+            alertBox.innerHTML = `تعذر قراءة البيانات من مجموعة <strong>${state.collectionName}</strong> (${err.message}). تأكد من تفعيل <strong>Firestore Database</strong> وضبط قواعد الأمان (Rules).`;
+          }
+        );
       } catch (e) {
         console.error("Firebase init error:", e);
-        badge.className = "sync-badge sync-local";
-        badge.innerHTML = '<i class="ph ph-warning"></i> تعذر تهيئة Firebase';
+        badge.className = "sync-badge sync-error";
+        badge.innerHTML = `<i class="ph ph-warning-circle"></i> فشل تهيئة Firebase`;
       }
     }
 
@@ -1025,42 +1320,50 @@
           <span class="kpi-val">${visitReqs}</span>
         </div>
         <div class="kpi-box">
-          <span class="kpi-label">تم إعداد المقايسة</span>
+          <span class="kpi-label">تم إرسال المقايسة</span>
           <span class="kpi-val emerald">${quotedReqs}</span>
         </div>
       `;
 
       const statusLabel = s => s === "new" ? "جديد" : s === "visit" ? "معاينة" : "تم التسعير";
       const statusClass = s => s === "new" ? "st-new" : s === "visit" ? "st-visit" : "st-quoted";
+      const selected = getSelectedRequest();
 
       if (!state.requests.length) {
         document.getElementById("requestsTableBody").innerHTML = `
-          <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px;">لا توجد طلبات واردة في قاعدة البيانات حالياً</td></tr>
+          <tr>
+            <td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">
+              لا توجد طلبات مسجلة في مجموعة <strong>${state.collectionName}</strong> حتى الآن.
+            </td>
+          </tr>
         `;
         return;
       }
 
-      document.getElementById("requestsTableBody").innerHTML = state.requests.map(req => `
-        <tr>
-          <td style="font-weight:800;">${req.client}</td>
-          <td dir="ltr" style="text-align:right;">${req.phone}</td>
-          <td>${req.location} — ${req.floor}</td>
-          <td class="num-col">${req.area} م²</td>
-          <td>${req.contract}</td>
-          <td>${req.has3D}</td>
-          <td>
-            <select onchange="updateRequestStatus('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
-              <option value="new" ${req.status === "new" ? "selected" : ""}>جديد</option>
-              <option value="visit" ${req.status === "visit" ? "selected" : ""}>معاينة</option>
-              <option value="quoted" ${req.status === "quoted" ? "selected" : ""}>تم التسعير</option>
-            </select>
-            <span class="status-pill ${statusClass(req.status)}" style="margin-right:6px;">${statusLabel(req.status)}</span>
-          </td>
-          <td class="no-print">
-            <button class="btn btn-dark btn-sm" onclick="loadRequestIntoEstimator('${req.id}')">فتح المقايسة</button>
-          </td>
-        </tr>
-      `).join("");
+      document.getElementById("requestsTableBody").innerHTML = state.requests.map(req => {
+        const isSelected = selected && selected.id === req.id;
+        return `
+          <tr class="request-row ${isSelected ? "selected-row" : ""}" onclick="openRequestWorkspace('${req.id}', true)">
+            <td style="font-weight:800;color:var(--obsidian);">${req.client}</td>
+            <td dir="ltr" style="text-align:right;font-weight:700;">${req.phone}</td>
+            <td>${req.location} — ${req.floor}</td>
+            <td class="num-col">${req.area} م²</td>
+            <td>${req.contract}</td>
+            <td>${req.has3D}</td>
+            <td onclick="event.stopPropagation()">
+              <select onchange="updateRequestStatus('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
+                <option value="new" ${req.status === "new" ? "selected" : ""}>جديد</option>
+                <option value="visit" ${req.status === "visit" ? "selected" : ""}>معاينة</option>
+                <option value="quoted" ${req.status === "quoted" ? "selected" : ""}>تم التسعير</option>
+              </select>
+              <span class="status-pill ${statusClass(req.status)}" style="margin-right:6px;">${statusLabel(req.status)}</span>
+            </td>
+            <td class="no-print" style="white-space:nowrap;" onclick="event.stopPropagation()">
+              <button class="btn btn-dark btn-sm" onclick="openRequestWorkspace('${req.id}', true)">فتح الطلب</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
     }
 
     async function updateRequestStatus(id, status) {
@@ -1069,54 +1372,37 @@
       r.status = status;
       saveState();
       renderDashboard();
+      renderRequestDossier();
 
-      if (isFirestoreConnected && db) {
+      if (db) {
         try {
-          await db.collection(FIRESTORE_COLLECTION).doc(id).set({ status }, { merge: true });
+          await db.collection(state.collectionName).doc(id).set({ status }, { merge: true });
         } catch (err) {
-          console.error("Error updating status in Firestore:", err);
+          console.error("Error updating status:", err);
         }
       }
-    }
-
-    function loadRequestIntoEstimator(id) {
-      const r = state.requests.find(x => x.id === id);
-      if (!r) return;
-      state.clientName = `${r.client} — ${r.location}`;
-      state.unitArea = +r.area || state.unitArea;
-      saveState();
-      syncGlobalInputs();
-      renderAll();
     }
 
     async function addSampleRequest() {
+      if (!db) return;
       const idx = state.requests.length + 1;
-      const newReq = {
-        client: `عميل جديد #${idx}`,
-        phone: "01060728015",
-        location: "القاهرة / 6 أكتوبر",
-        floor: "الدور الأول",
-        area: 150,
-        contract: "تشطيب كامل (Cost Plus)",
-        has3D: "حسب الطلب",
-        status: "new"
-      };
-
-      if (isFirestoreConnected && db) {
-        try {
-          await db.collection(FIRESTORE_COLLECTION).add({
-            ...newReq,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          return;
-        } catch (err) {
-          console.error("Error adding request to Firestore:", err);
-        }
+      try {
+        await db.collection(state.collectionName).add({
+          clientName: `عميل تجريبي #${idx}`,
+          phone: "01060728015",
+          location: "القاهرة / 6 أكتوبر",
+          floor: "الدور الثاني",
+          unitArea: 150,
+          contractScope: "full",
+          pricingModel: "Cost Plus",
+          design3DEnabled: true,
+          design3DStyle: "Modern",
+          status: "new",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (err) {
+        alert("تعذر إضافة الطلب التجريبي: " + err.message);
       }
-
-      state.requests.unshift({ id: "req-" + Date.now(), ...newReq });
-      saveState();
-      renderDashboard();
     }
 
     function calcItemBreakdown(item) {
@@ -1536,18 +1822,11 @@
     }
 
     function updateStickySummary() {
-      let mat = 0, labor = 0, overhead = 0, grand = 0;
-      state.items.forEach(item => {
-        const b = calcItemBreakdown(item);
-        mat += b.matTotal;
-        labor += b.laborTotal;
-        overhead += b.overhead;
-        grand += b.grand;
-      });
-      document.getElementById("sumMaterials").textContent = fmt(mat);
-      document.getElementById("sumLabor").textContent = fmt(labor);
-      document.getElementById("sumOverhead").textContent = fmt(overhead);
-      document.getElementById("sumGrand").textContent = fmt(grand);
+      const totals = calcProjectTotals();
+      document.getElementById("sumMaterials").textContent = fmt(totals.mat);
+      document.getElementById("sumLabor").textContent = fmt(totals.labor);
+      document.getElementById("sumOverhead").textContent = fmt(totals.overhead);
+      document.getElementById("sumGrand").textContent = fmt(totals.grand);
     }
 
     function updateItemField(itemId, key, val) {
@@ -1702,7 +1981,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "skybuild-cost-analysis.json";
+      a.download = "skybuild-admin-quote.json";
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -1716,14 +1995,17 @@
     }
 
     function syncGlobalInputs() {
+      document.getElementById("collectionSelector").value = state.collectionName || "inspection_requests";
       document.getElementById("clientName").value = state.clientName;
       document.getElementById("unitArea").value = state.unitArea;
       document.getElementById("plasterFactor").value = state.plasterFactor;
       document.getElementById("commonOverhead").value = state.commonOverhead;
+      document.getElementById("engineerQuoteNotes").value = state.engineerQuoteNotes || "";
     }
 
     function renderAll() {
       renderDashboard();
+      renderRequestDossier();
       renderNav();
       renderItems();
       updateStickySummary();
@@ -1731,7 +2013,7 @@
 
     syncGlobalInputs();
     renderAll();
-    initFirestoreListener();
+    startFirestoreListener();
   </script>
 </body>
 </html>
