@@ -3,466 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBuild for Design & Contracting | صفحة الإدارة وتحليل المقايسات</title>
+  <title>SkyBuild | صفحة الإدارة والداشبورد والمقايسات</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Firebase Compat SDK (Firestore) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
-      --bg: #F3F4F6;
-      --surface: #FFFFFF;
-      --surface-soft: #F9FAFB;
-      --surface-warm: #FFFBEB;
-      --border: #E5E7EB;
-      --border-strong: #D1D5DB;
+      --bg: #f4f5f7;
+      --card: #ffffff;
       --text: #111827;
-      --muted: #6B7280;
-      --obsidian: #090D16;
-      --slate-dark: #111827;
-      --gold: #D97706;
-      --gold-dark: #B45309;
-      --emerald: #059669;
-      --rose: #DC2626;
-      --radius: 16px;
-      --shadow: 0 4px 18px rgba(9, 13, 22, 0.05);
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --dark: #0f172a;
+      --gold: #d97706;
+      --green: #059669;
+      --red: #dc2626;
+      --blue: #2563eb;
+      --radius: 14px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Cairo", "Tajawal", sans-serif;
-      background-color: var(--bg);
+      font-family: "Cairo", sans-serif;
+      background: var(--bg);
       color: var(--text);
-      line-height: 1.65;
-      padding-bottom: 100px;
+      line-height: 1.6;
+      padding-bottom: 85px;
     }
 
-    button, select, input, textarea { font-family: inherit; }
+    button, input, select, textarea { font-family: inherit; }
 
-    .sb-header {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
+    .topbar {
+      background: var(--dark);
+      color: #fff;
+      padding: 14px 20px;
       position: sticky;
       top: 0;
-      z-index: 40;
-      box-shadow: 0 2px 10px rgba(9, 13, 22, 0.04);
+      z-index: 30;
     }
 
-    .sb-header-inner {
-      max-width: 1380px;
+    .topbar-inner {
+      max-width: 1240px;
       margin: 0 auto;
-      padding: 12px 20px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
 
-    .sb-logo-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      text-decoration: none;
-      direction: ltr;
-    }
+    .brand { font-size: 18px; font-weight: 800; }
+    .brand span { color: #fbbf24; }
 
-    .sb-logo-svg {
-      width: 52px;
-      height: 52px;
-      flex-shrink: 0;
-      transition: transform 0.25s ease;
-    }
-
-    .sb-logo-link:hover .sb-logo-svg { transform: scale(1.04); }
-
-    .sb-brand-text {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-      font-family: "Plus Jakarta Sans", sans-serif;
-    }
-
-    .sb-brand-row {
-      display: flex;
-      align-items: baseline;
-      line-height: 1;
-    }
-
-    .sb-sky {
-      font-style: italic;
-      font-weight: 800;
-      font-size: 26px;
-      color: var(--obsidian);
-      letter-spacing: -0.02em;
-    }
-
-    .sb-build {
-      font-weight: 700;
-      font-size: 26px;
-      color: var(--obsidian);
-      letter-spacing: -0.02em;
-      padding-bottom: 4px;
-      border-bottom: 3px solid var(--obsidian);
-    }
-
-    .sb-sub {
-      font-weight: 600;
-      font-size: 11px;
-      color: #4B5563;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    .sb-marquee {
-      background: var(--obsidian);
-      color: #FFFFFF;
-      border-top: 1px solid #1F2937;
-      overflow: hidden;
-      padding: 7px 0;
-    }
-
-    .sb-marquee-track {
-      display: inline-flex;
-      align-items: center;
-      gap: 28px;
-      white-space: nowrap;
-      font-size: 12.5px;
-      font-weight: 700;
-      animation: sbMarqueeRTL 22s linear infinite;
-    }
-
-    .sb-marquee-track:hover { animation-play-state: paused; }
-
-    .sb-marquee-gold {
-      color: #FBBF24;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    @keyframes sbMarqueeRTL {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
-    .header-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .btn {
       border: none;
-      border-radius: 12px;
-      padding: 9px 14px;
+      border-radius: 10px;
+      padding: 8px 13px;
       font-size: 12.5px;
-      font-weight: 800;
+      font-weight: 700;
       cursor: pointer;
-      transition: 0.18s ease;
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      text-decoration: none;
     }
 
-    .btn-dark { background: var(--obsidian); color: #FFFFFF; }
-    .btn-dark:hover { background: #1F2937; }
-    .btn-gold { background: var(--gold); color: #FFFFFF; }
-    .btn-gold:hover { background: var(--gold-dark); }
-    .btn-light { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-    .btn-light:hover { background: var(--surface-soft); border-color: var(--border-strong); }
-    .btn-phone { background: #F3F4F6; color: var(--obsidian); border: 1px solid var(--border-strong); }
-    .btn-phone:hover { background: #E5E7EB; }
-    .btn-whatsapp { background: var(--emerald); color: #FFFFFF; }
-    .btn-whatsapp:hover { background: #047857; }
-    .btn-danger { background: #FEE2E2; color: var(--rose); }
-    .btn-danger:hover { background: #FECACA; }
-    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 9px; }
+    .btn-gold { background: var(--gold); color: #fff; }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-light { background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-red { background: #fee2e2; color: var(--red); }
+    .btn-red-solid { background: var(--red); color: #fff; }
+    .btn-blue { background: #dbeafe; color: var(--blue); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
 
-    .container {
-      max-width: 1380px;
-      margin: 22px auto;
-      padding: 0 20px;
-    }
+    .wrap { max-width: 1240px; margin: 20px auto; padding: 0 16px; }
 
     .card {
-      background: var(--surface);
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .card-featured { border: 2px solid var(--slate-dark); }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
-
-    .section-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .step-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: var(--obsidian);
-      color: #FBBF24;
-      font-size: 12px;
-      font-weight: 800;
-      display: grid;
-      place-items: center;
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--obsidian);
-    }
-
-    .sync-badge {
-      font-size: 12px;
-      font-weight: 800;
-      padding: 4px 10px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-live { background: #D1FAE5; color: #065F46; }
-    .sync-local { background: #FEF3C7; color: #92400E; }
-    .sync-error { background: #FEE2E2; color: #991B1B; }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .kpi-box {
-      background: var(--surface-soft);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .kpi-label { font-size: 12px; font-weight: 700; color: var(--muted); }
-    .kpi-val { font-size: 20px; font-weight: 800; color: var(--obsidian); }
-    .kpi-val.gold { color: var(--gold-dark); }
-    .kpi-val.emerald { color: var(--emerald); }
-
-    .zones-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 14px;
-      padding: 12px;
-      background: var(--surface-soft);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      align-items: center;
-    }
-
-    .zone-chip {
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border-strong);
-      background: #FFFFFF;
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    .zone-chip:hover { border-color: var(--obsidian); }
-    .zone-chip.active {
-      background: var(--obsidian);
-      color: #FBBF24;
-      border-color: var(--obsidian);
-    }
-
-    .status-pill {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 800;
-    }
-    .st-new { background: #FEF3C7; color: #92400E; }
-    .st-visit { background: #E0E7FF; color: #1E40AF; }
-    .st-quoted { background: #D1FAE5; color: #065F46; }
-
-    .request-row {
-      cursor: pointer;
-      transition: background 0.15s ease;
-    }
-
-    .request-row:hover { background: #FFFBEB; }
-    .request-row.selected-row { background: #FEF3C7; }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 14px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .field label {
-      font-size: 12px;
-      font-weight: 700;
-      color: #374151;
-    }
-
-    .field input, .field select, .field textarea {
-      padding: 9px 11px;
-      border: 1px solid var(--border-strong);
-      border-radius: 10px;
-      font-size: 13.5px;
-      background: var(--surface-soft);
-      color: var(--text);
-      transition: 0.15s ease;
-    }
-
-    .field input:focus, .field select:focus, .field textarea:focus {
-      outline: none;
-      background: #FFFFFF;
-      border-color: var(--obsidian);
-      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
-    }
-
-    .dossier-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .dossier-box {
-      background: var(--surface-soft);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 11px 13px;
-    }
-
-    .dossier-box span {
-      display: block;
-      font-size: 11.5px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .dossier-box strong {
-      font-size: 13.5px;
-      color: var(--obsidian);
-    }
-
-    .quote-actions-bar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      background: var(--surface-warm);
-      border: 1px solid #FDE68A;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-top: 12px;
-    }
-
-    .items-nav {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 8px;
+      padding: 18px;
       margin-bottom: 18px;
     }
 
-    .nav-pill {
-      white-space: nowrap;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-size: 12.5px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    .nav-pill:hover { border-color: var(--obsidian); }
-
-    .nav-pill.active {
-      background: var(--obsidian);
-      color: #FFFFFF;
-      border-color: var(--obsidian);
-    }
-
-    .item-num {
-      background: var(--surface-warm);
-      color: var(--gold-dark);
-      border: 1px solid #FDE68A;
+    .card-title {
+      font-size: 16px;
       font-weight: 800;
-      font-size: 13px;
-      padding: 5px 11px;
-      border-radius: 9px;
-    }
-
-    .item-total-box {
-      background: var(--obsidian);
-      color: #FFFFFF;
-      padding: 8px 14px;
-      border-radius: 11px;
-      font-weight: 800;
-      font-size: 13.5px;
-    }
-
-    .item-total-box strong { color: #FBBF24; }
-
-    .sub-section {
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px dashed var(--border);
-    }
-
-    .sub-title {
-      font-size: 13.5px;
-      font-weight: 800;
-      color: var(--obsidian);
-      margin-bottom: 10px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -470,334 +108,264 @@
       gap: 8px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      margin-top: 6px;
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
     }
 
-    th, td {
-      padding: 9px 10px;
-      border-bottom: 1px solid #F1F5F9;
-      text-align: right;
+    .stat {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
     }
 
-    th {
-      background: var(--surface-soft);
-      color: var(--muted);
-      font-weight: 700;
+    .stat small { color: var(--muted); font-size: 12px; display: block; }
+    .stat strong { font-size: 20px; font-weight: 800; }
+
+    .zones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .zone-btn {
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 5px 11px;
+      border-radius: 999px;
       font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
-    td input, td select {
+    .zone-btn.active { background: var(--dark); color: #fbbf24; border-color: var(--dark); }
+
+    .bulk-bar {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 9px 8px; border-bottom: 1px solid #f1f5f9; text-align: right; }
+    th { background: #f9fafb; color: var(--muted); font-size: 12px; }
+
+    tr.req-row { cursor: pointer; }
+    tr.req-row:hover { background: #fffbeb; }
+    tr.req-row.active { background: #fef3c7; }
+
+    .zone-tag {
+      display: inline-block;
+      background: #eef2ff;
+      color: #1e3a8a;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .info-box {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .info-box small { color: var(--muted); font-size: 11.5px; display: block; }
+    .info-box strong { font-size: 13.5px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+    .field input, .field select, .field textarea {
       width: 100%;
-      padding: 6px 8px;
-      border: 1px solid var(--border-strong);
-      border-radius: 8px;
-      font-size: 12.5px;
-      background: #FFFFFF;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      font-size: 13px;
+      background: #fff;
     }
 
-    .num-col { font-weight: 800; color: var(--obsidian); white-space: nowrap; }
-
-    .note-box {
-      background: var(--surface-warm);
-      border: 1px solid #FDE68A;
-      color: #78350F;
-      padding: 10px 14px;
-      border-radius: 11px;
-      font-size: 12.5px;
-      margin-top: 10px;
-      font-weight: 600;
+    .items-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
     }
 
-    .warn-box {
-      background: #FEF2F2;
-      border: 1px solid #FECACA;
-      color: #991B1B;
-      padding: 10px 14px;
-      border-radius: 11px;
-      font-size: 12.5px;
-      margin-top: 10px;
-      font-weight: 600;
+    .pill {
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
-    .sticky-summary {
+    .pill.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+    .footer-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--obsidian);
-      color: #FFFFFF;
-      padding: 13px 24px;
+      background: var(--dark);
+      color: #fff;
+      padding: 12px 20px;
       border-top: 2px solid var(--gold);
-      box-shadow: 0 -6px 24px rgba(9, 13, 22, 0.2);
-      z-index: 50;
+      z-index: 40;
     }
 
-    .sticky-inner {
-      max-width: 1380px;
+    .footer-inner {
+      max-width: 1240px;
       margin: 0 auto;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
+      font-size: 13px;
     }
 
-    .summary-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      font-size: 13.5px;
-    }
-
-    .summary-stats strong { color: #FBBF24; font-size: 15px; }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(9, 13, 22, 0.6);
-      display: none;
-      place-items: center;
-      z-index: 100;
-      padding: 16px;
-    }
-
-    .modal-backdrop.open { display: grid; }
-
-    .modal {
-      background: var(--surface);
-      border-radius: var(--radius);
-      max-width: 860px;
-      width: 100%;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
-    }
-
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #F3F4F6; }
-    ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 4px; }
-
-    @media print {
-      .sb-header, .sticky-summary, .no-print, .items-nav { display: none !important; }
-      body { background: #FFFFFF; padding-bottom: 0; }
-      .card { box-shadow: none; break-inside: avoid; }
-    }
+    .footer-inner strong { color: #fbbf24; }
   </style>
 </head>
 <body>
 
-  <header class="sb-header">
-    <div class="sb-header-inner">
-      <a href="#" class="sb-logo-link">
-        <svg class="sb-logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="62" cy="60" r="50" fill="#F1F5F9" />
-          <path d="M 65 10 C 33 10 10 34 10 62 C 10 90 33 111 63 111 C 74 111 83 107 90 101 C 80 106 69 108 58 106 C 34 102 18 82 20 58 C 22 33 41 14 65 10 Z" fill="#0F172A" />
-          <path d="M 68 104 C 46 108 26 93 23 71 C 21 54 30 37 45 29 C 33 39 27 54 29 69 C 32 88 49 102 68 104 Z" fill="#0F172A" />
-          <text x="64" y="73" text-anchor="middle" fill="#0F172A" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="38" letter-spacing="-1.5">SB</text>
-        </svg>
-        <div class="sb-brand-text">
-          <div class="sb-brand-row">
-            <span class="sb-sky">Sky</span>
-            <span class="sb-build">Build</span>
-          </div>
-          <span class="sb-sub">for Design &amp; Contracting</span>
-        </div>
-      </a>
-
-      <div class="header-actions no-print">
-        <button class="btn btn-light" onclick="openReportModal()">
-          <i class="ph ph-table" style="color:#D97706;"></i>
-          <span>ملخص المقايسة</span>
-        </button>
-        <button class="btn btn-light" onclick="exportJSON()">
-          <i class="ph ph-download-simple" style="color:#090D16;"></i>
-          <span>تصدير JSON</span>
-        </button>
-        <button class="btn btn-light" onclick="window.print()">
-          <i class="ph ph-printer"></i>
-          <span>طباعة</span>
-        </button>
-        <button class="btn btn-danger" onclick="resetAllData()">
-          <i class="ph ph-arrow-counter-clockwise"></i>
-          <span>إعادة ضبط</span>
-        </button>
-        <a href="tel:01060728015" class="btn btn-phone">
-          <i class="ph ph-phone-call" style="color:#D97706;"></i>
-          <span dir="ltr">01060728015</span>
-        </a>
-        <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
-          <i class="ph ph-whatsapp-logo"></i>
-          <span>واتساب</span>
-        </a>
-      </div>
-    </div>
-
-    <div class="sb-marquee">
-      <div class="sb-marquee-track">
-        <span class="sb-marquee-gold">
-          <i class="ph ph-buildings"></i>
-          <span>SkyBuild for Design &amp; Contracting — نصمم ونبني تجربة متكاملة تناسبك</span>
-        </span>
-        <span style="color:#6B7280;">•</span>
-        <span>صفحة الإدارة — متابعة الطلبات وتوزيع المناطق وتحليل الأسعار وإرسال المقايسة</span>
-        <span style="color:#6B7280;">•</span>
-        <span class="sb-marquee-gold">
-          <i class="ph ph-phone"></i>
-          <span>للتواصل والاستفسار: <strong dir="ltr">01060728015</strong></span>
-        </span>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Sky<span>Build</span> — الداشبورد والمقايسات</div>
+      <div class="actions">
+        <button class="btn btn-light btn-sm" onclick="window.print()">طباعة</button>
+        <a href="https://wa.me/201060728015" target="_blank" rel="noopener noreferrer" class="btn btn-green btn-sm">واتساب الشركة</a>
       </div>
     </div>
   </header>
 
-  <div class="container">
-
-    <!-- 1) DASHBOARD & ZONES -->
-    <section class="card card-featured" id="dashboardSection">
-      <div class="section-head">
-        <div class="section-title-wrap">
-          <span class="step-badge"><i class="ph ph-gauge"></i></span>
-          <h2 class="section-title">داشبورد الطلبات وتوزيع المناطق</h2>
-          <span id="firestoreSyncBadge" class="sync-badge sync-local">جاري الاتصال بـ Firestore...</span>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;" class="no-print">
-          <select id="collectionSelector" onchange="switchCollection(this.value)" style="padding:6px 10px;border-radius:9px;border:1px solid var(--border-strong);font-size:12px;font-weight:700;">
-            <option value="inspection_requests">مجموعة: inspection_requests</option>
-            <option value="requests">مجموعة: requests</option>
-            <option value="leads">مجموعة: leads</option>
+  <main class="wrap">
+    <!-- الداشبورد والمناطق -->
+    <section class="card">
+      <div class="card-title">
+        <span>الطلبات الواردة وتقسيم المناطق</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="connStatus" style="font-size:12px;color:var(--muted);">جاري الاتصال...</span>
+          <select id="colSelect" onchange="changeCollection(this.value)" style="padding:5px 8px;border-radius:8px;border:1px solid #d1d5db;font-size:12px;">
+            <option value="inspection_requests">inspection_requests</option>
+            <option value="requests">requests</option>
+            <option value="leads">leads</option>
           </select>
-          <button class="btn btn-gold btn-sm" onclick="addSampleRequest()">+ إضافة طلب تجريبي</button>
         </div>
       </div>
 
-      <div id="firestoreAlert" class="warn-box" style="display:none;margin-bottom:14px;"></div>
+      <div class="stats" id="statsBox"></div>
+      <div class="zones" id="zonesBox"></div>
 
-      <div class="kpi-grid" id="dashboardKpis"></div>
-
-      <!-- Zones Filter Bar -->
-      <div class="zones-bar no-print" id="zonesFilterBar"></div>
-
-      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">اضغط على أي صف في الجدول لفتح <strong>لوحة معلومات الطلب الكاملة</strong>، أو استخدم زر <strong>مسح</strong> لحذف الطلب نهائياً من قاعدة البيانات.</p>
+      <div class="bulk-bar">
+        <div>
+          <label style="cursor:pointer;font-weight:700;">
+            <input type="checkbox" id="selectAllBox" onchange="toggleSelectAll(this.checked)" />
+            تحديد الظاهر
+          </label>
+          <span id="checkedCountLabel" style="margin-right:10px;color:var(--muted);">المحدد: 0 طلب</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-blue btn-sm" id="filterCheckedBtn" onclick="toggleFilterChecked()">فلترة بالمحدد (إيقاف)</button>
+          <button class="btn btn-red-solid btn-sm" onclick="deleteSelectedRequests()">حذف المحدد</button>
+        </div>
+      </div>
 
       <div style="overflow-x:auto;">
         <table>
           <thead>
             <tr>
-              <th>اسم العميل</th>
+              <th style="width:36px;"></th>
+              <th>العميل</th>
               <th>الهاتف</th>
-              <th>المنطقة</th>
-              <th>المكان / الدور</th>
-              <th>المساحة</th>
-              <th>نظام التعاقد</th>
-              <th>3D</th>
+              <th>المنطقة (من العنوان)</th>
+              <th>العنوان / المساحة</th>
               <th>الحالة</th>
-              <th class="no-print">إجراء</th>
+              <th>إجراء</th>
             </tr>
           </thead>
-          <tbody id="requestsTableBody"></tbody>
+          <tbody id="requestsTbody"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- 2) SELECTED REQUEST DOSSIER & QUOTE SENDER -->
-    <section class="card" id="requestDossierSection">
-      <div class="section-head">
-        <div class="section-title-wrap">
-          <span class="step-badge"><i class="ph ph-file-text"></i></span>
-          <h2 class="section-title">لوحة معلومات الطلب الكاملة وإرسال المقايسة</h2>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;" class="no-print">
-          <span id="selectedQuoteBadge" class="status-pill st-new">لم تُرسل مقايسة بعد</span>
-          <a href="#pricingSection" class="btn btn-dark btn-sm">الانتقال لتحليل الأسعار ↓</a>
+    <!-- تفاصيل الطلب المختار -->
+    <section class="card" id="dossierCard">
+      <div class="card-title">
+        <span>بيانات الطلب المختار وإرسال المقايسة</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-gold btn-sm" onclick="saveQuote()">حفظ وإرسال المقايسة</button>
+          <button class="btn btn-green btn-sm" onclick="sendWhatsApp()">إرسال واتساب</button>
         </div>
       </div>
+      <div id="dossierContent"></div>
+    </section>
 
-      <div id="requestDossierBody"></div>
-
-      <div class="quote-actions-bar no-print">
-        <div style="font-size:12.5px;color:#78350F;font-weight:700;">
-          بعد مراجعة البنود الـ 16 بالأسفل، يمكنك حفظ المقايسة وربطها بالطلب أو إرسال ملخصها للعميل مباشرة.
+    <!-- إعدادات الوحدة وتحليل البنود الـ 16 -->
+    <section class="card">
+      <div class="card-title"><span>بيانات الوحدة والمصاريف العامة</span></div>
+      <div class="form-grid">
+        <div class="field">
+          <label>اسم العميل / المشروع</label>
+          <input type="text" id="activeClient" oninput="state.clientName=this.value;saveLocal();updateFooter();" />
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-gold btn-sm" onclick="saveAndSendQuoteToFirestore()">
-            <i class="ph ph-paper-plane-tilt"></i>
-            <span>حفظ وإرسال المقايسة للطلب</span>
-          </button>
-          <button class="btn btn-whatsapp btn-sm" onclick="sendQuoteViaWhatsApp()">
-            <i class="ph ph-whatsapp-logo"></i>
-            <span>إرسال المقايسة واتساب للعميل</span>
-          </button>
+        <div class="field">
+          <label>مساحة الوحدة (م²)</label>
+          <input type="number" min="0" id="unitArea" oninput="state.unitArea=+this.value||0;saveLocal();renderItems();updateFooter();" />
         </div>
+        <div class="field">
+          <label>معامل الحوائط للمحارة</label>
+          <input type="number" min="0" step="0.1" id="plasterFactor" oninput="state.plasterFactor=+this.value||0;saveLocal();renderItems();updateFooter();" />
+        </div>
+        <div class="field">
+          <label>مصاريف إضافية لكل بند (ج.م)</label>
+          <input type="number" min="0" id="commonOverhead" oninput="state.commonOverhead=+this.value||0;saveLocal();renderItems();updateFooter();" />
+        </div>
+      </div>
+      <div class="field">
+        <label>ملاحظات المقايسة</label>
+        <textarea id="quoteNotes" rows="2" oninput="state.quoteNotes=this.value;saveLocal();"></textarea>
       </div>
     </section>
 
-    <!-- 3) UNIT PARAMETERS & OVERHEAD -->
-    <section class="card" id="pricingSection">
-      <div class="section-head">
-        <div class="section-title-wrap">
-          <span class="step-badge"><i class="ph ph-sliders-horizontal"></i></span>
-          <h2 class="section-title">بيانات الوحدة والمصاريف الإضافية الثابتة على كل البنود</h2>
-        </div>
-        <span style="font-size:12px;color:var(--emerald);font-weight:800;">✓ يتم الحفظ تلقائياً في المتصفح</span>
-      </div>
+    <div class="items-bar" id="itemsBar"></div>
+    <div id="itemsList"></div>
+  </main>
 
-      <div class="grid-4">
-        <div class="field">
-          <label>اسم العميل / المشروع النشط</label>
-          <input type="text" id="clientName" oninput="updateGlobal('clientName', this.value)" placeholder="مثال: تشطيب شقة - التجمع الخامس" />
-        </div>
-        <div class="field">
-          <label>مساحة السقف / الوحدة (م²)</label>
-          <input type="number" min="0" step="0.5" id="unitArea" oninput="updateGlobal('unitArea', +this.value || 0)" />
-        </div>
-        <div class="field">
-          <label>معامل الحوائط للمحارة (افتراضي ×3)</label>
-          <input type="number" min="0" step="0.1" id="plasterFactor" oninput="updateGlobal('plasterFactor', +this.value || 0)" />
-        </div>
-        <div class="field">
-          <label>مصاريف إضافية ثابتة لكل بند (هالك/نقل/تشوينات)</label>
-          <input type="number" min="0" step="50" id="commonOverhead" oninput="updateGlobal('commonOverhead', +this.value || 0)" />
-        </div>
-      </div>
-
-      <div class="field" style="margin-top:14px;">
-        <label>ملاحظات المهندس وشروط المقايسة المرسلة للعميل</label>
-        <textarea id="engineerQuoteNotes" rows="2" oninput="updateGlobal('engineerQuoteNotes', this.value)" placeholder="مثال: الأسعار استرشادية وفق المساحات المبدئية وتُعتمد نهائياً بعد المعاينة الفعلية بالموقع..."></textarea>
-      </div>
-    </section>
-
-    <!-- 4) 16 PRICING ITEMS -->
-    <div class="items-nav no-print" id="itemsNav"></div>
-    <main id="itemsContainer"></main>
-  </div>
-
-  <div class="sticky-summary">
-    <div class="sticky-inner">
-      <div class="summary-stats">
-        <div>إجمالي الخامات: <strong id="sumMaterials">0</strong> ج.م</div>
-        <div>إجمالي المصنعيات: <strong id="sumLabor">0</strong> ج.م</div>
-        <div>إجمالي المصاريف الإضافية: <strong id="sumOverhead">0</strong> ج.م</div>
-        <div>إجمالي المقايسة: <strong id="sumGrand">0</strong> ج.م</div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-light btn-sm" onclick="openReportModal()">جدول المقايسة</button>
-        <button class="btn btn-gold btn-sm" onclick="saveAndSendQuoteToFirestore()">إرسال المقايسة</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Report Modal -->
-  <div class="modal-backdrop" id="reportModal" onclick="if(event.target===this)closeReportModal()">
-    <div class="modal">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h3 style="font-weight:800;font-size:17px;">ملخص المقايسة التفصيلي (16 بنداً) — SkyBuild</h3>
-        <button class="btn btn-light btn-sm" onclick="closeReportModal()">إغلاق ✕</button>
-      </div>
-      <div id="reportContent"></div>
+  <div class="footer-bar">
+    <div class="footer-inner">
+      <div>خامات: <strong id="totMat">0</strong> ج.م | مصنعيات: <strong id="totLabor">0</strong> ج.م | إضافية: <strong id="totOver">0</strong> ج.م</div>
+      <div>الإجمالي الكلي: <strong id="totGrand">0</strong> ج.م</div>
     </div>
   </div>
 
@@ -812,1405 +380,495 @@
       measurementId: "G-TL1THMTTC8"
     };
 
-    const STORAGE_KEY = "skybuild_admin_zones_v1";
-    const UNITS = ["م²", "م.ط", "عدد", "شكارة", "لتر", "متر", "يومية", "مقطوعية", "قطعة", "جركن", "م³"];
+    const ZONES = ["مدينة نصر", "التجمع الخامس", "المعادي", "المقطم", "البساتين", "المرج", "بنها", "أشمون"];
+    const STORAGE_KEY = "skybuild_admin_exact_v1";
 
-    const REGIONS = [
-      "مدينة نصر",
-      "التجمع الخامس",
-      "المعادي",
-      "المقطم",
-      "البساتين",
-      "المرج",
-      "بنها",
-      "أشمون"
+    const DEFAULT_ITEMS = [
+      { num: "01", name: "أعمال المباني (هدم وبناء)", labor: 18500, mat: 14500 },
+      { num: "02", name: "تأسيس السباكة", labor: 8500, mat: 17300 },
+      { num: "03", name: "تأسيس الكهرباء", labor: 9500, mat: 14500 },
+      { num: "04", name: "تأسيس التكييفات", labor: 9625, mat: 17875 },
+      { num: "05", name: "أعمال الشبابيك", labor: 11400, mat: 34200 },
+      { num: "06", name: "المحارة والمصيص", labor: 29500, mat: 17500 },
+      { num: "07", name: "الجبسمبورد", labor: 7560, mat: 11340 },
+      { num: "08", name: "الأبواب", labor: 40500, mat: 0 },
+      { num: "09", name: "الأرضيات والسيراميك", labor: 11400, mat: 47520 },
+      { num: "10", name: "أعمال الدهانات", labor: 19400, mat: 35600 },
+      { num: "11", name: "أعمال الديكورات", labor: 4500, mat: 10500 },
+      { num: "12", name: "أعمال الرخام", labor: 8490, mat: 19810 },
+      { num: "13", name: "تشطيبات السباكة", labor: 5500, mat: 32500 },
+      { num: "14", name: "تشطيبات الكهرباء", labor: 6000, mat: 26500 },
+      { num: "15", name: "أعمال العزل", labor: 2500, mat: 4900 },
+      { num: "16", name: "أعمال النجارة", labor: 4000, mat: 12000 }
     ];
 
-    const DEFAULT_STATE = {
-      collectionName: "inspection_requests",
-      selectedRequestId: null,
-      selectedZoneFilter: "all",
+    let state = {
+      collection: "inspection_requests",
+      zoneFilter: "all",
+      onlyChecked: false,
+      selectedIds: [],
+      selectedId: null,
       clientName: "تشطيب وحدة — SkyBuild",
       unitArea: 140,
       plasterFactor: 3,
       commonOverhead: 1500,
-      engineerQuoteNotes: "الأسعار مبدئية بناءً على البيانات المسجلة وتُراجع وتُعتمد نهائياً بعد المعاينة الهندسية.",
-      activeTab: "all",
+      quoteNotes: "",
+      activeItem: "all",
       requests: [],
-      items: [
-        {
-          id: "masonry",
-          num: "01",
-          name: "أعمال المباني (هدم وإزالة مخلفات + بناء)",
-          type: "masonry",
-          demolitionCost: 4500,
-          buildCost: 14000,
-          materials: [
-            { name: "طوب أسمنتي / أحمر", unit: "عدد", qty: 2000, price: 2.2 },
-            { name: "أسمنت بورتلاندي", unit: "شكارة", qty: 35, price: 165 },
-            { name: "رمل حرش", unit: "م³", qty: 10, price: 220 }
-          ]
-        },
-        {
-          id: "plumbing_rough",
-          num: "02",
-          name: "تأسيس السباكة",
-          type: "lump_plus_mat",
-          laborCost: 8500,
-          laborLabel: "مصنعية تأسيس السباكة (مقطوعية)",
-          materials: [
-            { name: "مواسير تغذية وبولي بروبلين ولوازمها", unit: "مقطوعية", qty: 1, price: 9500 },
-            { name: "مواسير صرف ومشتملاتها", unit: "مقطوعية", qty: 1, price: 7800 }
-          ]
-        },
-        {
-          id: "elec_rough",
-          num: "03",
-          name: "تأسيس الكهرباء",
-          type: "lump_plus_mat",
-          laborCost: 9500,
-          laborLabel: "مصنعية تأسيس الكهرباء (مقطوعية)",
-          materials: [
-            { name: "أسلاك وخراطيم ولوحات تأسيس", unit: "مقطوعية", qty: 1, price: 14500 }
-          ]
-        },
-        {
-          id: "hvac_rough",
-          num: "04",
-          name: "تأسيس التكييفات (توريد وتركيب بالمتر الطولي)",
-          type: "linear_supply_install",
-          length: 25,
-          ratePerMeter: 1100,
-          materials: []
-        },
-        {
-          id: "windows",
-          num: "05",
-          name: "أعمال الشبابيك (توريد وتركيب بالمتر المسطح)",
-          type: "windows",
-          system: "alumetal",
-          alumetalProfiles: [
-            { name: "PS صغير", area: 4, rate: 2600 },
-            { name: "PS كبير", area: 5, rate: 3100 },
-            { name: "تانجو", area: 3, rate: 3600 },
-            { name: "جامبو", area: 2, rate: 4200 }
-          ],
-          upvcProfiles: [
-            { name: "قطاع UPVC قياسي", area: 6, rate: 3800 }
-          ],
-          woodArea: 0,
-          woodRate: 3400,
-          materials: []
-        },
-        {
-          id: "plastering",
-          num: "06",
-          name: "المحارة والمصيص",
-          type: "plastering",
-          plasterRate: 65,
-          hasFlatGypsum: false,
-          includeMassis: true,
-          massisLabor: 2200,
-          materials: [
-            { name: "أسمنت محارة", unit: "شكارة", qty: 60, price: 165 },
-            { name: "رمل محارة", unit: "م³", qty: 18, price: 220 },
-            { name: "جبس مصيص", unit: "شكارة", qty: 15, price: 95 },
-            { name: "أسمنت أبيض مصيص", unit: "شكارة", qty: 8, price: 240 }
-          ]
-        },
-        {
-          id: "gypsum",
-          num: "07",
-          name: "الجبسمبورد (توريد وتركيب بالمتر المسطح)",
-          type: "gypsum",
-          system: "ركب",
-          area: 45,
-          ratePerSqm: 420,
-          materials: []
-        },
-        {
-          id: "doors",
-          num: "08",
-          name: "الأبواب (بالعدد)",
-          type: "doors",
-          entries: [
-            { category: "خارجي", kind: "مصفح", count: 1, unitPrice: 14500 },
-            { category: "داخلي", kind: "عمولة", count: 5, unitPrice: 5200 }
-          ],
-          materials: []
-        },
-        {
-          id: "flooring",
-          num: "09",
-          name: "الأرضيات والسيراميك",
-          type: "flooring",
-          area: 120,
-          laborRate: 95,
-          materials: [
-            { name: "سيراميك / بورسلين", unit: "م²", qty: 126, price: 340 },
-            { name: "مادة لصق", unit: "شكارة", qty: 24, price: 145 },
-            { name: "مشابك وكلبسات تسوية", unit: "قطعة", qty: 300, price: 4 }
-          ]
-        },
-        {
-          id: "painting",
-          num: "10",
-          name: "أعمال الدهانات",
-          type: "painting",
-          paintArea: 320,
-          laborPerSqm: 55,
-          cornerDays: 4,
-          cornerDailyWage: 450,
-          materials: [
-            { name: "سيلر مائي", unit: "جركن", qty: 6, price: 420 },
-            { name: "سيلر حراري (عند وجود جبسمبورد)", unit: "جركن", qty: 3, price: 650 },
-            { name: "معجون دايتون", unit: "شكارة", qty: 10, price: 230 },
-            { name: "معجون شروخ", unit: "قطعة", qty: 5, price: 140 },
-            { name: "بلاستيك 3030", unit: "جركن", qty: 5, price: 520 },
-            { name: "بلاستيك 7070", unit: "جركن", qty: 4, price: 740 },
-            { name: "ألوان سكيب", unit: "قطعة", qty: 12, price: 65 },
-            { name: "لزق تيب", unit: "قطعة", qty: 10, price: 35 },
-            { name: "ورنيش مائي", unit: "لتر", qty: 5, price: 240 },
-            { name: "دهانات التشطيب (جوتن / GLC تقريبي)", unit: "جركن", qty: 6, price: 1350 },
-            { name: "صنفرة", unit: "متر", qty: 40, price: 25 },
-            { name: "معجون ممتاز", unit: "شكارة", qty: 8, price: 290 }
-          ]
-        },
-        {
-          id: "decor",
-          num: "11",
-          name: "أعمال الديكورات",
-          type: "decor",
-          decorItems: [
-            { name: "بانوهات / فيوتك حوائط", matQty: 1, matPrice: 4500, laborQty: 1, laborPrice: 2500 },
-            { name: "تكسيات خشبية / بديل خشب", matQty: 1, matPrice: 6000, laborQty: 1, laborPrice: 2000 }
-          ],
-          materials: []
-        },
-        {
-          id: "marble",
-          num: "12",
-          name: "أعمال الرخام (مطبخ م² / عتب م.ط)",
-          type: "marble",
-          kitchenArea: 8,
-          kitchenRate: 2400,
-          thresholdLength: 14,
-          thresholdRate: 650,
-          materials: []
-        },
-        {
-          id: "plumbing_finishing",
-          num: "13",
-          name: "تشطيبات السباكة",
-          type: "lump_plus_mat",
-          laborCost: 5500,
-          laborLabel: "مصنعية تشطيب السباكة (مقطوعية)",
-          materials: [
-            { name: "قاعدة", unit: "عدد", qty: 2, price: 4800 },
-            { name: "حوض حمام", unit: "عدد", qty: 2, price: 2200 },
-            { name: "حوض مطبخ", unit: "عدد", qty: 1, price: 3100 },
-            { name: "خلاط حوض حمام", unit: "عدد", qty: 2, price: 1850 },
-            { name: "خلاط حوض مطبخ", unit: "عدد", qty: 1, price: 2100 },
-            { name: "خلاط شاور", unit: "عدد", qty: 2, price: 2400 },
-            { name: "خلاط شطاف", unit: "عدد", qty: 2, price: 650 },
-            { name: "حنفيات غسالة", unit: "عدد", qty: 2, price: 280 },
-            { name: "محابس", unit: "عدد", qty: 8, price: 220 },
-            { name: "وش نيكل", unit: "عدد", qty: 10, price: 65 },
-            { name: "شطاف خارجي", unit: "عدد", qty: 2, price: 450 },
-            { name: "وصلات وإضافات أخرى", unit: "مقطوعية", qty: 1, price: 1800 }
-          ]
-        },
-        {
-          id: "elec_finishing",
-          num: "14",
-          name: "تشطيبات الكهرباء",
-          type: "lump_plus_mat",
-          laborCost: 6000,
-          laborLabel: "مصنعية تشطيب الكهرباء (مقطوعية)",
-          materials: [
-            { name: "برايز ومفاتيح", unit: "عدد", qty: 35, price: 95 },
-            { name: "شاسيهات", unit: "عدد", qty: 25, price: 55 },
-            { name: "أوشاش", unit: "عدد", qty: 25, price: 45 },
-            { name: "ليد بروفايل", unit: "م.ط", qty: 20, price: 260 },
-            { name: "ليد عادي", unit: "متر", qty: 30, price: 85 },
-            { name: "كشافات", unit: "عدد", qty: 4, price: 450 },
-            { name: "أسبوتات", unit: "عدد", qty: 24, price: 120 },
-            { name: "أباليك", unit: "عدد", qty: 4, price: 650 },
-            { name: "دلايات", unit: "عدد", qty: 3, price: 550 },
-            { name: "نجف", unit: "عدد", qty: 2, price: 2800 },
-            { name: "مفاتيح أوتوماتيك", unit: "عدد", qty: 12, price: 180 },
-            { name: "برايز مجوفة", unit: "عدد", qty: 4, price: 140 },
-            { name: "برايز ثلاثية", unit: "عدد", qty: 6, price: 130 }
-          ]
-        },
-        {
-          id: "waterproofing",
-          num: "15",
-          name: "أعمال العزل المائي والحراري",
-          type: "lump_plus_mat",
-          laborCost: 2500,
-          laborLabel: "مصنعية العزل (مقطوعية)",
-          materials: [
-            { name: "مادة عزل مائي / حراري", unit: "م²", qty: 35, price: 140 }
-          ]
-        },
-        {
-          id: "carpentry_misc",
-          num: "16",
-          name: "أعمال النجارة والمطبخ والدريسنج",
-          type: "lump_plus_mat",
-          laborCost: 4000,
-          laborLabel: "مصنعية تركيب وإكسسوارات (مقطوعية)",
-          materials: [
-            { name: "وحدات وإكسسوارات نجارة", unit: "مقطوعية", qty: 1, price: 12000 }
-          ]
-        }
-      ]
+      items: structuredClone(DEFAULT_ITEMS)
     };
 
-    let state = loadState();
     let db = null;
-    let unsubscribeListener = null;
+    let unsub = null;
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return structuredClone(DEFAULT_STATE);
-        return { ...structuredClone(DEFAULT_STATE), ...JSON.parse(raw) };
-      } catch {
-        return structuredClone(DEFAULT_STATE);
-      }
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    function loadLocal() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) state = { ...state, ...JSON.parse(raw) };
+        if (!Array.isArray(state.selectedIds)) state.selectedIds = [];
+      } catch {}
     }
 
     function fmt(n) {
       return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
     }
 
-    function isGarbledOrTechnical(str, docId) {
-      if (!str) return true;
-      const s = String(str).trim();
-      if (!s) return true;
-      if (docId && s === docId) return true;
-      if (/^[A-Za-z0-9_-]{18,}$/.test(s)) return true;
-      if (/^(undefined|null|nan|test|sample|عميل تجريبي)$/i.test(s)) return true;
-      return false;
-    }
+    // قراءة اسم العميل كما سجله العميل بالضبط بدون اختلاق أسماء
+    function getExactClientName(d, docId) {
+      if (!d || typeof d !== "object") return `#${String(docId || "").slice(-6)}`;
 
-    function extractClientName(d, docId) {
-      const candidates = [
-        d.clientName,
-        d.fullName,
-        d.name,
-        d.leadName,
-        d.client,
-        d.customerName,
-        d.clientData && (d.clientData.name || d.clientData.fullName || d.clientData.clientName),
-        d.customer && (d.customer.name || d.customer.fullName)
+      const keys = [
+        "clientName", "fullName", "name", "leadName", "client",
+        "customerName", "userName", "username", "ownerName", "title"
       ];
-      for (const c of candidates) {
-        if (typeof c === "string" && !isGarbledOrTechnical(c, docId)) {
-          return c.trim();
-        }
-      }
-      return "اسم غير مسجل في الطلب";
-    }
 
-    function detectRegion(d, locationText) {
-      const explicit = d.region || d.zone || d.areaZone || d.district || "";
-      if (explicit && REGIONS.includes(String(explicit).trim())) {
-        return String(explicit).trim();
-      }
-      const hay = `${explicit} ${locationText || ""}`;
-      for (const reg of REGIONS) {
-        if (hay.includes(reg)) return reg;
-      }
-      return "غير محدد";
-    }
-
-    function pickFirst(obj, keys, fallback) {
       for (const k of keys) {
-        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== "") {
-          return obj[k];
+        if (typeof d[k] === "string" && d[k].trim()) {
+          return d[k].trim();
         }
       }
-      return fallback;
+
+      for (const val of Object.values(d)) {
+        if (val && typeof val === "object" && !Array.isArray(val)) {
+          for (const k of keys) {
+            if (typeof val[k] === "string" && val[k].trim()) {
+              return val[k].trim();
+            }
+          }
+        }
+      }
+
+      return `#${String(docId || "").slice(-6)}`;
     }
 
-    function normalizeFirestoreDoc(doc) {
+    // استخراج المنطقة تلقائياً من عنوان الوحدة / بيانات العميل
+    function extractZoneFromAddress(d) {
+      const addressParts = [
+        d.location, d.unitLocation, d.address, d.unitAddress,
+        d.areaName, d.district, d.region, d.zone, d.city
+      ].filter(v => typeof v === "string" && v.trim());
+
+      const fullAddress = addressParts.join(" — ").trim();
+
+      for (const z of ZONES) {
+        if (fullAddress.includes(z)) {
+          return { zone: z, fullAddress: fullAddress || z };
+        }
+      }
+
+      if (fullAddress) {
+        return { zone: fullAddress, fullAddress };
+      }
+
+      return { zone: "غير محدد بالعنوان", fullAddress: "-" };
+    }
+
+    function mapDoc(doc) {
       const d = doc.data() || {};
-      const client = extractClientName(d, doc.id);
-      const phone = pickFirst(d, ["phone", "leadPhone", "mobile", "whatsapp", "phoneNumber"], "-");
-      const location = pickFirst(d, ["location", "unitLocation", "address", "areaName"], "غير محدد");
-      const zone = detectRegion(d, location);
-      const floor = pickFirst(d, ["floor", "unitFloor"], "-");
-      const area = Number(pickFirst(d, ["unitArea", "area"], 150)) || 150;
-
-      const rawScope = pickFirst(d, ["contractScope", "contract", "scope"], "full");
-      const contractScope = (rawScope === "supervision" || String(rawScope).includes("إشراف"))
-        ? "إشراف هندسي فقط"
-        : "تشطيب كامل";
-      const pricingModel = pickFirst(d, ["pricingModel", "model"], "");
-      const contract = pricingModel && !contractScope.includes(pricingModel)
-        ? `${contractScope} (${pricingModel})`
-        : contractScope;
-
-      const enabled3D = d.design3DEnabled === true || d.has3D === true || String(d.has3D || "").includes("نعم");
-      const style3D = pickFirst(d, ["design3DStyle", "style3D", "design3DMode"], "");
-      const has3D = enabled3D ? (style3D ? `نعم — ${style3D}` : "نعم (3D)") : "لا";
-
+      const addr = extractZoneFromAddress(d);
       return {
         id: doc.id,
-        client,
-        phone,
-        location,
-        zone,
-        floor,
-        area,
-        contract,
-        has3D,
-        preferredDate: pickFirst(d, ["preferredDate", "leadDate", "date"], "غير محدد"),
-        notes: pickFirst(d, ["notes", "leadNotes"], "لا توجد ملاحظات"),
-        elevator: pickFirst(d, ["elevator", "unitElevator"], "غير محدد"),
-        utilities: Array.isArray(d.utilities) ? d.utilities.join("، ") : pickFirst(d, ["utilities"], "غير محدد"),
-        selectedItems: Array.isArray(d.selectedItems) ? d.selectedItems : [],
+        client: getExactClientName(d, doc.id),
+        phone: d.phone || d.leadPhone || d.mobile || d.whatsapp || "-",
+        zone: addr.zone,
+        location: addr.fullAddress,
+        floor: d.floor || d.unitFloor || "-",
+        area: Number(d.unitArea || d.area || 140) || 140,
+        contract: d.contract || d.contractScope || "-",
+        has3D: d.has3D || d.design3DStyle || "-",
+        date: d.preferredDate || d.date || "-",
+        notes: d.notes || "-",
         status: ["new", "visit", "quoted"].includes(d.status) ? d.status : "new",
-        quoteSent: d.quoteSent === true || d.status === "quoted",
         quoteTotal: Number(d.quoteTotal || 0)
       };
     }
 
-    function getFilteredRequests() {
-      if (!state.selectedZoneFilter || state.selectedZoneFilter === "all") {
-        return state.requests;
-      }
-      return state.requests.filter(r => r.zone === state.selectedZoneFilter);
+    function changeCollection(col) {
+      state.collection = col;
+      state.selectedIds = [];
+      state.onlyChecked = false;
+      saveLocal();
+      connectFirestore();
     }
 
-    function setZoneFilter(zone) {
-      state.selectedZoneFilter = zone;
-      saveState();
-      renderZonesBar();
-      renderDashboard();
-    }
+    function connectFirestore() {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      if (unsub) unsub();
 
-    function renderZonesBar() {
-      const bar = document.getElementById("zonesFilterBar");
-      const allCount = state.requests.length;
-      const chips = [
-        `<button class="zone-chip ${state.selectedZoneFilter === "all" ? "active" : ""}" onclick="setZoneFilter('all')">كل المناطق (${allCount})</button>`
-      ];
-
-      REGIONS.forEach(reg => {
-        const count = state.requests.filter(r => r.zone === reg).length;
-        chips.push(`
-          <button class="zone-chip ${state.selectedZoneFilter === reg ? "active" : ""}" onclick="setZoneFilter('${reg}')">
-            ${reg} (${count})
-          </button>
-        `);
+      document.getElementById("connStatus").textContent = `متصل بـ ${state.collection}`;
+      unsub = db.collection(state.collection).onSnapshot(snap => {
+        state.requests = snap.docs.map(mapDoc);
+        const validIds = new Set(state.requests.map(r => r.id));
+        state.selectedIds = state.selectedIds.filter(id => validIds.has(id));
+        if (!state.selectedId && state.requests.length) state.selectedId = state.requests[0].id;
+        saveLocal();
+        renderDashboard();
+        renderDossier();
+      }, err => {
+        document.getElementById("connStatus").textContent = "خطأ في الاتصال";
+        console.error(err);
       });
-
-      const unzonedCount = state.requests.filter(r => r.zone === "غير محدد").length;
-      if (unzonedCount > 0) {
-        chips.push(`
-          <button class="zone-chip ${state.selectedZoneFilter === "غير محدد" ? "active" : ""}" onclick="setZoneFilter('غير محدد')">
-            غير محدد (${unzonedCount})
-          </button>
-        `);
-      }
-
-      bar.innerHTML = `<span style="font-size:12px;font-weight:800;color:var(--muted);">المناطق:</span>` + chips.join("");
     }
 
-    function getSelectedRequest() {
-      if (!state.requests.length) return null;
-      return state.requests.find(r => r.id === state.selectedRequestId) || state.requests[0];
+    function getVisibleRequests() {
+      let list = state.requests;
+      if (state.zoneFilter !== "all") {
+        list = list.filter(r => r.zone === state.zoneFilter);
+      }
+      if (state.onlyChecked) {
+        const set = new Set(state.selectedIds);
+        list = list.filter(r => set.has(r.id));
+      }
+      return list;
     }
 
-    function openRequestWorkspace(id, scrollToDossier = true) {
-      const r = state.requests.find(x => x.id === id);
-      if (!r) return;
-      state.selectedRequestId = r.id;
-      state.clientName = `${r.client} — ${r.zone !== "غير محدد" ? r.zone : r.location}`;
-      state.unitArea = +r.area || state.unitArea;
-      saveState();
-      syncGlobalInputs();
-      renderDashboard();
-      renderRequestDossier();
-      renderItems();
-      updateStickySummary();
+    function renderStats() {
+      const total = state.requests.length;
+      const isNew = state.requests.filter(r => r.status === "new").length;
+      const isVisit = state.requests.filter(r => r.status === "visit").length;
+      const isQuoted = state.requests.filter(r => r.status === "quoted").length;
 
-      if (scrollToDossier) {
-        document.getElementById("requestDossierSection").scrollIntoView({ behavior: "smooth" });
-      }
-    }
-
-    function renderRequestDossier() {
-      const r = getSelectedRequest();
-      const badge = document.getElementById("selectedQuoteBadge");
-
-      if (!r) {
-        badge.className = "status-pill st-new";
-        badge.textContent = "لم يُحدد طلب بعد";
-        document.getElementById("requestDossierBody").innerHTML = `
-          <p style="color:var(--muted);font-size:13px;">اضغط على أي طلب من الداشبورد بالأعلى لعرض معلوماته الكاملة، أو أضف طلباً تجريبياً وابدأ تحليل الأسعار وإرسال المقايسة.</p>
-        `;
-        return;
-      }
-
-      if (r.quoteSent || r.status === "quoted") {
-        badge.className = "status-pill st-quoted";
-        badge.textContent = r.quoteTotal ? `تم إرسال المقايسة (${fmt(r.quoteTotal)} ج.م)` : "تم التسعير";
-      } else {
-        badge.className = "status-pill st-new";
-        badge.textContent = "لم تُرسل مقايسة بعد";
-      }
-
-      const itemsList = r.selectedItems.length
-        ? r.selectedItems.map(x => `<span class="status-pill st-visit" style="margin:2px;">${x}</span>`).join(" ")
-        : `<span style="color:var(--muted);font-size:12.5px;">يشمل المقايسة الكاملة للبنود الـ 16</span>`;
-
-      document.getElementById("requestDossierBody").innerHTML = `
-        <div class="dossier-grid">
-          <div class="dossier-box"><span>اسم العميل</span><strong>${r.client}</strong></div>
-          <div class="dossier-box"><span>رقم الموبايل / واتساب</span><strong dir="ltr">${r.phone}</strong></div>
-          <div class="dossier-box"><span>المنطقة</span><strong>${r.zone}</strong></div>
-          <div class="dossier-box"><span>المكان التفصيلي</span><strong>${r.location}</strong></div>
-          <div class="dossier-box"><span>الدور</span><strong>${r.floor}</strong></div>
-          <div class="dossier-box"><span>مساحة الوحدة</span><strong>${r.area} م²</strong></div>
-          <div class="dossier-box"><span>الأسانسير</span><strong>${r.elevator}</strong></div>
-          <div class="dossier-box"><span>الخدمات الواصلة</span><strong>${r.utilities}</strong></div>
-          <div class="dossier-box"><span>نظام التعاقد</span><strong>${r.contract}</strong></div>
-          <div class="dossier-box"><span>التصميم 3D</span><strong>${r.has3D}</strong></div>
-          <div class="dossier-box"><span>الموعد المفضل للمعاينة</span><strong>${r.preferredDate}</strong></div>
-        </div>
-        <div class="dossier-box" style="margin-bottom:10px;">
-          <span>ملاحظات العميل</span>
-          <strong>${r.notes}</strong>
-        </div>
-        <div class="dossier-box">
-          <span>البنود المختارة من العميل</span>
-          <div style="margin-top:6px;">${itemsList}</div>
-        </div>
+      document.getElementById("statsBox").innerHTML = `
+        <div class="stat"><small>إجمالي الطلبات</small><strong>${total}</strong></div>
+        <div class="stat"><small>جديد</small><strong>${isNew}</strong></div>
+        <div class="stat"><small>معاينة</small><strong>${isVisit}</strong></div>
+        <div class="stat"><small>تم التسعير</small><strong>${isQuoted}</strong></div>
       `;
     }
 
-    function calcProjectTotals() {
-      let mat = 0, labor = 0, overhead = 0, grand = 0;
-      state.items.forEach(item => {
-        const b = calcItemBreakdown(item);
-        mat += b.matTotal;
-        labor += b.laborTotal;
-        overhead += b.overhead;
-        grand += b.grand;
-      });
-      return { mat, labor, overhead, grand };
-    }
+    function renderZones() {
+      const extraZones = Array.from(new Set(
+        state.requests
+          .map(r => r.zone)
+          .filter(z => z && !ZONES.includes(z) && z !== "غير محدد بالعنوان")
+      ));
 
-    async function saveAndSendQuoteToFirestore() {
-      const r = getSelectedRequest();
-      const totals = calcProjectTotals();
+      const allZonesList = [...ZONES, ...extraZones];
+      let html = `<button class="zone-btn ${state.zoneFilter === "all" ? "active" : ""}" onclick="setZone('all')">الكل (${state.requests.length})</button>`;
 
-      const quotePayload = {
-        quoteSent: true,
-        status: "quoted",
-        quoteTotal: totals.grand,
-        quoteMaterialsTotal: totals.mat,
-        quoteLaborTotal: totals.labor,
-        quoteOverheadTotal: totals.overhead,
-        quoteUnitArea: state.unitArea,
-        quoteNotes: state.engineerQuoteNotes,
-        quoteUpdatedAt: new Date().toISOString()
-      };
-
-      if (r) {
-        r.status = "quoted";
-        r.quoteSent = true;
-        r.quoteTotal = totals.grand;
-        saveState();
-        renderDashboard();
-        renderRequestDossier();
+      for (const z of allZonesList) {
+        const c = state.requests.filter(r => r.zone === z).length;
+        html += `<button class="zone-btn ${state.zoneFilter === z ? "active" : ""}" onclick="setZone('${z.replace(/'/g, "\\'")}')">${z} (${c})</button>`;
       }
 
-      if (db && r) {
-        try {
-          await db.collection(state.collectionName).doc(r.id).set(quotePayload, { merge: true });
-          await db.collection(state.collectionName).doc(r.id).collection("quotes").add({
-            ...quotePayload,
-            clientName: r.client,
-            phone: r.phone,
-            zone: r.zone,
-            itemsBreakdown: state.items.map(item => ({
-              num: item.num,
-              name: item.name,
-              ...calcItemBreakdown(item)
-            }))
-          });
-          alert(`تم حفظ وإرسال المقايسة للعميل (${r.client}) بإجمالي ${fmt(totals.grand)} ج.م.`);
-        } catch (err) {
-          console.error("Error saving quote:", err);
-          alert("تم تحديث المقايسة محلياً، وحدث خطأ أثناء الحفظ في Firestore: " + err.message);
-        }
+      const unzoned = state.requests.filter(r => r.zone === "غير محدد بالعنوان").length;
+      if (unzoned > 0) {
+        html += `<button class="zone-btn ${state.zoneFilter === "غير محدد بالعنوان" ? "active" : ""}" onclick="setZone('غير محدد بالعنوان')">غير محدد (${unzoned})</button>`;
+      }
+
+      document.getElementById("zonesBox").innerHTML = html;
+    }
+
+    function setZone(z) {
+      state.zoneFilter = z;
+      saveLocal();
+      renderZones();
+      renderRows();
+    }
+
+    function updateBulkBar() {
+      document.getElementById("checkedCountLabel").textContent = `المحدد: ${state.selectedIds.length} طلب`;
+      const btn = document.getElementById("filterCheckedBtn");
+      btn.textContent = state.onlyChecked ? "عرض كل الطلبات (إلغاء الفلتر)" : "فلترة بالمحدد";
+    }
+
+    function toggleCheckRequest(id, checked) {
+      if (checked) {
+        if (!state.selectedIds.includes(id)) state.selectedIds.push(id);
       } else {
-        alert(`تم إعداد المقايسة بإجمالي ${fmt(totals.grand)} ج.م.`);
+        state.selectedIds = state.selectedIds.filter(x => x !== id);
       }
+      saveLocal();
+      updateBulkBar();
+      if (state.onlyChecked) renderRows();
     }
 
-    function sendQuoteViaWhatsApp() {
-      const r = getSelectedRequest();
-      const totals = calcProjectTotals();
-      const clientName = r ? r.client : state.clientName;
-      const lines = [
-        `مرحباً ${clientName}،`,
-        `إليك ملخص المقايسة المبدئية من SkyBuild for Design & Contracting:`,
-        r && r.zone !== "غير محدد" ? `• المنطقة: ${r.zone}` : "",
-        `• مساحة الوحدة: ${state.unitArea} م²`,
-        `• إجمالي الخامات: ${fmt(totals.mat)} ج.م`,
-        `• إجمالي المصنعيات: ${fmt(totals.labor)} ج.م`,
-        `• المصاريف الإضافية: ${fmt(totals.overhead)} ج.م`,
-        `• الإجمالي الكلي للمقايسة: ${fmt(totals.grand)} ج.م`,
-        state.engineerQuoteNotes ? `ملاحظات: ${state.engineerQuoteNotes}` : ""
-      ].filter(Boolean).join("\n");
-
-      const cleanPhone = r && r.phone && r.phone !== "-"
-        ? String(r.phone).replace(/\D/g, "").replace(/^0/, "20")
-        : "201060728015";
-      const targetPhone = cleanPhone.startsWith("20") ? cleanPhone : `20${cleanPhone}`;
-      window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(lines)}`, "_blank", "noopener,noreferrer");
+    function toggleSelectAll(checked) {
+      const visible = getVisibleRequests();
+      if (checked) {
+        const set = new Set([...state.selectedIds, ...visible.map(r => r.id)]);
+        state.selectedIds = Array.from(set);
+      } else {
+        const visSet = new Set(visible.map(r => r.id));
+        state.selectedIds = state.selectedIds.filter(id => !visSet.has(id));
+      }
+      saveLocal();
+      renderRows();
+      updateBulkBar();
     }
 
-    function switchCollection(colName) {
-      state.collectionName = colName;
-      saveState();
-      startFirestoreListener();
+    function toggleFilterChecked() {
+      if (!state.onlyChecked && state.selectedIds.length === 0) {
+        alert("حدد طلباً واحداً أو أكثر أولاً.");
+        return;
+      }
+      state.onlyChecked = !state.onlyChecked;
+      saveLocal();
+      updateBulkBar();
+      renderRows();
     }
 
-    function startFirestoreListener() {
-      const badge = document.getElementById("firestoreSyncBadge");
-      const alertBox = document.getElementById("firestoreAlert");
-      alertBox.style.display = "none";
+    async function deleteSelectedRequests() {
+      if (!state.selectedIds.length) {
+        alert("لم يتم تحديد أي طلبات للحذف.");
+        return;
+      }
+      if (!confirm(`هل أنت متأكد من حذف (${state.selectedIds.length}) طلب محدد نهائياً؟`)) return;
 
-      try {
-        if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
-        }
-        db = firebase.firestore();
+      const idsToDelete = [...state.selectedIds];
+      state.requests = state.requests.filter(r => !idsToDelete.includes(r.id));
+      state.selectedIds = [];
+      if (idsToDelete.includes(state.selectedId)) {
+        state.selectedId = state.requests[0]?.id || null;
+      }
+      saveLocal();
+      renderDashboard();
+      renderDossier();
 
-        if (unsubscribeListener) {
-          unsubscribeListener();
-          unsubscribeListener = null;
-        }
-
-        badge.className = "sync-badge sync-local";
-        badge.innerHTML = `<i class="ph ph-spinner"></i> جاري الاتصال بـ (${state.collectionName})...`;
-
-        unsubscribeListener = db.collection(state.collectionName).onSnapshot(
-          snapshot => {
-            state.requests = snapshot.docs.map(normalizeFirestoreDoc);
-            if (!state.selectedRequestId && state.requests.length) {
-              state.selectedRequestId = state.requests[0].id;
-            } else if (state.selectedRequestId && !state.requests.some(r => r.id === state.selectedRequestId)) {
-              state.selectedRequestId = state.requests.length ? state.requests[0].id : null;
-            }
-            saveState();
-            renderZonesBar();
-            renderDashboard();
-            renderRequestDossier();
-
-            badge.className = "sync-badge sync-live";
-            badge.innerHTML = `<i class="ph ph-broadcast"></i> متصل بـ Firestore (${state.collectionName}) — ${state.requests.length} طلب`;
-          },
-          err => {
-            console.error("Firestore error:", err);
-            badge.className = "sync-badge sync-error";
-            badge.innerHTML = `<i class="ph ph-warning-circle"></i> خطأ في الاتصال بـ Firestore`;
-            alertBox.style.display = "block";
-            alertBox.innerHTML = `تعذر قراءة البيانات من مجموعة <strong>${state.collectionName}</strong> (${err.message}). تأكد من تفعيل <strong>Firestore Database</strong> وضبط قواعد الأمان (Rules).`;
+      if (db) {
+        for (const id of idsToDelete) {
+          try {
+            await db.collection(state.collection).doc(id).delete();
+          } catch (err) {
+            console.error("Delete error:", err);
           }
-        );
-      } catch (e) {
-        console.error("Firebase init error:", e);
-        badge.className = "sync-badge sync-error";
-        badge.innerHTML = `<i class="ph ph-warning-circle"></i> فشل تهيئة Firebase`;
+        }
       }
+    }
+
+    function renderRows() {
+      const list = getVisibleRequests();
+      const checkedSet = new Set(state.selectedIds);
+      const selectAll = document.getElementById("selectAllBox");
+      if (selectAll) {
+        selectAll.checked = list.length > 0 && list.every(r => checkedSet.has(r.id));
+      }
+
+      if (!list.length) {
+        document.getElementById("requestsTbody").innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);">لا توجد طلبات</td></tr>`;
+        return;
+      }
+
+      document.getElementById("requestsTbody").innerHTML = list.map(r => `
+        <tr class="req-row ${state.selectedId === r.id ? "active" : ""}" onclick="selectRequest('${r.id}')">
+          <td onclick="event.stopPropagation()">
+            <input type="checkbox" ${checkedSet.has(r.id) ? "checked" : ""} onchange="toggleCheckRequest('${r.id}', this.checked)" />
+          </td>
+          <td><strong>${r.client}</strong></td>
+          <td dir="ltr" style="text-align:right;">${r.phone}</td>
+          <td><span class="zone-tag">${r.zone}</span></td>
+          <td>${r.location} — ${r.area} م²</td>
+          <td onclick="event.stopPropagation()">
+            <select onchange="updateStatus('${r.id}', this.value)" style="padding:4px 6px;border-radius:7px;border:1px solid #d1d5db;font-size:12px;">
+              <option value="new" ${r.status === "new" ? "selected" : ""}>جديد</option>
+              <option value="visit" ${r.status === "visit" ? "selected" : ""}>معاينة</option>
+              <option value="quoted" ${r.status === "quoted" ? "selected" : ""}>تم التسعير</option>
+            </select>
+          </td>
+          <td onclick="event.stopPropagation()">
+            <button class="btn btn-red btn-sm" onclick="deleteReq('${r.id}')">مسح</button>
+          </td>
+        </tr>
+      `).join("");
     }
 
     function renderDashboard() {
-      const totalReqs = state.requests.length;
-      const newReqs = state.requests.filter(r => r.status === "new").length;
-      const visitReqs = state.requests.filter(r => r.status === "visit").length;
-      const quotedReqs = state.requests.filter(r => r.status === "quoted").length;
+      renderStats();
+      renderZones();
+      updateBulkBar();
+      renderRows();
+    }
 
-      document.getElementById("dashboardKpis").innerHTML = `
-        <div class="kpi-box">
-          <span class="kpi-label">إجمالي الطلبات الواردة</span>
-          <span class="kpi-val">${totalReqs}</span>
-        </div>
-        <div class="kpi-box">
-          <span class="kpi-label">طلبات جديدة</span>
-          <span class="kpi-val gold">${newReqs}</span>
-        </div>
-        <div class="kpi-box">
-          <span class="kpi-label">معاينة / زيارة مجدولة</span>
-          <span class="kpi-val">${visitReqs}</span>
-        </div>
-        <div class="kpi-box">
-          <span class="kpi-label">تم إرسال المقايسة</span>
-          <span class="kpi-val emerald">${quotedReqs}</span>
-        </div>
-      `;
+    function selectRequest(id) {
+      const r = state.requests.find(x => x.id === id);
+      if (!r) return;
+      state.selectedId = r.id;
+      state.clientName = r.client;
+      state.unitArea = r.area;
+      document.getElementById("activeClient").value = state.clientName;
+      document.getElementById("unitArea").value = state.unitArea;
+      saveLocal();
+      renderRows();
+      renderDossier();
+      updateFooter();
+    }
 
-      const statusLabel = s => s === "new" ? "جديد" : s === "visit" ? "معاينة" : "تم التسعير";
-      const statusClass = s => s === "new" ? "st-new" : s === "visit" ? "st-visit" : "st-quoted";
-      const selected = getSelectedRequest();
-      const visibleReqs = getFilteredRequests();
-
-      if (!visibleReqs.length) {
-        document.getElementById("requestsTableBody").innerHTML = `
-          <tr>
-            <td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">
-              لا توجد طلبات مطابقة للفلتر الحالي في مجموعة <strong>${state.collectionName}</strong>.
-            </td>
-          </tr>
-        `;
+    function renderDossier() {
+      const r = state.requests.find(x => x.id === state.selectedId);
+      if (!r) {
+        document.getElementById("dossierContent").innerHTML = `<p style="color:var(--muted);">اختر طلباً من الجدول لعرض تفاصيله.</p>`;
         return;
       }
-
-      document.getElementById("requestsTableBody").innerHTML = visibleReqs.map(req => {
-        const isSelected = selected && selected.id === req.id;
-        return `
-          <tr class="request-row ${isSelected ? "selected-row" : ""}" onclick="openRequestWorkspace('${req.id}', true)">
-            <td style="font-weight:800;color:var(--obsidian);">${req.client}</td>
-            <td dir="ltr" style="text-align:right;font-weight:700;">${req.phone}</td>
-            <td onclick="event.stopPropagation()">
-              <select onchange="updateRequestZone('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
-                <option value="غير محدد" ${req.zone === "غير محدد" ? "selected" : ""}>غير محدد</option>
-                ${REGIONS.map(reg => `<option value="${reg}" ${req.zone === reg ? "selected" : ""}>${reg}</option>`).join("")}
-              </select>
-            </td>
-            <td>${req.location} — ${req.floor}</td>
-            <td class="num-col">${req.area} م²</td>
-            <td>${req.contract}</td>
-            <td>${req.has3D}</td>
-            <td onclick="event.stopPropagation()">
-              <select onchange="updateRequestStatus('${req.id}', this.value)" style="width:auto;padding:4px 8px;font-size:12px;font-weight:700;">
-                <option value="new" ${req.status === "new" ? "selected" : ""}>جديد</option>
-                <option value="visit" ${req.status === "visit" ? "selected" : ""}>معاينة</option>
-                <option value="quoted" ${req.status === "quoted" ? "selected" : ""}>تم التسعير</option>
-              </select>
-              <span class="status-pill ${statusClass(req.status)}" style="margin-right:6px;">${statusLabel(req.status)}</span>
-            </td>
-            <td class="no-print" style="white-space:nowrap;" onclick="event.stopPropagation()">
-              <button class="btn btn-dark btn-sm" onclick="openRequestWorkspace('${req.id}', true)">فتح الطلب</button>
-              <button class="btn btn-danger btn-sm" title="مسح الطلب" onclick="deleteRequest('${req.id}')">
-                <i class="ph ph-trash"></i>
-                <span>مسح</span>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    async function updateRequestZone(id, zone) {
-      const r = state.requests.find(x => x.id === id);
-      if (!r) return;
-      r.zone = zone;
-      saveState();
-      renderZonesBar();
-      renderDashboard();
-      if (getSelectedRequest() && getSelectedRequest().id === id) {
-        renderRequestDossier();
-      }
-
-      if (db) {
-        try {
-          await db.collection(state.collectionName).doc(id).set({ zone, region: zone }, { merge: true });
-        } catch (err) {
-          console.error("Error updating zone:", err);
-        }
-      }
-    }
-
-    async function updateRequestStatus(id, status) {
-      const r = state.requests.find(x => x.id === id);
-      if (!r) return;
-      r.status = status;
-      saveState();
-      renderDashboard();
-      renderRequestDossier();
-
-      if (db) {
-        try {
-          await db.collection(state.collectionName).doc(id).set({ status }, { merge: true });
-        } catch (err) {
-          console.error("Error updating status:", err);
-        }
-      }
-    }
-
-    async function deleteRequest(id) {
-      const r = state.requests.find(x => x.id === id);
-      const label = r ? r.client : "هذا الطلب";
-      if (!confirm(`هل أنت متأكد من مسح طلب (${label}) نهائياً؟`)) return;
-
-      state.requests = state.requests.filter(x => x.id !== id);
-      if (state.selectedRequestId === id) {
-        state.selectedRequestId = state.requests.length ? state.requests[0].id : null;
-      }
-      saveState();
-      renderZonesBar();
-      renderDashboard();
-      renderRequestDossier();
-
-      if (db) {
-        try {
-          await db.collection(state.collectionName).doc(id).delete();
-        } catch (err) {
-          console.error("Error deleting request:", err);
-          alert("تعذر حذف الطلب من Firestore: " + err.message);
-        }
-      }
-    }
-
-    async function addSampleRequest() {
-      if (!db) return;
-      const zonesCycle = ["التجمع الخامس", "مدينة نصر", "المعادي", "المقطم", "البساتين", "المرج", "بنها", "أشمون"];
-      const idx = state.requests.length + 1;
-      const sampleZone = zonesCycle[(idx - 1) % zonesCycle.length];
-      try {
-        await db.collection(state.collectionName).add({
-          clientName: `أ. كريم حسن`,
-          phone: "01060728015",
-          zone: sampleZone,
-          location: `${sampleZone} — مشروع سكني`,
-          floor: "الدور الثاني",
-          unitArea: 150,
-          contractScope: "full",
-          pricingModel: "Cost Plus",
-          design3DEnabled: true,
-          design3DStyle: "Modern",
-          status: "new",
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } catch (err) {
-        alert("تعذر إضافة الطلب التجريبي: " + err.message);
-      }
-    }
-
-    function calcItemBreakdown(item) {
-      let matTotal = (item.materials || []).reduce((acc, m) => acc + ((+m.qty || 0) * (+m.price || 0)), 0);
-      let laborTotal = 0;
-
-      if (item.type === "masonry") {
-        laborTotal = (+item.demolitionCost || 0) + (+item.buildCost || 0);
-      } else if (item.type === "lump_plus_mat") {
-        laborTotal = +item.laborCost || 0;
-      } else if (item.type === "linear_supply_install") {
-        const total = (+item.length || 0) * (+item.ratePerMeter || 0);
-        matTotal += total * 0.65;
-        laborTotal += total * 0.35;
-      } else if (item.type === "windows") {
-        let winCost = 0;
-        if (item.system === "alumetal") {
-          winCost = (item.alumetalProfiles || []).reduce((s, p) => s + ((+p.area || 0) * (+p.rate || 0)), 0);
-        } else if (item.system === "upvc") {
-          winCost = (item.upvcProfiles || []).reduce((s, p) => s + ((+p.area || 0) * (+p.rate || 0)), 0);
-        } else {
-          winCost = (+item.woodArea || 0) * (+item.woodRate || 0);
-        }
-        matTotal += winCost * 0.75;
-        laborTotal += winCost * 0.25;
-      } else if (item.type === "plastering") {
-        const wallsArea = (+state.unitArea || 0) * (+state.plasterFactor || 0);
-        laborTotal += wallsArea * (+item.plasterRate || 0);
-        if (!item.hasFlatGypsum && item.includeMassis) {
-          laborTotal += +item.massisLabor || 0;
-        }
-      } else if (item.type === "gypsum") {
-        const gypCost = (+item.area || 0) * (+item.ratePerSqm || 0);
-        matTotal += gypCost * 0.6;
-        laborTotal += gypCost * 0.4;
-      } else if (item.type === "doors") {
-        laborTotal += (item.entries || []).reduce((s, d) => s + ((+d.count || 0) * (+d.unitPrice || 0)), 0);
-      } else if (item.type === "flooring") {
-        laborTotal += (+item.area || 0) * (+item.laborRate || 0);
-      } else if (item.type === "painting") {
-        laborTotal += (+item.paintArea || 0) * (+item.laborPerSqm || 0);
-        laborTotal += (+item.cornerDays || 0) * (+item.cornerDailyWage || 0);
-      } else if (item.type === "decor") {
-        (item.decorItems || []).forEach(d => {
-          matTotal += (+d.matQty || 0) * (+d.matPrice || 0);
-          laborTotal += (+d.laborQty || 0) * (+d.laborPrice || 0);
-        });
-      } else if (item.type === "marble") {
-        const mCost = ((+item.kitchenArea || 0) * (+item.kitchenRate || 0)) + ((+item.thresholdLength || 0) * (+item.thresholdRate || 0));
-        matTotal += mCost * 0.7;
-        laborTotal += mCost * 0.3;
-      }
-
-      const overhead = +state.commonOverhead || 0;
-      const grand = matTotal + laborTotal + overhead;
-      return { matTotal, laborTotal, overhead, grand };
-    }
-
-    function updateGlobal(key, val) {
-      state[key] = val;
-      saveState();
-      renderAll();
-    }
-
-    function setActiveTab(tab) {
-      state.activeTab = tab;
-      saveState();
-      renderNav();
-      renderItems();
-    }
-
-    function renderNav() {
-      const nav = document.getElementById("itemsNav");
-      let html = `<button class="nav-pill ${state.activeTab === "all" ? "active" : ""}" onclick="setActiveTab('all')">كل البنود (16)</button>`;
-      state.items.forEach(item => {
-        html += `<button class="nav-pill ${state.activeTab === item.id ? "active" : ""}" onclick="setActiveTab('${item.id}')">${item.num} - ${item.name.split("(")[0].trim()}</button>`;
-      });
-      nav.innerHTML = html;
-    }
-
-    function renderMaterialsTable(item) {
-      const rows = (item.materials || []).map((m, idx) => {
-        const lineTotal = (+m.qty || 0) * (+m.price || 0);
-        const unitOpts = UNITS.includes(m.unit) ? UNITS : [m.unit, ...UNITS];
-        return `
-          <tr>
-            <td><input type="text" value="${m.name}" oninput="updateMat('${item.id}', ${idx}, 'name', this.value)" /></td>
-            <td>
-              <select onchange="updateMat('${item.id}', ${idx}, 'unit', this.value)">
-                ${unitOpts.map(u => `<option value="${u}" ${m.unit === u ? "selected" : ""}>${u}</option>`).join("")}
-              </select>
-            </td>
-            <td><input type="number" min="0" step="0.5" value="${m.qty}" oninput="updateMat('${item.id}', ${idx}, 'qty', +this.value || 0)" /></td>
-            <td><input type="number" min="0" step="5" value="${m.price}" oninput="updateMat('${item.id}', ${idx}, 'price', +this.value || 0)" /></td>
-            <td class="num-col">${fmt(lineTotal)} ج.م</td>
-            <td><button class="btn btn-danger btn-sm" onclick="removeMat('${item.id}', ${idx})">✕</button></td>
-          </tr>
-        `;
-      }).join("");
-
-      return `
-        <div class="sub-section">
-          <div class="sub-title">
-            <span>الخامات (الكمية حسب الوحدة × سعر الوحدة)</span>
-            <button class="btn btn-light btn-sm" onclick="addMat('${item.id}')">+ إضافة خامة</button>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width:34%">اسم الخامة</th>
-                <th style="width:15%">الوحدة</th>
-                <th style="width:14%">الكمية</th>
-                <th style="width:15%">سعر الوحدة</th>
-                <th style="width:15%">الإجمالي</th>
-                <th style="width:7%">حذف</th>
-              </tr>
-            </thead>
-            <tbody>${rows || `<tr><td colspan="6" style="text-align:center;color:var(--muted)">لا توجد خامات مضافة لهذا البند</td></tr>`}</tbody>
-          </table>
+      document.getElementById("dossierContent").innerHTML = `
+        <div class="info-grid">
+          <div class="info-box"><small>العميل</small><strong>${r.client}</strong></div>
+          <div class="info-box"><small>الهاتف</small><strong dir="ltr">${r.phone}</strong></div>
+          <div class="info-box"><small>المنطقة</small><strong>${r.zone}</strong></div>
+          <div class="info-box"><small>العنوان / الدور</small><strong>${r.location} — ${r.floor}</strong></div>
+          <div class="info-box"><small>المساحة</small><strong>${r.area} م²</strong></div>
+          <div class="info-box"><small>التعاقد / 3D</small><strong>${r.contract} | ${r.has3D}</strong></div>
+          <div class="info-box"><small>الموعد</small><strong>${r.date}</strong></div>
+          <div class="info-box"><small>الملاحظات</small><strong>${r.notes}</strong></div>
         </div>
       `;
     }
 
-    function renderSpecificLogic(item) {
-      if (item.type === "masonry") {
-        return `
-          <div class="grid-4">
-            <div class="field">
-              <label>هدم وإزالة مخلفات (مقطوعية)</label>
-              <input type="number" min="0" value="${item.demolitionCost}" oninput="updateItemField('${item.id}', 'demolitionCost', +this.value || 0)" />
-            </div>
-            <div class="field">
-              <label>مصنعية البناء (مقطوعية)</label>
-              <input type="number" min="0" value="${item.buildCost}" oninput="updateItemField('${item.id}', 'buildCost', +this.value || 0)" />
-            </div>
-          </div>
-        `;
+    async function updateStatus(id, status) {
+      const r = state.requests.find(x => x.id === id);
+      if (r) r.status = status;
+      saveLocal();
+      renderStats();
+      if (db) await db.collection(state.collection).doc(id).set({ status }, { merge: true });
+    }
+
+    async function deleteReq(id) {
+      if (!confirm("هل تريد مسح هذا الطلب؟")) return;
+      state.requests = state.requests.filter(x => x.id !== id);
+      state.selectedIds = state.selectedIds.filter(x => x !== id);
+      if (state.selectedId === id) state.selectedId = state.requests[0]?.id || null;
+      saveLocal();
+      renderDashboard();
+      renderDossier();
+      if (db) await db.collection(state.collection).doc(id).delete();
+    }
+
+    function getTotals() {
+      let mat = 0, labor = 0, over = 0;
+      for (const it of state.items) {
+        mat += Number(it.mat || 0);
+        labor += Number(it.labor || 0);
+        over += Number(state.commonOverhead || 0);
       }
+      return { mat, labor, over, grand: mat + labor + over };
+    }
 
-      if (item.type === "lump_plus_mat") {
-        return `
-          <div class="grid-4">
-            <div class="field">
-              <label>${item.laborLabel || "المصنعية (مقطوعية)"}</label>
-              <input type="number" min="0" value="${item.laborCost}" oninput="updateItemField('${item.id}', 'laborCost', +this.value || 0)" />
-            </div>
-          </div>
-        `;
-      }
+    function updateFooter() {
+      const t = getTotals();
+      document.getElementById("totMat").textContent = fmt(t.mat);
+      document.getElementById("totLabor").textContent = fmt(t.labor);
+      document.getElementById("totOver").textContent = fmt(t.over);
+      document.getElementById("totGrand").textContent = fmt(t.grand);
+    }
 
-      if (item.type === "linear_supply_install") {
-        return `
-          <div class="grid-4">
-            <div class="field">
-              <label>الطول (متر طولي)</label>
-              <input type="number" min="0" step="0.5" value="${item.length}" oninput="updateItemField('${item.id}', 'length', +this.value || 0)" />
-            </div>
-            <div class="field">
-              <label>سعر توريد وتركيب المتر الطولي</label>
-              <input type="number" min="0" value="${item.ratePerMeter}" oninput="updateItemField('${item.id}', 'ratePerMeter', +this.value || 0)" />
-            </div>
-          </div>
-        `;
-      }
+    function renderItemsBar() {
+      let html = `<button class="pill ${state.activeItem === "all" ? "active" : ""}" onclick="setItemTab('all')">الكل (16)</button>`;
+      state.items.forEach((it, idx) => {
+        html += `<button class="pill ${state.activeItem === idx ? "active" : ""}" onclick="setItemTab(${idx})">${it.num} - ${it.name}</button>`;
+      });
+      document.getElementById("itemsBar").innerHTML = html;
+    }
 
-      if (item.type === "windows") {
-        let sysHtml = "";
-        if (item.system === "alumetal") {
-          sysHtml = `
-            <div class="sub-title" style="margin-top:12px;">
-              <span>قطاعات الألوميتال (الكمية م² × سعر المتر)</span>
-              <button class="btn btn-light btn-sm" onclick="addWinProfile('alumetalProfiles')">+ إضافة قطاع</button>
-            </div>
-            <table>
-              <thead><tr><th>القطاع</th><th>المساحة (م²)</th><th>سعر الم²</th><th>الإجمالي</th><th></th></tr></thead>
-              <tbody>
-                ${item.alumetalProfiles.map((p, i) => `
-                  <tr>
-                    <td><input type="text" value="${p.name}" oninput="updateWinProfile('alumetalProfiles', ${i}, 'name', this.value)" /></td>
-                    <td><input type="number" min="0" step="0.5" value="${p.area}" oninput="updateWinProfile('alumetalProfiles', ${i}, 'area', +this.value || 0)" /></td>
-                    <td><input type="number" min="0" value="${p.rate}" oninput="updateWinProfile('alumetalProfiles', ${i}, 'rate', +this.value || 0)" /></td>
-                    <td class="num-col">${fmt((+p.area || 0) * (+p.rate || 0))} ج.م</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="removeWinProfile('alumetalProfiles', ${i})">✕</button></td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          `;
-        } else if (item.system === "upvc") {
-          sysHtml = `
-            <div class="sub-title" style="margin-top:12px;">
-              <span>قطاعات UPVC (قابلة للإضافة والتعديل)</span>
-              <button class="btn btn-light btn-sm" onclick="addWinProfile('upvcProfiles')">+ إضافة قطاع UPVC</button>
-            </div>
-            <table>
-              <thead><tr><th>القطاع</th><th>المساحة (م²)</th><th>سعر الم²</th><th>الإجمالي</th><th></th></tr></thead>
-              <tbody>
-                ${item.upvcProfiles.map((p, i) => `
-                  <tr>
-                    <td><input type="text" value="${p.name}" oninput="updateWinProfile('upvcProfiles', ${i}, 'name', this.value)" /></td>
-                    <td><input type="number" min="0" step="0.5" value="${p.area}" oninput="updateWinProfile('upvcProfiles', ${i}, 'area', +this.value || 0)" /></td>
-                    <td><input type="number" min="0" value="${p.rate}" oninput="updateWinProfile('upvcProfiles', ${i}, 'rate', +this.value || 0)" /></td>
-                    <td class="num-col">${fmt((+p.area || 0) * (+p.rate || 0))} ج.م</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="removeWinProfile('upvcProfiles', ${i})">✕</button></td>
-                  </tr>
-                `).join("")}
-              </tbody>
-            </table>
-          `;
-        } else {
-          sysHtml = `
-            <div class="grid-4" style="margin-top:12px;">
-              <div class="field"><label>مساحة الشبابيك الخشبية (م²)</label><input type="number" min="0" value="${item.woodArea}" oninput="updateItemField('windows', 'woodArea', +this.value || 0)" /></div>
-              <div class="field"><label>سعر المتر المسطح</label><input type="number" min="0" value="${item.woodRate}" oninput="updateItemField('windows', 'woodRate', +this.value || 0)" /></div>
-            </div>
-          `;
-        }
-
-        return `
-          <div class="grid-4">
-            <div class="field">
-              <label>اختيار نظام الشبابيك</label>
-              <select onchange="updateItemField('windows', 'system', this.value)">
-                <option value="alumetal" ${item.system === "alumetal" ? "selected" : ""}>ألوميتال (PS صغير / PS كبير / تانجو / جامبو)</option>
-                <option value="upvc" ${item.system === "upvc" ? "selected" : ""}>UPVC</option>
-                <option value="wood" ${item.system === "wood" ? "selected" : ""}>خشب</option>
-              </select>
-            </div>
-          </div>
-          ${sysHtml}
-        `;
-      }
-
-      if (item.type === "plastering") {
-        const wallsArea = (+state.unitArea || 0) * (+state.plasterFactor || 0);
-        return `
-          <div class="grid-4">
-            <div class="field">
-              <label>مساحة الحوائط المحسوبة (${state.unitArea} × ${state.plasterFactor})</label>
-              <input type="text" disabled value="${fmt(wallsArea)} م²" />
-            </div>
-            <div class="field">
-              <label>سعر مصنعية المحارة (للمتر المسطح)</label>
-              <input type="number" min="0" value="${item.plasterRate}" oninput="updateItemField('plastering', 'plasterRate', +this.value || 0)" />
-            </div>
-            <div class="field">
-              <label>هل السقف جبسمبورد فلات؟</label>
-              <select onchange="updateItemField('plastering', 'hasFlatGypsum', this.value === 'true')">
-                <option value="false" ${!item.hasFlatGypsum ? "selected" : ""}>لا (يُرشح المصيص)</option>
-                <option value="true" ${item.hasFlatGypsum ? "selected" : ""}>نعم (لا يُنصح بالمصيص غالباً)</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>إدراج بند المصيص</label>
-              <select onchange="updateItemField('plastering', 'includeMassis', this.value === 'true')">
-                <option value="true" ${item.includeMassis ? "selected" : ""}>نعم</option>
-                <option value="false" ${!item.includeMassis ? "selected" : ""}>لا</option>
-              </select>
-            </div>
-          </div>
-          ${item.includeMassis ? `
-            <div class="grid-4" style="margin-top:12px;">
-              <div class="field">
-                <label>مصنعية المصيص (مقطوعية)</label>
-                <input type="number" min="0" value="${item.massisLabor}" oninput="updateItemField('plastering', 'massisLabor', +this.value || 0)" />
-              </div>
-            </div>
-          ` : ""}
-          ${item.hasFlatGypsum ? `<div class="warn-box">تنبيه: العميل مختار جبسمبورد فلات؛ يمكنك إبقاء المصيص مفعلاً يدوياً أو إيقافه.</div>` : ""}
-        `;
-      }
-
-      if (item.type === "gypsum") {
-        return `
-          <div class="grid-4">
-            <div class="field">
-              <label>نظام التنفيذ</label>
-              <select onchange="updateItemField('gypsum', 'system', this.value)">
-                <option value="ركب" ${item.system === "ركب" ? "selected" : ""}>نظام الركب</option>
-                <option value="أتياش" ${item.system === "أتياش" ? "selected" : ""}>نظام الأتياش</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>المساحة (م²)</label>
-              <input type="number" min="0" step="0.5" value="${item.area}" oninput="updateItemField('gypsum', 'area', +this.value || 0)" />
-            </div>
-            <div class="field">
-              <label>سعر توريد وتركيب الم²</label>
-              <input type="number" min="0" value="${item.ratePerSqm}" oninput="updateItemField('gypsum', 'ratePerSqm', +this.value || 0)" />
-            </div>
-          </div>
-        `;
-      }
-
-      if (item.type === "doors") {
-        return `
-          <div class="sub-title">
-            <span>الأبواب الخارجية والداخلية (بالعدد)</span>
-            <button class="btn btn-light btn-sm" onclick="addDoorEntry()">+ إضافة باب</button>
-          </div>
-          <table>
-            <thead><tr><th>الموقع</th><th>النوع (مصفح / عمولة)</th><th>العدد</th><th>سعر الوحدة</th><th>الإجمالي</th><th></th></tr></thead>
-            <tbody>
-              ${item.entries.map((d, i) => `
-                <tr>
-                  <td>
-                    <select onchange="updateDoorEntry(${i}, 'category', this.value)">
-                      <option value="خارجي" ${d.category === "خارجي" ? "selected" : ""}>خارجي</option>
-                      <option value="داخلي" ${d.category === "داخلي" ? "selected" : ""}>داخلي</option>
-                    </select>
-                  </td>
-                  <td><input type="text" value="${d.kind}" oninput="updateDoorEntry(${i}, 'kind', this.value)" /></td>
-                  <td><input type="number" min="0" value="${d.count}" oninput="updateDoorEntry(${i}, 'count', +this.value || 0)" /></td>
-                  <td><input type="number" min="0" value="${d.unitPrice}" oninput="updateDoorEntry(${i}, 'unitPrice', +this.value || 0)" /></td>
-                  <td class="num-col">${fmt((+d.count || 0) * (+d.unitPrice || 0))} ج.م</td>
-                  <td><button class="btn btn-danger btn-sm" onclick="removeDoorEntry(${i})">✕</button></td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        `;
-      }
-
-      if (item.type === "flooring") {
-        return `
-          <div class="grid-4">
-            <div class="field"><label>مساحة التركيب (م²)</label><input type="number" min="0" step="0.5" value="${item.area}" oninput="updateItemField('flooring', 'area', +this.value || 0)" /></div>
-            <div class="field"><label>مصنعية التركيب للمتر المسطح</label><input type="number" min="0" value="${item.laborRate}" oninput="updateItemField('flooring', 'laborRate', +this.value || 0)" /></div>
-          </div>
-        `;
-      }
-
-      if (item.type === "painting") {
-        return `
-          <div class="grid-4">
-            <div class="field"><label>مسطح الدهانات (م²)</label><input type="number" min="0" value="${item.paintArea}" oninput="updateItemField('painting', 'paintArea', +this.value || 0)" /></div>
-            <div class="field"><label>مصنعية الدهانات للمتر المسطح</label><input type="number" min="0" value="${item.laborPerSqm}" oninput="updateItemField('painting', 'laborPerSqm', +this.value || 0)" /></div>
-            <div class="field"><label>أيام تركيب الزوايا (باليومية)</label><input type="number" min="0" value="${item.cornerDays}" oninput="updateItemField('painting', 'cornerDays', +this.value || 0)" /></div>
-            <div class="field"><label>يومية تركيب الزوايا</label><input type="number" min="0" value="${item.cornerDailyWage}" oninput="updateItemField('painting', 'cornerDailyWage', +this.value || 0)" /></div>
-          </div>
-          <div class="note-box">تشطيب الدهانات (جوتن / GLC / درجة اللون) يُحتسب بسعر تقريبي قابل للتعديل ضمن جدول الخامات بالأسفل.</div>
-        `;
-      }
-
-      if (item.type === "decor") {
-        return `
-          <div class="sub-title">
-            <span>تحليل عناصر الديكور (خامة ومصنعية لكل عنصر)</span>
-            <button class="btn btn-light btn-sm" onclick="addDecorEntry()">+ إضافة عنصر ديكور</button>
-          </div>
-          <table>
-            <thead><tr><th>بند الديكور</th><th>كمية خامة</th><th>سعر خامة</th><th>كمية مصنعية</th><th>سعر مصنعية</th><th>الإجمالي</th><th></th></tr></thead>
-            <tbody>
-              ${item.decorItems.map((d, i) => {
-                const rowSum = ((+d.matQty || 0) * (+d.matPrice || 0)) + ((+d.laborQty || 0) * (+d.laborPrice || 0));
-                return `
-                  <tr>
-                    <td><input type="text" value="${d.name}" oninput="updateDecorEntry(${i}, 'name', this.value)" /></td>
-                    <td><input type="number" min="0" step="0.5" value="${d.matQty}" oninput="updateDecorEntry(${i}, 'matQty', +this.value || 0)" /></td>
-                    <td><input type="number" min="0" value="${d.matPrice}" oninput="updateDecorEntry(${i}, 'matPrice', +this.value || 0)" /></td>
-                    <td><input type="number" min="0" step="0.5" value="${d.laborQty}" oninput="updateDecorEntry(${i}, 'laborQty', +this.value || 0)" /></td>
-                    <td><input type="number" min="0" value="${d.laborPrice}" oninput="updateDecorEntry(${i}, 'laborPrice', +this.value || 0)" /></td>
-                    <td class="num-col">${fmt(rowSum)} ج.م</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="removeDecorEntry(${i})">✕</button></td>
-                  </tr>
-                `;
-              }).join("")}
-            </tbody>
-          </table>
-        `;
-      }
-
-      if (item.type === "marble") {
-        return `
-          <div class="grid-4">
-            <div class="field"><label>رخام المطبخ (م²)</label><input type="number" min="0" step="0.5" value="${item.kitchenArea}" oninput="updateItemField('marble', 'kitchenArea', +this.value || 0)" /></div>
-            <div class="field"><label>سعر توريد وتركيب رخام المطبخ (م²)</label><input type="number" min="0" value="${item.kitchenRate}" oninput="updateItemField('marble', 'kitchenRate', +this.value || 0)" /></div>
-            <div class="field"><label>عتب الرخام (متر طولي)</label><input type="number" min="0" step="0.5" value="${item.thresholdLength}" oninput="updateItemField('marble', 'thresholdLength', +this.value || 0)" /></div>
-            <div class="field"><label>سعر توريد وتركيب العتب (م.ط)</label><input type="number" min="0" value="${item.thresholdRate}" oninput="updateItemField('marble', 'thresholdRate', +this.value || 0)" /></div>
-          </div>
-        `;
-      }
-
-      return "";
+    function setItemTab(tab) {
+      state.activeItem = tab;
+      saveLocal();
+      renderItemsBar();
+      renderItems();
     }
 
     function renderItems() {
-      const container = document.getElementById("itemsContainer");
-      const visibleItems = state.activeTab === "all"
-        ? state.items
-        : state.items.filter(i => i.id === state.activeTab);
+      const list = state.activeItem === "all"
+        ? state.items.map((it, idx) => ({ it, idx }))
+        : [{ it: state.items[state.activeItem], idx: state.activeItem }];
 
-      container.innerHTML = visibleItems.map(item => {
-        const b = calcItemBreakdown(item);
+      document.getElementById("itemsList").innerHTML = list.map(({ it, idx }) => {
+        const total = Number(it.mat || 0) + Number(it.labor || 0) + Number(state.commonOverhead || 0);
         return `
-          <section class="card" id="card-${item.id}">
-            <div class="section-head">
-              <div class="section-title-wrap">
-                <span class="item-num">بند ${item.num}</span>
-                <h2 class="section-title">${item.name}</h2>
+          <div class="card">
+            <div class="card-title">
+              <span>بند ${it.num}: ${it.name}</span>
+              <strong>${fmt(total)} ج.م</strong>
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>إجمالي الخامات (ج.م)</label>
+                <input type="number" min="0" value="${it.mat}" oninput="state.items[${idx}].mat=+this.value||0;saveLocal();renderItems();updateFooter();" />
               </div>
-              <div class="item-total-box">إجمالي البند: <strong>${fmt(b.grand)}</strong> ج.م</div>
+              <div class="field">
+                <label>إجمالي المصنعيات (ج.م)</label>
+                <input type="number" min="0" value="${it.labor}" oninput="state.items[${idx}].labor=+this.value||0;saveLocal();renderItems();updateFooter();" />
+              </div>
             </div>
-
-            ${renderSpecificLogic(item)}
-            ${renderMaterialsTable(item)}
-
-            <div class="sub-section" style="display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;font-size:13px;">
-              <div>خامات البند: <strong>${fmt(b.matTotal)} ج.م</strong></div>
-              <div>مصنعيات البند: <strong>${fmt(b.laborTotal)} ج.م</strong></div>
-              <div>مصاريف إضافية ثابتة: <strong>${fmt(b.overhead)} ج.م</strong></div>
-              <div style="color:var(--gold-dark);font-weight:800;">صافي البند: <strong>${fmt(b.grand)}</strong> ج.م</div>
-            </div>
-          </section>
+          </div>
         `;
       }).join("");
     }
 
-    function updateStickySummary() {
-      const totals = calcProjectTotals();
-      document.getElementById("sumMaterials").textContent = fmt(totals.mat);
-      document.getElementById("sumLabor").textContent = fmt(totals.labor);
-      document.getElementById("sumOverhead").textContent = fmt(totals.overhead);
-      document.getElementById("sumGrand").textContent = fmt(totals.grand);
+    async function saveQuote() {
+      const r = state.requests.find(x => x.id === state.selectedId);
+      const t = getTotals();
+      if (r) {
+        r.status = "quoted";
+        r.quoteTotal = t.grand;
+        saveLocal();
+        renderDashboard();
+        if (db) {
+          await db.collection(state.collection).doc(r.id).set({
+            status: "quoted",
+            quoteTotal: t.grand,
+            quoteNotes: state.quoteNotes,
+            quoteSentAt: new Date().toISOString()
+          }, { merge: true });
+        }
+      }
+      alert(`تم حفظ المقايسة بإجمالي ${fmt(t.grand)} ج.م`);
     }
 
-    function updateItemField(itemId, key, val) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-      item[key] = val;
-      saveState();
-      renderItems();
-      updateStickySummary();
+    function sendWhatsApp() {
+      const r = state.requests.find(x => x.id === state.selectedId);
+      const t = getTotals();
+      const text = [
+        `مرحباً ${state.clientName}،`,
+        `ملخص المقايسة من SkyBuild:`,
+        `• الخامات: ${fmt(t.mat)} ج.م`,
+        `• المصنعيات: ${fmt(t.labor)} ج.م`,
+        `• المصاريف الإضافية: ${fmt(t.over)} ج.م`,
+        `• الإجمالي الكلي: ${fmt(t.grand)} ج.م`,
+        state.quoteNotes ? `ملاحظات: ${state.quoteNotes}` : ""
+      ].filter(Boolean).join("\n");
+
+      const phone = r && r.phone && r.phone !== "-" ? String(r.phone).replace(/\D/g, "").replace(/^0/, "20") : "201060728015";
+      window.open(`https://wa.me/${phone.startsWith("20") ? phone : "20" + phone}?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
     }
 
-    function addMat(itemId) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-      item.materials.push({ name: "خامة جديدة", unit: "عدد", qty: 1, price: 0 });
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
+    loadLocal();
+    document.getElementById("colSelect").value = state.collection;
+    document.getElementById("activeClient").value = state.clientName;
+    document.getElementById("unitArea").value = state.unitArea;
+    document.getElementById("plasterFactor").value = state.plasterFactor;
+    document.getElementById("commonOverhead").value = state.commonOverhead;
+    document.getElementById("quoteNotes").value = state.quoteNotes;
 
-    function updateMat(itemId, idx, key, val) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item || !item.materials[idx]) return;
-      item.materials[idx][key] = val;
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function removeMat(itemId, idx) {
-      const item = state.items.find(i => i.id === itemId);
-      if (!item) return;
-      item.materials.splice(idx, 1);
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function addWinProfile(listKey) {
-      const winItem = state.items.find(i => i.id === "windows");
-      winItem[listKey].push({ name: "قطاع جديد", area: 1, rate: 3000 });
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function updateWinProfile(listKey, idx, key, val) {
-      const winItem = state.items.find(i => i.id === "windows");
-      winItem[listKey][idx][key] = val;
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function removeWinProfile(listKey, idx) {
-      const winItem = state.items.find(i => i.id === "windows");
-      winItem[listKey].splice(idx, 1);
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function addDoorEntry() {
-      const dItem = state.items.find(i => i.id === "doors");
-      dItem.entries.push({ category: "داخلي", kind: "عمولة", count: 1, unitPrice: 4500 });
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function updateDoorEntry(idx, key, val) {
-      const dItem = state.items.find(i => i.id === "doors");
-      dItem.entries[idx][key] = val;
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function removeDoorEntry(idx) {
-      const dItem = state.items.find(i => i.id === "doors");
-      dItem.entries.splice(idx, 1);
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function addDecorEntry() {
-      const decItem = state.items.find(i => i.id === "decor");
-      decItem.decorItems.push({ name: "عنصر ديكور جديد", matQty: 1, matPrice: 1500, laborQty: 1, laborPrice: 800 });
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function updateDecorEntry(idx, key, val) {
-      const decItem = state.items.find(i => i.id === "decor");
-      decItem.decorItems[idx][key] = val;
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function removeDecorEntry(idx) {
-      const decItem = state.items.find(i => i.id === "decor");
-      decItem.decorItems.splice(idx, 1);
-      saveState();
-      renderItems();
-      updateStickySummary();
-    }
-
-    function openReportModal() {
-      let totalAll = 0;
-      const rows = state.items.map(item => {
-        const b = calcItemBreakdown(item);
-        totalAll += b.grand;
-        return `
-          <tr>
-            <td>${item.num}</td>
-            <td>${item.name}</td>
-            <td>${fmt(b.matTotal)}</td>
-            <td>${fmt(b.laborTotal)}</td>
-            <td>${fmt(b.overhead)}</td>
-            <td class="num-col">${fmt(b.grand)} ج.م</td>
-          </tr>
-        `;
-      }).join("");
-
-      document.getElementById("reportContent").innerHTML = `
-        <p style="margin-bottom:12px;color:var(--muted)">المشروع: <strong>${state.clientName || "غير محدد"}</strong> | مساحة الوحدة: <strong>${state.unitArea} م²</strong></p>
-        <table>
-          <thead>
-            <tr><th>#</th><th>البند</th><th>الخامات</th><th>المصنعيات</th><th>إضافية</th><th>الإجمالي</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-          <tfoot>
-            <tr>
-              <th colspan="5">الإجمالي الكلي</th>
-              <th class="num-col">${fmt(totalAll)} ج.م</th>
-            </tr>
-          </tfoot>
-        </table>
-      `;
-      document.getElementById("reportModal").classList.add("open");
-    }
-
-    function closeReportModal() {
-      document.getElementById("reportModal").classList.remove("open");
-    }
-
-    function exportJSON() {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "skybuild-admin-zones.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function resetAllData() {
-      if (!confirm("هل أنت متأكد من إعادة ضبط جميع البيانات والأسعار إلى القيم الافتراضية؟")) return;
-      state = structuredClone(DEFAULT_STATE);
-      saveState();
-      syncGlobalInputs();
-      renderAll();
-    }
-
-    function syncGlobalInputs() {
-      document.getElementById("collectionSelector").value = state.collectionName || "inspection_requests";
-      document.getElementById("clientName").value = state.clientName;
-      document.getElementById("unitArea").value = state.unitArea;
-      document.getElementById("plasterFactor").value = state.plasterFactor;
-      document.getElementById("commonOverhead").value = state.commonOverhead;
-      document.getElementById("engineerQuoteNotes").value = state.engineerQuoteNotes || "";
-    }
-
-    function renderAll() {
-      renderZonesBar();
-      renderDashboard();
-      renderRequestDossier();
-      renderNav();
-      renderItems();
-      updateStickySummary();
-    }
-
-    syncGlobalInputs();
-    renderAll();
-    startFirestoreListener();
+    renderDashboard();
+    renderDossier();
+    renderItemsBar();
+    renderItems();
+    updateFooter();
+    connectFirestore();
   </script>
 </body>
 </html>
